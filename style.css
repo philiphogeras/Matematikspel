@@ -250,8 +250,9 @@ body {
   text-align: center;
 }
 
+/* KALKYLATOR / SIFFERTANGENTBORD (3x4 RUTNÄT) */
 .keypad-grid {
-  display.grid;
+  display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   width: 210px;
