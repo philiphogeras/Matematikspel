@@ -1,6 +1,6 @@
 /**
  * MathEngine.js
- * Hanterar matematiklogik, adaptivitet och exponentiell progressionskurva.
+ * Hanterar matematiklogik, adaptivitet och nivåbaserade intervall för termer.
  */
 export class MathEngine {
   constructor() {
@@ -10,35 +10,47 @@ export class MathEngine {
   }
 
   /**
-   * Beräknar högsta tillåtna värdet för termerna på den aktuella nivån.
+   * Hämtar min och max för termerna baserat på aktuell nivå.
    */
-  getMaxTermForLevel(level) {
-    if (level === 1) return 5;
-    if (level === 2) return 8;
-
-    // Exponentiell ökning från nivå 3 (Nivå 3: 12, Nivå 4: 17, Nivå 5: 25, Nivå 6: 36...)
-    return Math.round(8 * Math.pow(1.45, level - 2));
+  getTermRangeForLevel(level) {
+    switch (level) {
+      case 1:
+        return { min: 0, max: 5 };
+      case 2:
+        return { min: 5, max: 10 };
+      case 3:
+        return { min: 7, max: 13 };
+      case 4:
+        return { min: 9, max: 16 };
+      default:
+        // För nivåer över 4 ökar intervallet stegvis vidare
+        const extra = level - 4;
+        return {
+          min: 9 + extra * 2,
+          max: 16 + extra * 4
+        };
+    }
   }
 
   /**
    * Genererar en matematikfråga utifrån spelarens nivå.
    */
   generateQuestion() {
-    const maxTerm = this.getMaxTermForLevel(this.level);
+    const { min, max } = this.getTermRangeForLevel(this.level);
 
-    // Slumpa två termer mellan 0 och maxTerm
-    const num1 = Math.floor(Math.random() * (maxTerm + 1));
-    const num2 = Math.floor(Math.random() * (maxTerm + 1));
+    // Slumpa två termer inom intervallet [min, max]
+    const num1 = Math.floor(Math.random() * (max - min + 1)) + min;
+    const num2 = Math.floor(Math.random() * (max - min + 1)) + min;
     const answer = num1 + num2;
 
     // Anpassa det visuella stödet efter svarstalets storlek
     let visualAidType = 'dots';
     if (answer <= 10) {
-      visualAidType = 'ten-frame'; // Tiotalsram passar bäst för tal upp till 10
+      visualAidType = 'ten-frame'; // Tiotalsram för summan 0-10
     } else if (answer <= 20) {
-      visualAidType = 'dots';      // Prickar för tal upp till 20
+      visualAidType = 'dots';      // Prickar för summan 11-20
     } else {
-      visualAidType = 'none';      // Dölj grafiskt stöd vid högre tal
+      visualAidType = 'none';      // Rent sifferläge för högre summan
     }
 
     this.currentQuestion = {
@@ -57,7 +69,7 @@ export class MathEngine {
   }
 
   /**
-   * Rättar svaret och hanterar adaptiviteten.
+   * Rättar svaret och hanterar nivåhopp.
    */
   checkAnswer(userAnswer) {
     const numericAnswer = parseInt(userAnswer, 10);
