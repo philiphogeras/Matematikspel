@@ -86,8 +86,27 @@ export class HUD {
   }
 
   updateProgress(percentage, tierName) {
+    if (!this.progressBar) {
+      this.progressBar = document.getElementById('progress-bar');
+    }
+    if (!this.progressBar) return;
+
     const tierKey = tierName ? tierName.toLowerCase() : 'brons';
+
+    // Färgkoder för mjukare nyanser för respektive nivå
+    const colors = {
+      brons: '#e2a76f',
+      bronze: '#e2a76f',
+      silver: '#94a3b8',
+      guld: '#fcd34d',
+      gold: '#fcd34d'
+    };
+
+    const activeColor = colors[tierKey] || '#e2a76f';
+
+    // Sätt procent och färg direkt på mätarelementet
     this.progressBar.style.width = `${percentage}%`;
+    this.progressBar.style.backgroundColor = activeColor;
     this.progressBar.className = `progress-${tierKey}`;
   }
 

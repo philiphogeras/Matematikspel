@@ -20,17 +20,22 @@ export class MathEngine {
   }
 
   /**
-   * Beräknar hur många procent av den aktuella trofégraden som spelaren har klarat.
+   * Beräknar exakt procentandel av hela trofén (30 frågor per trofé).
    */
   getProgressPercentage() {
-    const totalLevelsInTier = this.maxLevel - this.startLevel + 1; // t.ex. 10 nivåer
-    const totalQuestions = totalLevelsInTier * 3; // 30 frågor totalt per trofé
+    const totalLevelsInTier = this.maxLevel - this.startLevel + 1; // 10 nivåer
+    const totalQuestions = totalLevelsInTier * 3; // 30 frågor totalt
 
-    const completedLevels = this.level - this.startLevel;
-    const completedQuestions = completedLevels * 3 + this.consecutiveCorrect;
+    const currentLevel = this.level || this.startLevel;
+    const currentConsecutive = this.consecutiveCorrect || 0;
+
+    const completedLevels = currentLevel - this.startLevel;
+    const completedQuestions = completedLevels * 3 + currentConsecutive;
+
+    if (totalQuestions <= 0) return 0;
 
     const percentage = Math.round((completedQuestions / totalQuestions) * 100);
-    return Math.min(100, percentage);
+    return Math.min(100, Math.max(0, percentage));
   }
 
   getTermRangeForLevel(level) {
