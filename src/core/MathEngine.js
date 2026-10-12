@@ -1,10 +1,10 @@
 /**
-/**
  * MathEngine.js
  * Hanterar matematiklogik, adaptivitet och nivåbaserade intervall för termer.
  */
 export class MathEngine {
   constructor() {
+    this.maxLevel = 10;
     this.reset();
   }
 
@@ -49,25 +49,11 @@ export class MathEngine {
     const num2 = Math.floor(Math.random() * (max - min + 1)) + min;
     const answer = num1 + num2;
 
-    let visualAidType = 'dots';
-    if (answer <= 10) {
-      visualAidType = 'ten-frame';
-    } else if (answer <= 20) {
-      visualAidType = 'dots';
-    } else {
-      visualAidType = 'none';
-    }
-
     this.currentQuestion = {
       num1,
       num2,
       operator: '+',
-      answer,
-      visualAid: {
-        type: visualAidType,
-        colorA: '#2563eb',
-        colorB: '#e11d48'
-      }
+      answer
     };
 
     return this.currentQuestion;
@@ -83,17 +69,19 @@ export class MathEngine {
     if (isCorrect) {
       this.consecutiveCorrect++;
 
-      // Om spelaren svarar rätt 3 gånger på nivå 10 -> Spelet avklarat!
-      if (this.consecutiveCorrect >= 3 && this.level >= 10) {
-        return {
-          isCorrect: true,
-          isCompleted: true,
-          message: '🏆 GRATTIS! Du har klarat alla 10 nivåer! 🏆'
-        };
-      }
-
-      // Gå upp i nivå efter 3 rätt i rad
+      // När spelaren får 3 rätt i rad
       if (this.consecutiveCorrect >= 3) {
+        
+        // Om vi redan är på sista nivån (Nivå 10) -> Vinst!
+        if (this.level >= this.maxLevel) {
+          return {
+            isCorrect: true,
+            isCompleted: true,
+            message: '🏆 GRATTIS! Du har klarat alla 10 nivåer! 🏆'
+          };
+        }
+
+        // Annars gå upp en nivå och nollställ sviten
         this.level++;
         this.consecutiveCorrect = 0;
       }
@@ -104,13 +92,12 @@ export class MathEngine {
         message: 'Bra jobbat! Helt rätt! 🎉'
       };
     } else {
-      this.consecutiveCorrect = 0; // Nollställ sviten utan bestraffning
+      this.consecutiveCorrect = 0;
 
       return {
         isCorrect: false,
         isCompleted: false,
-        message: 'Inte riktigt. Försök igen!',
-        visualAidUpdated: this.currentQuestion.visualAid
+        message: 'Inte riktigt. Försök igen!'
       };
     }
   }

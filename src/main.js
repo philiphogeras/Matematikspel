@@ -15,7 +15,8 @@ const hud = new HUD(
 );
 
 function startGame() {
-  mathEngine.reset(); // Återställ till nivå 1 vid varje nytt spel
+  mathEngine.reset();
+  renderer.clear();
   loadNextQuestion();
 }
 
@@ -29,8 +30,7 @@ function loadNextQuestion() {
   
   levelIndicator.innerText = `Nivå: ${mathEngine.level}`;
   hud.displayQuestion(question);
-
-  renderer.renderVisualAid(question.visualAid, question.num1, question.num2);
+  renderer.clear();
 }
 
 function handleAnswerSubmitted(userAnswer) {
@@ -40,7 +40,6 @@ function handleAnswerSubmitted(userAnswer) {
     hud.showFeedback(true, result.message);
     
     if (result.isCompleted) {
-      // Spelet är avklarat! Visa vinsttexten i 3 sekunder och skicka till menyn
       setTimeout(() => {
         returnToMenu();
       }, 3000);
@@ -51,13 +50,5 @@ function handleAnswerSubmitted(userAnswer) {
     }
   } else {
     hud.showFeedback(false, result.message);
-
-    if (result.visualAidUpdated) {
-      renderer.renderVisualAid(
-        result.visualAidUpdated,
-        mathEngine.currentQuestion.num1,
-        mathEngine.currentQuestion.num2
-      );
-    }
   }
 }
