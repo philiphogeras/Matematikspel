@@ -10,12 +10,12 @@ const renderer = new VisualRenderer(canvas);
 
 const hud = new HUD(
   (userAnswer) => handleAnswerSubmitted(userAnswer),
-  () => startGame(),
+  (startLevel, maxLevel, tierName) => startGame(startLevel, maxLevel, tierName),
   () => returnToMenu()
 );
 
-function startGame() {
-  mathEngine.reset();
+function startGame(startLevel, maxLevel, tierName) {
+  mathEngine.reset(startLevel, maxLevel, tierName);
   renderer.clear();
   loadNextQuestion();
 }
@@ -28,7 +28,7 @@ function returnToMenu() {
 function loadNextQuestion() {
   const question = mathEngine.generateQuestion();
   
-  levelIndicator.innerText = `Nivå: ${mathEngine.level}`;
+  levelIndicator.innerText = `${mathEngine.tierName} – Nivå: ${mathEngine.level}`;
   hud.displayQuestion(question);
   renderer.clear();
 }

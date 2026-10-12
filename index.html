@@ -9,7 +9,7 @@
 <body>
 
   <div id="game-container">
-    <!-- Canvas för tiotalsramar och visuellt stöd -->
+    <!-- Canvas -->
     <canvas id="gameCanvas" width="800" height="600"></canvas>
     
     <!-- UI Overlay -->
@@ -17,12 +17,37 @@
       
       <!-- STARTMENY -->
       <div id="start-screen" class="screen-panel">
-        <h1 class="game-title">Matematikspelet</h1>
-        <p class="game-subtitle">Räkna i din egen takt utan stress</p>
-        <button id="btn-start" class="btn-primary">Starta spelet</button>
+        
+        <!-- HUVUDMENY -->
+        <div id="menu-main" class="menu-step">
+          <h1 class="game-title">Matematikspelet</h1>
+          <p class="game-subtitle">Välj vad du vill öva på:</p>
+          <div class="menu-buttons">
+            <button id="btn-category-addition" class="btn-primary">Addition (+)</button>
+          </div>
+        </div>
+
+        <!-- NIVEÅMENY FÖR ADDITION (Döljs i början) -->
+        <div id="menu-addition" class="menu-step hidden">
+          <h2 class="game-title">Addition</h2>
+          <p class="game-subtitle">Välj svårighetsgrad:</p>
+          <div class="menu-buttons">
+            <button class="btn-tier btn-bronze" data-start="1" data-max="10" data-name="Brons">
+              🥉 Brons <span>(Nivå 1 – 10)</span>
+            </button>
+            <button class="btn-tier btn-silver" data-start="11" data-max="20" data-name="Silver">
+              🥈 Silver <span>(Nivå 11 – 20)</span>
+            </button>
+            <button class="btn-tier btn-gold" data-start="21" data-max="30" data-name="Guld">
+              🥇 Guld <span>(Nivå 21 – 30)</span>
+            </button>
+            <button id="btn-back-to-main" class="btn-secondary">← Tillbaka</button>
+          </div>
+        </div>
+
       </div>
 
-      <!-- SPELSKÄRM (Döljs i början) -->
+      <!-- SPELSKÄRM -->
       <div id="game-screen" class="screen-panel hidden">
         <div id="top-bar">
           <div id="level-indicator">Nivå: 1</div>

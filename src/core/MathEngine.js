@@ -1,42 +1,56 @@
 /**
  * MathEngine.js
- * Hanterar matematiklogik, adaptivitet och nivåbaserade intervall för termer.
+ * Hanterar matematiklogik, adaptivitet och nivåbaserade intervall för Brons, Silver och Guld.
  */
 export class MathEngine {
   constructor() {
+    this.startLevel = 1;
     this.maxLevel = 10;
+    this.tierName = 'Brons';
     this.reset();
   }
 
   /**
-   * Återställer motorn till startläget (Nivå 1)
+   * Återställer motorn och sätter vald trofénivå.
    */
-  reset() {
-    this.level = 1;
+  reset(startLevel = 1, maxLevel = 10, tierName = 'Brons') {
+    this.startLevel = startLevel;
+    this.level = startLevel;
+    this.maxLevel = maxLevel;
+    this.tierName = tierName;
     this.consecutiveCorrect = 0;
     this.currentQuestion = null;
   }
 
   /**
-   * Hämtar min och max för termerna baserat på aktuell nivå.
+   * Hämtar min och max för termerna baserat på vald nivå (1–30).
    */
   getTermRangeForLevel(level) {
-    switch (level) {
-      case 1:
-        return { min: 0, max: 5 };
-      case 2:
-        return { min: 5, max: 10 };
-      case 3:
-        return { min: 7, max: 13 };
-      case 4:
-        return { min: 9, max: 16 };
-      default:
-        const extra = level - 4;
-        return {
-          min: 9 + extra * 2,
-          max: 16 + extra * 4
-        };
+    // BRONS (Nivå 1–10)
+    if (level === 1) return { min: 0, max: 5 };
+    if (level === 2) return { min: 5, max: 10 };
+    if (level === 3) return { min: 7, max: 13 };
+    if (level === 4) return { min: 9, max: 16 };
+    if (level <= 10) {
+      const extra = level - 4;
+      return { min: 9 + extra * 2, max: 16 + extra * 4 };
     }
+
+    // SILVER (Nivå 11–20) - Större tiotal
+    if (level <= 20) {
+      const step = level - 10;
+      return {
+        min: 10 + step * 3, // Startar kring 13–40
+        max: 25 + step * 8  // Går upp till ca 30–105
+      };
+    }
+
+    // GULD (Nivå 21–30) - Hundratal och stora tal
+    const step = level - 20;
+    return {
+      min: 40 + step * 10, // Startar på 50–140
+      max: 100 + step * 40 // Går upp till ca 140–500
+    };
   }
 
   /**
@@ -69,19 +83,16 @@ export class MathEngine {
     if (isCorrect) {
       this.consecutiveCorrect++;
 
-      // När spelaren får 3 rätt i rad
       if (this.consecutiveCorrect >= 3) {
-        
-        // Om vi redan är på sista nivån (Nivå 10) -> Vinst!
+        // Om maxnivån för vald trofé uppnåtts -> Vinst!
         if (this.level >= this.maxLevel) {
           return {
             isCorrect: true,
             isCompleted: true,
-            message: '🏆 GRATTIS! Du har klarat alla 10 nivåer! 🏆'
+            message: ` GRATTIS! Du har klarat alla nivåer i ${this.tierName}! `
           };
         }
 
-        // Annars gå upp en nivå och nollställ sviten
         this.level++;
         this.consecutiveCorrect = 0;
       }
@@ -89,7 +100,7 @@ export class MathEngine {
       return {
         isCorrect: true,
         isCompleted: false,
-        message: 'Bra jobbat! Helt rätt! 🎉'
+        message: 'Bra jobbat! Helt rätt! '
       };
     } else {
       this.consecutiveCorrect = 0;

@@ -1,6 +1,6 @@
 /**
  * HUD.js
- * Hanterar användargränssnittet (startmeny, spelskärm, sifferknappar och feedback).
+ * Hanterar menyväxlingar, start av specifika nivåer och användargränssnittet.
  */
 export class HUD {
   constructor(onAnswerSubmit, onStartGame, onReturnToMenu) {
@@ -10,6 +10,9 @@ export class HUD {
 
     this.startScreen = document.getElementById('start-screen');
     this.gameScreen = document.getElementById('game-screen');
+    this.menuMain = document.getElementById('menu-main');
+    this.menuAddition = document.getElementById('menu-addition');
+
     this.questionElement = document.getElementById('question-box');
     this.inputArea = document.getElementById('input-area');
     this.feedbackElement = document.getElementById('feedback-message');
@@ -21,11 +24,32 @@ export class HUD {
   }
 
   initEventListeners() {
-    document.getElementById('btn-start').onclick = () => {
-      this.showGameScreen();
-      this.onStartGame();
+    // Öppna additionsmenyn
+    document.getElementById('btn-category-addition').onclick = () => {
+      this.menuMain.classList.add('hidden');
+      this.menuAddition.classList.remove('hidden');
     };
 
+    // Gå tillbaka till huvudmenyn
+    document.getElementById('btn-back-to-main').onclick = () => {
+      this.menuAddition.classList.add('hidden');
+      this.menuMain.classList.remove('hidden');
+    };
+
+    // Klick på Brons, Silver eller Guld
+    const tierButtons = document.querySelectorAll('.btn-tier');
+    tierButtons.forEach((btn) => {
+      btn.onclick = () => {
+        const startLevel = parseInt(btn.getAttribute('data-start'), 10);
+        const maxLevel = parseInt(btn.getAttribute('data-max'), 10);
+        const tierName = btn.getAttribute('data-name');
+
+        this.showGameScreen();
+        this.onStartGame(startLevel, maxLevel, tierName);
+      };
+    });
+
+    // Knapp under spelets gång för att avbryta till meny
     document.getElementById('btn-menu').onclick = () => {
       this.showStartScreen();
       this.onReturnToMenu();
@@ -35,6 +59,10 @@ export class HUD {
   showStartScreen() {
     this.startScreen.classList.remove('hidden');
     this.gameScreen.classList.add('hidden');
+    
+    // Nollställ till huvudmenyn
+    this.menuMain.classList.remove('hidden');
+    this.menuAddition.classList.add('hidden');
   }
 
   showGameScreen() {
@@ -85,7 +113,7 @@ export class HUD {
   }
 
   appendDigit(digit) {
-    if (this.currentInput.length < 3) {
+    if (this.currentInput.length < 4) { // Tillåt upp till 4 siffror för guld-frågor
       this.currentInput += digit;
       this.updateDisplay();
     }
