@@ -8,7 +8,6 @@ const levelIndicator = document.getElementById('level-indicator');
 const mathEngine = new MathEngine();
 const renderer = new VisualRenderer(canvas);
 
-// Skapa HUD med händelser för start, svar och återgång till meny
 const hud = new HUD(
   (userAnswer) => handleAnswerSubmitted(userAnswer),
   () => startGame(),
@@ -16,11 +15,13 @@ const hud = new HUD(
 );
 
 function startGame() {
+  mathEngine.reset(); // Återställ till nivå 1 vid varje nytt spel
   loadNextQuestion();
 }
 
 function returnToMenu() {
   renderer.clear();
+  hud.showStartScreen();
 }
 
 function loadNextQuestion() {
@@ -38,9 +39,16 @@ function handleAnswerSubmitted(userAnswer) {
   if (result.isCorrect) {
     hud.showFeedback(true, result.message);
     
-    setTimeout(() => {
-      loadNextQuestion();
-    }, 1200);
+    if (result.isCompleted) {
+      // Spelet är avklarat! Visa vinsttexten i 3 sekunder och skicka till menyn
+      setTimeout(() => {
+        returnToMenu();
+      }, 3000);
+    } else {
+      setTimeout(() => {
+        loadNextQuestion();
+      }, 1200);
+    }
   } else {
     hud.showFeedback(false, result.message);
 

@@ -1,11 +1,19 @@
 /**
+/**
  * MathEngine.js
  * Hanterar matematiklogik, adaptivitet och nivåbaserade intervall för termer.
  */
 export class MathEngine {
   constructor() {
+    this.reset();
+  }
+
+  /**
+   * Återställer motorn till startläget (Nivå 1)
+   */
+  reset() {
     this.level = 1;
-    this.consecutiveCorrect = 0; // Antal rätt i rad för nivåhopp
+    this.consecutiveCorrect = 0;
     this.currentQuestion = null;
   }
 
@@ -23,7 +31,6 @@ export class MathEngine {
       case 4:
         return { min: 9, max: 16 };
       default:
-        // För nivåer över 4 ökar intervallet stegvis vidare
         const extra = level - 4;
         return {
           min: 9 + extra * 2,
@@ -38,19 +45,17 @@ export class MathEngine {
   generateQuestion() {
     const { min, max } = this.getTermRangeForLevel(this.level);
 
-    // Slumpa två termer inom intervallet [min, max]
     const num1 = Math.floor(Math.random() * (max - min + 1)) + min;
     const num2 = Math.floor(Math.random() * (max - min + 1)) + min;
     const answer = num1 + num2;
 
-    // Anpassa det visuella stödet efter svarstalets storlek
     let visualAidType = 'dots';
     if (answer <= 10) {
-      visualAidType = 'ten-frame'; // Tiotalsram för summan 0-10
+      visualAidType = 'ten-frame';
     } else if (answer <= 20) {
-      visualAidType = 'dots';      // Prickar för summan 11-20
+      visualAidType = 'dots';
     } else {
-      visualAidType = 'none';      // Rent sifferläge för högre summan
+      visualAidType = 'none';
     }
 
     this.currentQuestion = {
@@ -60,8 +65,8 @@ export class MathEngine {
       answer,
       visualAid: {
         type: visualAidType,
-        colorA: '#2563eb', // Blå för första talet
-        colorB: '#e11d48'  // Röd för andra talet
+        colorA: '#2563eb',
+        colorB: '#e11d48'
       }
     };
 
@@ -69,7 +74,7 @@ export class MathEngine {
   }
 
   /**
-   * Rättar svaret och hanterar nivåhopp.
+   * Rättar svaret och hanterar nivåhopp samt vinstvillkor.
    */
   checkAnswer(userAnswer) {
     const numericAnswer = parseInt(userAnswer, 10);
@@ -77,6 +82,15 @@ export class MathEngine {
 
     if (isCorrect) {
       this.consecutiveCorrect++;
+
+      // Om spelaren svarar rätt 3 gånger på nivå 10 -> Spelet avklarat!
+      if (this.consecutiveCorrect >= 3 && this.level >= 10) {
+        return {
+          isCorrect: true,
+          isCompleted: true,
+          message: '🏆 GRATTIS! Du har klarat alla 10 nivåer! 🏆'
+        };
+      }
 
       // Gå upp i nivå efter 3 rätt i rad
       if (this.consecutiveCorrect >= 3) {
@@ -86,6 +100,7 @@ export class MathEngine {
 
       return {
         isCorrect: true,
+        isCompleted: false,
         message: 'Bra jobbat! Helt rätt! 🎉'
       };
     } else {
@@ -93,6 +108,7 @@ export class MathEngine {
 
       return {
         isCorrect: false,
+        isCompleted: false,
         message: 'Inte riktigt. Försök igen!',
         visualAidUpdated: this.currentQuestion.visualAid
       };
