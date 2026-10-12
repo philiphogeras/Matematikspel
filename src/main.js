@@ -40,10 +40,8 @@ function handleAnswerSubmitted(userAnswer) {
     hud.showFeedback(true, result.message);
     
     if (result.isCompleted) {
-      // Starta konfettiregn!
       renderer.startConfetti();
 
-      // Visa vinsttext och konfetti i 3.5 sekunder innan återgång till menyn
       setTimeout(() => {
         returnToMenu();
       }, 3500);
@@ -54,5 +52,6 @@ function handleAnswerSubmitted(userAnswer) {
     }
   } else {
     hud.showFeedback(false, result.message);
+    hud.unlockInput(); // Lås upp tangentbordet så att spelaren kan korrigera sitt felaktiga svar
   }
 }

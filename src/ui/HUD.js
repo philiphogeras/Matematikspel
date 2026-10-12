@@ -18,6 +18,7 @@ export class HUD {
     this.feedbackElement = document.getElementById('feedback-message');
     
     this.currentInput = '';
+    this.isWaiting = false; // Spärr för att förhindra dubbelklick på OK
     
     this.initEventListeners();
     this.initKeypad();
@@ -63,6 +64,7 @@ export class HUD {
     // Nollställ till huvudmenyn
     this.menuMain.classList.remove('hidden');
     this.menuAddition.classList.add('hidden');
+    this.isWaiting = false;
   }
 
   showGameScreen() {
@@ -72,6 +74,7 @@ export class HUD {
 
   displayQuestion(question) {
     if (!question) return;
+    this.isWaiting = false; // Lås upp tangentbordet för den nya frågan
     this.questionElement.innerText = `${question.num1} ${question.operator} ${question.num2} = ?`;
     this.clearInput();
     this.clearFeedback();
@@ -113,13 +116,15 @@ export class HUD {
   }
 
   appendDigit(digit) {
-    if (this.currentInput.length < 4) { // Tillåt upp till 4 siffror för guld-frågor
+    if (this.isWaiting) return; // Ignorera knapptryck under väntetid
+    if (this.currentInput.length < 4) {
       this.currentInput += digit;
       this.updateDisplay();
     }
   }
 
   clearInput() {
+    if (this.isWaiting) return;
     this.currentInput = '';
     this.updateDisplay();
   }
@@ -132,8 +137,13 @@ export class HUD {
   }
 
   submitAnswer() {
-    if (this.currentInput === '') return;
+    if (this.currentInput === '' || this.isWaiting) return;
+    this.isWaiting = true; // Lås inmatningen direkt vid skickat svar
     this.onAnswerSubmit(this.currentInput);
+  }
+
+  unlockInput() {
+    this.isWaiting = false; // Lås upp om svaret var fel så spelaren kan försöka igen
   }
 
   showFeedback(isCorrect, message) {
