@@ -1,124 +1,74 @@
 /**
  * VisualRenderer.js
- * Ansvarar för att rita ut allt pedagogiskt stöd (tiotalsramar, prickar) på Canvasen.
+ * Hanterar grafik och visuella effekter som konfettiregn vid vinst.
  */
 export class VisualRenderer {
   constructor(canvas) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
+    this.confettiParticles = [];
+    this.animationFrame = null;
   }
 
   /**
-   * Rensar ritytan inför en ny rendering
+   * Rensar canvasen och stoppar eventuell pågående animation.
    */
   clear() {
+    if (this.animationFrame) {
+      cancelAnimationFrame(this.animationFrame);
+      this.animationFrame = null;
+    }
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
   /**
-   * Huvudmetod som kollar vilket visuellt stöd frågan vill visa och ritar det
+   * Startar ett färgstarkt konfettiregn på canvasen.
    */
-  renderVisualAid(visualAid, num1, num2) {
+  startConfetti() {
     this.clear();
 
-    if (!visualAid || visualAid.type === 'none') {
-      return; // Inget visuellt stöd ska visas på denna nivå
+    const colors = ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#eab308'];
+    this.confettiParticles = [];
+
+    // Skapa 130 konfettibitar i olika färger, storlekar och hastigheter
+    for (let i = 0; i < 130; i++) {
+      this.confettiParticles.push({
+        x: Math.random() * this.canvas.width,
+        y: Math.random() * this.canvas.height - this.canvas.height,
+        size: Math.random() * 10 + 6,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        vx: (Math.random() - 0.5) * 3,
+        vy: Math.random() * 4 + 3,
+        rotation: Math.random() * 360,
+        rotationSpeed: (Math.random() - 0.5) * 8
+      });
     }
 
-    if (visualAid.type === 'ten-frame') {
-      // Centrera tiotalsramen horisontellt på skärmen
-      const frameWidth = 5 * (50 + 6);
-      const startX = (this.canvas.width - frameWidth) / 2;
-      const startY = 180;
+    const animate = () => {
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-      this.drawTenFrame(startX, startY, num1, visualAid.colorA, num2, visualAid.colorB);
-    } else if (visualAid.type === 'dots') {
-      const startX = 200;
-      const startY = 220;
-      this.drawDots(startX, startY, num1, visualAid.colorA, num2, visualAid.colorB);
-    }
-  }
+      this.confettiParticles.forEach((p) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.rotation += p.rotationSpeed;
 
-  /**
-   * Ritar en tiotalsram (2 rader x 5 rutor) med färgade cirklar
-   */
-  drawTenFrame(startX, startY, countA, colorA, countB = 0, colorB = null) {
-    const boxSize = 50;
-    const padding = 6;
-    const columns = 5;
+        // Om konfettibiten faller utanför botten, snurra om den från toppen
+        if (p.y > this.canvas.height) {
+          p.y = -10;
+          p.x = Math.random() * this.canvas.width;
+        }
 
-    // 1. Rita bakgrundsramen (10 gråa rutor)
-    for (let i = 0; i < 10; i++) {
-      const col = i % columns;
-      const row = Math.floor(i / columns);
-      const x = startX + col * (boxSize + padding);
-      const y = startY + row * (boxSize + padding);
+        this.ctx.save();
+        this.ctx.translate(p.x, p.y);
+        this.ctx.rotate((p.rotation * Math.PI) / 180);
+        this.ctx.fillStyle = p.color;
+        this.ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+        this.ctx.restore();
+      });
 
-      this.ctx.fillStyle = '#F1F5F9';
-      this.ctx.strokeStyle = '#94A3B8';
-      this.ctx.lineWidth = 2;
+      this.animationFrame = requestAnimationFrame(animate);
+    };
 
-      this.ctx.fillRect(x, y, boxSize, boxSize);
-      this.ctx.strokeRect(x, y, boxSize, boxSize);
-    }
-
-    // 2. Fyll i cirklar för första talet
-    let totalDrawn = 0;
-    for (let i = 0; i < countA && totalDrawn < 10; i++) {
-      this.drawDotInBox(startX, startY, totalDrawn, colorA, boxSize, padding);
-      totalDrawn++;
-    }
-
-    // 3. Fyll i cirklar för andra talet (om det finns)
-    for (let i = 0; i < countB && totalDrawn < 10; i++) {
-      this.drawDotInBox(startX, startY, totalDrawn, colorB, boxSize, padding);
-      totalDrawn++;
-    }
-  }
-
-  /**
-   * Hjälpfunktion för att rita en enskild cirkel i en viss ruta i tiotalsramen
-   */
-  drawDotInBox(startX, startY, index, color, boxSize, padding) {
-    const col = index % 5;
-    const row = Math.floor(index / 5);
-    const centerX = startX + col * (boxSize + padding) + boxSize / 2;
-    const centerY = startY + row * (boxSize + padding) + boxSize / 2;
-    const radius = boxSize / 3;
-
-    this.ctx.beginPath();
-    this.ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-    this.ctx.fillStyle = color;
-    this.ctx.fill();
-    this.ctx.closePath();
-  }
-
-  /**
-   * Ritar ut fristående grupper av prickar (används t.ex. vid subtraktion)
-   */
-  drawDots(startX, startY, countA, colorA, countB = 0, colorB = null) {
-    const radius = 18;
-    const gap = 45;
-
-    // Grupp A
-    for (let i = 0; i < countA; i++) {
-      this.ctx.beginPath();
-      this.ctx.arc(startX + i * gap, startY, radius, 0, Math.PI * 2);
-      this.ctx.fillStyle = colorA;
-      this.ctx.fill();
-      this.ctx.closePath();
-    }
-
-    // Grupp B (om tillämpligt)
-    if (countB > 0) {
-      const startXB = startX + countA * gap + 40;
-      for (let i = 0; i < countB; i++) {
-        this.ctx.beginPath();
-        this.ctx.arc(startXB + i * gap, startY, radius, 0, Math.PI * 2);
-        this.ctx.fillStyle = colorB;
-        this.ctx.fill();
-        this.ctx.closePath();
-      }
-    }
+    animate();
   }
 }

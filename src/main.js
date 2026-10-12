@@ -40,9 +40,13 @@ function handleAnswerSubmitted(userAnswer) {
     hud.showFeedback(true, result.message);
     
     if (result.isCompleted) {
+      // Starta konfettiregn!
+      renderer.startConfetti();
+
+      // Visa vinsttext och konfetti i 3.5 sekunder innan återgång till menyn
       setTimeout(() => {
         returnToMenu();
-      }, 3000);
+      }, 3500);
     } else {
       setTimeout(() => {
         loadNextQuestion();
