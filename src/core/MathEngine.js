@@ -1,6 +1,6 @@
 /**
  * MathEngine.js
- * Hanterar matematiklogik, adaptivitet och nivåbaserade intervall för Brons, Silver och Guld.
+ * Hanterar matematiklogik, adaptivitet, intervall och framstegsberäkning.
  */
 export class MathEngine {
   constructor() {
@@ -10,9 +10,6 @@ export class MathEngine {
     this.reset();
   }
 
-  /**
-   * Återställer motorn och sätter vald trofénivå.
-   */
   reset(startLevel = 1, maxLevel = 10, tierName = 'Brons') {
     this.startLevel = startLevel;
     this.level = startLevel;
@@ -23,10 +20,20 @@ export class MathEngine {
   }
 
   /**
-   * Hämtar min och max för termerna baserat på vald nivå (1–30).
+   * Beräknar hur många procent av den aktuella trofégraden som spelaren har klarat.
    */
+  getProgressPercentage() {
+    const totalLevelsInTier = this.maxLevel - this.startLevel + 1; // t.ex. 10 nivåer
+    const totalQuestions = totalLevelsInTier * 3; // 30 frågor totalt per trofé
+
+    const completedLevels = this.level - this.startLevel;
+    const completedQuestions = completedLevels * 3 + this.consecutiveCorrect;
+
+    const percentage = Math.round((completedQuestions / totalQuestions) * 100);
+    return Math.min(100, percentage);
+  }
+
   getTermRangeForLevel(level) {
-    // BRONS (Nivå 1–10)
     if (level === 1) return { min: 0, max: 5 };
     if (level === 2) return { min: 5, max: 10 };
     if (level === 3) return { min: 7, max: 13 };
@@ -36,26 +43,21 @@ export class MathEngine {
       return { min: 9 + extra * 2, max: 16 + extra * 4 };
     }
 
-    // SILVER (Nivå 11–20) - Större tiotal
     if (level <= 20) {
       const step = level - 10;
       return {
-        min: 10 + step * 3, // Startar kring 13–40
-        max: 25 + step * 8  // Går upp till ca 30–105
+        min: 10 + step * 3,
+        max: 25 + step * 8
       };
     }
 
-    // GULD (Nivå 21–30) - Hundratal och stora tal
     const step = level - 20;
     return {
-      min: 40 + step * 10, // Startar på 50–140
-      max: 100 + step * 40 // Går upp till ca 140–500
+      min: 40 + step * 10,
+      max: 100 + step * 40
     };
   }
 
-  /**
-   * Genererar en matematikfråga utifrån spelarens nivå.
-   */
   generateQuestion() {
     const { min, max } = this.getTermRangeForLevel(this.level);
 
@@ -73,9 +75,6 @@ export class MathEngine {
     return this.currentQuestion;
   }
 
-  /**
-   * Rättar svaret och hanterar nivåhopp samt vinstvillkor.
-   */
   checkAnswer(userAnswer) {
     const numericAnswer = parseInt(userAnswer, 10);
     const isCorrect = numericAnswer === this.currentQuestion.answer;
@@ -84,12 +83,11 @@ export class MathEngine {
       this.consecutiveCorrect++;
 
       if (this.consecutiveCorrect >= 3) {
-        // Om maxnivån för vald trofé uppnåtts -> Vinst!
         if (this.level >= this.maxLevel) {
           return {
             isCorrect: true,
             isCompleted: true,
-            message: ` GRATTIS! Du har klarat alla nivåer i ${this.tierName}! `
+            message: `🏆 GRATTIS! Du har klarat alla nivåer i ${this.tierName}! 🏆`
           };
         }
 
@@ -100,7 +98,7 @@ export class MathEngine {
       return {
         isCorrect: true,
         isCompleted: false,
-        message: 'Bra jobbat! Helt rätt! '
+        message: 'Bra jobbat! Helt rätt! 🎉'
       };
     } else {
       this.consecutiveCorrect = 0;

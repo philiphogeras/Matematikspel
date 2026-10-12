@@ -9,7 +9,7 @@
 <body>
 
   <div id="game-container">
-    <!-- Canvas -->
+    <!-- Canvas för konfetti -->
     <canvas id="gameCanvas" width="800" height="600"></canvas>
     
     <!-- UI Overlay -->
@@ -27,20 +27,35 @@
           </div>
         </div>
 
-        <!-- NIVEÅMENY FÖR ADDITION (Döljs i början) -->
+        <!-- NIVÅMENY FÖR ADDITION -->
         <div id="menu-addition" class="menu-step hidden">
           <h2 class="game-title">Addition</h2>
           <p class="game-subtitle">Välj svårighetsgrad:</p>
           <div class="menu-buttons">
             <button class="btn-tier btn-bronze" data-start="1" data-max="10" data-name="Brons">
-              🥉 Brons <span>(Nivå 1 – 10)</span>
+              <div class="tier-info">
+                <span class="tier-title">🥉 Brons</span>
+                <span class="tier-sub">(Nivå 1 – 10)</span>
+              </div>
+              <span id="badge-brons" class="tier-badge hidden">✓ Klarad!</span>
             </button>
+
             <button class="btn-tier btn-silver" data-start="11" data-max="20" data-name="Silver">
-              🥈 Silver <span>(Nivå 11 – 20)</span>
+              <div class="tier-info">
+                <span class="tier-title">🥈 Silver</span>
+                <span class="tier-sub">(Nivå 11 – 20)</span>
+              </div>
+              <span id="badge-silver" class="tier-badge hidden">✓ Klarad!</span>
             </button>
+
             <button class="btn-tier btn-gold" data-start="21" data-max="30" data-name="Guld">
-              🥇 Guld <span>(Nivå 21 – 30)</span>
+              <div class="tier-info">
+                <span class="tier-title">🥇 Guld</span>
+                <span class="tier-sub">(Nivå 21 – 30)</span>
+              </div>
+              <span id="badge-guld" class="tier-badge hidden">✓ Klarad!</span>
             </button>
+
             <button id="btn-back-to-main" class="btn-secondary">← Tillbaka</button>
           </div>
         </div>
@@ -52,6 +67,11 @@
         <div id="top-bar">
           <div id="level-indicator">Nivå: 1</div>
           <button id="btn-menu" class="btn-secondary">Meny</button>
+        </div>
+
+        <!-- MÄTARE / PROGRESS BAR -->
+        <div id="progress-container">
+          <div id="progress-bar" class="progress-bronze"></div>
         </div>
 
         <div id="question-box">0 + 0 = ?</div>

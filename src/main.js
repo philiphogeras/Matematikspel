@@ -30,16 +30,22 @@ function loadNextQuestion() {
   
   levelIndicator.innerText = `${mathEngine.tierName} – Nivå: ${mathEngine.level}`;
   hud.displayQuestion(question);
+  hud.updateProgress(mathEngine.getProgressPercentage(), mathEngine.tierName);
   renderer.clear();
 }
 
 function handleAnswerSubmitted(userAnswer) {
   const result = mathEngine.checkAnswer(userAnswer);
 
+  hud.updateProgress(mathEngine.getProgressPercentage(), mathEngine.tierName);
+
   if (result.isCorrect) {
     hud.showFeedback(true, result.message);
     
     if (result.isCompleted) {
+      // Spara i minnet att denna nivå har klarats av!
+      localStorage.setItem(`completed_${mathEngine.tierName}`, 'true');
+
       renderer.startConfetti();
 
       setTimeout(() => {
@@ -52,6 +58,6 @@ function handleAnswerSubmitted(userAnswer) {
     }
   } else {
     hud.showFeedback(false, result.message);
-    hud.unlockInput(); // Lås upp tangentbordet så att spelaren kan korrigera sitt felaktiga svar
+    hud.unlockInput();
   }
 }

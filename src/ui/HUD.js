@@ -1,6 +1,6 @@
 /**
  * HUD.js
- * Hanterar menyväxlingar, start av specifika nivåer och användargränssnittet.
+ * Hanterar menyväxlingar, klarat-märken och mätaren under spelets gång.
  */
 export class HUD {
   constructor(onAnswerSubmit, onStartGame, onReturnToMenu) {
@@ -16,28 +16,28 @@ export class HUD {
     this.questionElement = document.getElementById('question-box');
     this.inputArea = document.getElementById('input-area');
     this.feedbackElement = document.getElementById('feedback-message');
+    this.progressBar = document.getElementById('progress-bar');
     
     this.currentInput = '';
-    this.isWaiting = false; // Spärr för att förhindra dubbelklick på OK
+    this.isWaiting = false;
     
     this.initEventListeners();
     this.initKeypad();
+    this.updateBadges();
   }
 
   initEventListeners() {
-    // Öppna additionsmenyn
     document.getElementById('btn-category-addition').onclick = () => {
       this.menuMain.classList.add('hidden');
       this.menuAddition.classList.remove('hidden');
+      this.updateBadges();
     };
 
-    // Gå tillbaka till huvudmenyn
     document.getElementById('btn-back-to-main').onclick = () => {
       this.menuAddition.classList.add('hidden');
       this.menuMain.classList.remove('hidden');
     };
 
-    // Klick på Brons, Silver eller Guld
     const tierButtons = document.querySelectorAll('.btn-tier');
     tierButtons.forEach((btn) => {
       btn.onclick = () => {
@@ -50,21 +50,37 @@ export class HUD {
       };
     });
 
-    // Knapp under spelets gång för att avbryta till meny
     document.getElementById('btn-menu').onclick = () => {
       this.showStartScreen();
       this.onReturnToMenu();
     };
   }
 
+  /**
+   * Läser in från localStorage och visar "✓ Klarad!" på menyknapparna.
+   */
+  updateBadges() {
+    const tiers = ['Brons', 'Silver', 'Guld'];
+    tiers.forEach((tier) => {
+      const isCompleted = localStorage.getItem(`completed_${tier}`) === 'true';
+      const badgeElement = document.getElementById(`badge-${tier.toLowerCase()}`);
+      if (badgeElement) {
+        if (isCompleted) {
+          badgeElement.classList.remove('hidden');
+        } else {
+          badgeElement.classList.add('hidden');
+        }
+      }
+    });
+  }
+
   showStartScreen() {
     this.startScreen.classList.remove('hidden');
     this.gameScreen.classList.add('hidden');
-    
-    // Nollställ till huvudmenyn
     this.menuMain.classList.remove('hidden');
     this.menuAddition.classList.add('hidden');
     this.isWaiting = false;
+    this.updateBadges();
   }
 
   showGameScreen() {
@@ -72,9 +88,14 @@ export class HUD {
     this.gameScreen.classList.remove('hidden');
   }
 
+  updateProgress(percentage, tierName) {
+    this.progressBar.style.width = `${percentage}%`;
+    this.progressBar.className = `progress-${tierName.toLowerCase()}`;
+  }
+
   displayQuestion(question) {
     if (!question) return;
-    this.isWaiting = false; // Lås upp tangentbordet för den nya frågan
+    this.isWaiting = false;
     this.questionElement.innerText = `${question.num1} ${question.operator} ${question.num2} = ?`;
     this.clearInput();
     this.clearFeedback();
@@ -116,7 +137,7 @@ export class HUD {
   }
 
   appendDigit(digit) {
-    if (this.isWaiting) return; // Ignorera knapptryck under väntetid
+    if (this.isWaiting) return;
     if (this.currentInput.length < 4) {
       this.currentInput += digit;
       this.updateDisplay();
@@ -138,12 +159,12 @@ export class HUD {
 
   submitAnswer() {
     if (this.currentInput === '' || this.isWaiting) return;
-    this.isWaiting = true; // Lås inmatningen direkt vid skickat svar
+    this.isWaiting = true;
     this.onAnswerSubmit(this.currentInput);
   }
 
   unlockInput() {
-    this.isWaiting = false; // Lås upp om svaret var fel så spelaren kan försöka igen
+    this.isWaiting = false;
   }
 
   showFeedback(isCorrect, message) {
