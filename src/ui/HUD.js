@@ -56,9 +56,6 @@ export class HUD {
     };
   }
 
-  /**
-   * Läser in från localStorage och visar "✓ Klarad!" på menyknapparna.
-   */
   updateBadges() {
     const tiers = ['Brons', 'Silver', 'Guld'];
     tiers.forEach((tier) => {
@@ -89,8 +86,9 @@ export class HUD {
   }
 
   updateProgress(percentage, tierName) {
+    const tierKey = tierName ? tierName.toLowerCase() : 'brons';
     this.progressBar.style.width = `${percentage}%`;
-    this.progressBar.className = `progress-${tierName.toLowerCase()}`;
+    this.progressBar.className = `progress-${tierKey}`;
   }
 
   displayQuestion(question) {

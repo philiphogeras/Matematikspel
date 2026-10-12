@@ -217,6 +217,8 @@ body {
   transition: width 0.4s ease-in-out;
 }
 
+/* Fyllningsfärger för mätaren (stödjer både svensk och engelsk namngivning) */
+.progress-brons,
 .progress-bronze {
   background-color: #e2a76f;
 }
@@ -225,6 +227,7 @@ body {
   background-color: #94a3b8;
 }
 
+.progress-guld,
 .progress-gold {
   background-color: #fcd34d;
 }
