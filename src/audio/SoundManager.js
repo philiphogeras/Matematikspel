@@ -1,21 +1,35 @@
 /**
  * SoundManager.js
- * Genererar mjuka och positiva ljudeffekter direkt via Web Audio API.
- * Kräver inga externa MP3-filer!
+ * Genererar mjuka och positiva ljudeffekter via Web Audio API.
+ * Innehåller automatisk upplåsning för alla webbläsare och mobila enheter.
  */
 export class SoundManager {
   constructor() {
     this.ctx = null;
+
+    // Lås upp ljudmotorn automatiskt vid första klicket/touchen på skärmen
+    const unlock = () => {
+      this.init();
+      if (this.ctx && this.ctx.state === 'running') {
+        window.removeEventListener('click', unlock);
+        window.removeEventListener('touchstart', unlock);
+        window.removeEventListener('keydown', unlock);
+      }
+    };
+
+    window.addEventListener('click', unlock);
+    window.addEventListener('touchstart', unlock);
+    window.addEventListener('keydown', unlock);
   }
 
   /**
-   * Startar ljudmotorn vid första klicket (webbläsarkrav för ljud).
+   * Startar eller återupptar AudioContext.
    */
   init() {
     if (!this.ctx) {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (AudioContext) {
-        this.ctx = new AudioContext();
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioContextClass) {
+        this.ctx = new AudioContextClass();
       }
     }
     if (this.ctx && this.ctx.state === 'suspended') {
@@ -34,20 +48,21 @@ export class SoundManager {
     const notes = [523.25, 659.25, 783.99]; // Frekvenser för C, E, G
 
     notes.forEach((freq, index) => {
+      const startTime = now + index * 0.08;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
 
       osc.type = 'sine'; // Mjuk sinusvåg
-      osc.frequency.setValueAtTime(freq, now + index * 0.08);
+      osc.frequency.setValueAtTime(freq, startTime);
 
-      gain.gain.setValueAtTime(0.12, now + index * 0.08);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + index * 0.08 + 0.25);
+      gain.gain.setValueAtTime(0.2, startTime);
+      gain.gain.linearRampToValueAtTime(0.001, startTime + 0.25);
 
       osc.connect(gain);
       gain.connect(this.ctx.destination);
 
-      osc.start(now + index * 0.08);
-      osc.stop(now + index * 0.08 + 0.25);
+      osc.start(startTime);
+      osc.stop(startTime + 0.25);
     });
   }
 
@@ -64,10 +79,10 @@ export class SoundManager {
 
     osc.type = 'triangle'; // Mjuk triangelvåg
     osc.frequency.setValueAtTime(220, now);
-    osc.frequency.exponentialRampToValueAtTime(160, now + 0.25);
+    osc.frequency.linearRampToValueAtTime(160, now + 0.25);
 
-    gain.gain.setValueAtTime(0.1, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+    gain.gain.setValueAtTime(0.15, now);
+    gain.gain.linearRampToValueAtTime(0.001, now + 0.25);
 
     osc.connect(gain);
     gain.connect(this.ctx.destination);
@@ -85,27 +100,28 @@ export class SoundManager {
 
     const now = this.ctx.currentTime;
     const notes = [
-      { freq: 523.25, time: 0, duration: 0.15 },   // C5
-      { freq: 659.25, time: 0.15, duration: 0.15 }, // E5
-      { freq: 783.99, time: 0.30, duration: 0.15 }, // G5
-      { freq: 1046.50, time: 0.45, duration: 0.6 }  // C6 (lång vinstton)
+      { freq: 523.25, time: 0, duration: 0.15 },
+      { freq: 659.25, time: 0.15, duration: 0.15 },
+      { freq: 783.99, time: 0.30, duration: 0.15 },
+      { freq: 1046.50, time: 0.45, duration: 0.6 }
     ];
 
     notes.forEach((note) => {
+      const startTime = now + note.time;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
 
       osc.type = 'triangle';
-      osc.frequency.setValueAtTime(note.freq, now + note.time);
+      osc.frequency.setValueAtTime(note.freq, startTime);
 
-      gain.gain.setValueAtTime(0.18, now + note.time);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + note.time + note.duration);
+      gain.gain.setValueAtTime(0.25, startTime);
+      gain.gain.linearRampToValueAtTime(0.001, startTime + note.duration);
 
       osc.connect(gain);
       gain.connect(this.ctx.destination);
 
-      osc.start(now + note.time);
-      osc.stop(now + note.time + note.duration);
+      osc.start(startTime);
+      osc.stop(startTime + note.duration);
     });
   }
 }
