@@ -9,15 +9,32 @@
 <body>
 
   <div id="game-container">
-    <!-- Canvas för pedagogiskt visuellt stöd -->
+    <!-- Canvas för tiotalsramar och visuellt stöd -->
     <canvas id="gameCanvas" width="800" height="600"></canvas>
     
-    <!-- UI Overlay för text, siffertangentbord och feedback -->
+    <!-- UI Overlay -->
     <div id="ui-overlay">
-      <div id="level-indicator">Nivå: 1</div>
-      <div id="question-box">Laddar fråga...</div>
-      <div id="input-area"></div>
-      <div id="feedback-message"></div>
+      
+      <!-- STARTMENY -->
+      <div id="start-screen" class="screen-panel">
+        <h1 class="game-title">Matematikspelet</h1>
+        <p class="game-subtitle">Räkna i din egen takt utan stress</p>
+        <button id="btn-start" class="btn-primary">Starta spelet</button>
+      </div>
+
+      <!-- SPELSKÄRM (Döljs i början) -->
+      <div id="game-screen" class="screen-panel hidden">
+        <div id="top-bar">
+          <div id="level-indicator">Nivå: 1</div>
+          <button id="btn-menu" class="btn-secondary">Meny</button>
+        </div>
+
+        <div id="question-box">0 + 0 = ?</div>
+        
+        <div id="input-area"></div>
+        <div id="feedback-message"></div>
+      </div>
+
     </div>
   </div>
 

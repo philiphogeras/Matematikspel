@@ -17,7 +17,7 @@ body {
   position: relative;
   width: 800px;
   height: 600px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
   border-radius: 16px;
   overflow: hidden;
   background-color: #ffffff;
@@ -40,11 +40,6 @@ body {
   height: 100%;
   z-index: 2;
   pointer-events: none;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  padding: 24px;
 }
 
 #ui-overlay button, 
@@ -52,22 +47,96 @@ body {
   pointer-events: auto;
 }
 
+.screen-panel {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* STARTMENY STYLING */
+#start-screen {
+  justify-content: center;
+  gap: 24px;
+  background-color: rgba(255, 255, 255, 0.95);
+  text-align: center;
+}
+
+.game-title {
+  font-size: 3rem;
+  color: #1e293b;
+}
+
+.game-subtitle {
+  font-size: 1.3rem;
+  color: #64748b;
+}
+
+.btn-primary {
+  font-size: 1.8rem;
+  font-weight: bold;
+  padding: 16px 40px;
+  background-color: #22c55e;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+  transition: transform 0.1s, background-color 0.1s;
+}
+
+.btn-primary:hover {
+  background-color: #16a34a;
+}
+
+.btn-primary:active {
+  transform: scale(0.96);
+}
+
+.btn-secondary {
+  font-size: 1rem;
+  font-weight: bold;
+  padding: 6px 14px;
+  background-color: #cbd5e1;
+  color: #334155;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* SPELSKÄRM LAYOUT */
+#top-bar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 #level-indicator {
-  align-self: flex-start;
   background-color: #e2e8f0;
   color: #334155;
-  padding: 8px 16px;
+  padding: 6px 16px;
   border-radius: 20px;
   font-weight: bold;
   font-size: 1.1rem;
 }
 
 #question-box {
-  font-size: 3rem;
+  font-size: 2.8rem;
   font-weight: bold;
   color: #1e293b;
-  margin-top: 10px;
+  margin-top: 5px;
   text-align: center;
+  background-color: rgba(255, 255, 255, 0.85);
+  padding: 4px 20px;
+  border-radius: 12px;
 }
 
 /* Siffertangentbord */
@@ -75,38 +144,38 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  margin-top: auto; /* Trycker ner tangentbordet mot botten */
 }
 
 .answer-display {
-  font-size: 2rem;
+  font-size: 1.8rem;
   font-weight: bold;
   color: #2563eb;
-  background-color: #f1f5f9;
-  padding: 8px 24px;
+  background-color: #ffffff;
+  padding: 4px 20px;
   border-radius: 8px;
   border: 2px solid #cbd5e1;
-  min-width: 120px;
+  min-width: 100px;
   text-align: center;
 }
 
 .keypad-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  width: 240px;
+  gap: 8px;
+  width: 210px;
 }
 
 .keypad-btn {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: bold;
-  padding: 14px;
+  padding: 10px;
   background-color: #ffffff;
   border: 2px solid #cbd5e1;
-  border-radius: 10px;
+  border-radius: 8px;
   cursor: pointer;
   color: #1e293b;
-  transition: background-color 0.1s, transform 0.1s;
 }
 
 .keypad-btn:active {
@@ -126,11 +195,10 @@ body {
   color: #166534;
 }
 
-/* Feedback */
 #feedback-message {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   font-weight: bold;
-  min-height: 36px;
+  min-height: 28px;
   text-align: center;
 }
 

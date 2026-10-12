@@ -1,21 +1,47 @@
 /**
  * HUD.js
- * Hanterar användargränssnittet (frågetext, svarsknappar och feedback).
+ * Hanterar användargränssnittet (startmeny, spelskärm, sifferknappar och feedback).
  */
 export class HUD {
-  constructor(onAnswerSubmit) {
-    this.onAnswerSubmit = onAnswerSubmit; // Funktion som anropas när eleven svarar
+  constructor(onAnswerSubmit, onStartGame, onReturnToMenu) {
+    this.onAnswerSubmit = onAnswerSubmit;
+    this.onStartGame = onStartGame;
+    this.onReturnToMenu = onReturnToMenu;
+
+    this.startScreen = document.getElementById('start-screen');
+    this.gameScreen = document.getElementById('game-screen');
     this.questionElement = document.getElementById('question-box');
     this.inputArea = document.getElementById('input-area');
     this.feedbackElement = document.getElementById('feedback-message');
     
     this.currentInput = '';
+    
+    this.initEventListeners();
     this.initKeypad();
   }
 
-  /**
-   * Visar den aktuella mattefrågan på skärmen
-   */
+  initEventListeners() {
+    document.getElementById('btn-start').onclick = () => {
+      this.showGameScreen();
+      this.onStartGame();
+    };
+
+    document.getElementById('btn-menu').onclick = () => {
+      this.showStartScreen();
+      this.onReturnToMenu();
+    };
+  }
+
+  showStartScreen() {
+    this.startScreen.classList.remove('hidden');
+    this.gameScreen.classList.add('hidden');
+  }
+
+  showGameScreen() {
+    this.startScreen.classList.add('hidden');
+    this.gameScreen.classList.remove('hidden');
+  }
+
   displayQuestion(question) {
     if (!question) return;
     this.questionElement.innerText = `${question.num1} ${question.operator} ${question.num2} = ?`;
@@ -23,20 +49,15 @@ export class HUD {
     this.clearFeedback();
   }
 
-  /**
-   * Bygger upp sifferknapparna (0-9, Rensa, Skicka)
-   */
   initKeypad() {
     this.inputArea.innerHTML = '';
 
-    // Visningsfält för vad eleven har tryckt in
     const display = document.createElement('div');
     display.id = 'answer-display';
     display.className = 'answer-display';
     display.innerText = '_';
     this.inputArea.appendChild(display);
 
-    // Sifferknappar 1-9 och 0
     const keypadGrid = document.createElement('div');
     keypadGrid.className = 'keypad-grid';
 
@@ -63,19 +84,13 @@ export class HUD {
     this.inputArea.appendChild(keypadGrid);
   }
 
-  /**
-   * Lägger till en siffra i svaret
-   */
   appendDigit(digit) {
-    if (this.currentInput.length < 3) { // Max 3 siffror
+    if (this.currentInput.length < 3) {
       this.currentInput += digit;
       this.updateDisplay();
     }
   }
 
-  /**
-   * Rensa inmatningen
-   */
   clearInput() {
     this.currentInput = '';
     this.updateDisplay();
@@ -88,17 +103,11 @@ export class HUD {
     }
   }
 
-  /**
-   * Skickar svaret vidare till spelloopen
-   */
   submitAnswer() {
     if (this.currentInput === '') return;
     this.onAnswerSubmit(this.currentInput);
   }
 
-  /**
-   * Visar mjuk och tydlig feedback
-   */
   showFeedback(isCorrect, message) {
     this.feedbackElement.innerText = message;
     this.feedbackElement.className = isCorrect ? 'feedback-success' : 'feedback-hint';
