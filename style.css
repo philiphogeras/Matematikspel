@@ -1,0 +1,143 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #f0f4f8;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+#game-container {
+  position: relative;
+  width: 800px;
+  height: 600px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  overflow: hidden;
+  background-color: #ffffff;
+}
+
+#gameCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+#ui-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+}
+
+#ui-overlay button, 
+#ui-overlay input {
+  pointer-events: auto;
+}
+
+#level-indicator {
+  align-self: flex-start;
+  background-color: #e2e8f0;
+  color: #334155;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+#question-box {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #1e293b;
+  margin-top: 10px;
+  text-align: center;
+}
+
+/* Siffertangentbord */
+#input-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.answer-display {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #2563eb;
+  background-color: #f1f5f9;
+  padding: 8px 24px;
+  border-radius: 8px;
+  border: 2px solid #cbd5e1;
+  min-width: 120px;
+  text-align: center;
+}
+
+.keypad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 240px;
+}
+
+.keypad-btn {
+  font-size: 1.5rem;
+  font-weight: bold;
+  padding: 14px;
+  background-color: #ffffff;
+  border: 2px solid #cbd5e1;
+  border-radius: 10px;
+  cursor: pointer;
+  color: #1e293b;
+  transition: background-color 0.1s, transform 0.1s;
+}
+
+.keypad-btn:active {
+  transform: scale(0.95);
+  background-color: #e2e8f0;
+}
+
+.btn-clear {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+  color: #991b1b;
+}
+
+.btn-submit {
+  background-color: #dcfce7;
+  border-color: #86efac;
+  color: #166534;
+}
+
+/* Feedback */
+#feedback-message {
+  font-size: 1.3rem;
+  font-weight: bold;
+  min-height: 36px;
+  text-align: center;
+}
+
+.feedback-success {
+  color: #15803d;
+}
+
+.feedback-hint {
+  color: #c2410c;
+}

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matematikspelet</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div id="game-container">
+    <!-- Canvas för pedagogiskt visuellt stöd -->
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    
+    <!-- UI Overlay för text, siffertangentbord och feedback -->
+    <div id="ui-overlay">
+      <div id="level-indicator">Nivå: 1</div>
+      <div id="question-box">Laddar fråga...</div>
+      <div id="input-area"></div>
+      <div id="feedback-message"></div>
+    </div>
+  </div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
