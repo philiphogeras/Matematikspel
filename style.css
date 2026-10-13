@@ -71,12 +71,12 @@ body {
   display: none !important;
 }
 
-/* KUGGHJULSKNAPP (SYNS ALLTID) */
+/* KUGGHJULSKNAPP (SYNS ALLTID LÄNGST UPP TILL HÖGER) */
 .btn-gear {
   position: absolute;
   top: 16px;
   right: 16px;
-  z-index: 100;
+  z-index: 999;
   background-color: #ffffff;
   color: #475569;
   border: 2px solid #cbd5e1;
@@ -87,7 +87,7 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   transition: transform 0.1s, background-color 0.1s;
 }
 
@@ -295,12 +295,13 @@ body {
   transition: width 0.3s ease-in-out, background-color 0.3s ease;
 }
 
-/* SPELSKÄRM LAYOUT & FRÅGA */
-.question-container {
+/* FRÅGA OCH HJÄLPKNAPP LAYOUT */
+.question-wrapper {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 14px;
-  margin-top: 5px;
+  gap: 8px;
+  margin-top: 4px;
 }
 
 #question-box {
@@ -309,20 +310,21 @@ body {
   color: #1e293b;
   text-align: center;
   background-color: rgba(255, 255, 255, 0.9);
-  padding: 8px 24px;
+  padding: 6px 24px;
   border-radius: 12px;
 }
 
 .btn-help {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: bold;
-  padding: 10px 16px;
+  padding: 6px 16px;
   background-color: #e0f2fe;
   color: #0369a1;
   border: 2px solid #38bdf8;
-  border-radius: 10px;
+  border-radius: 20px;
   cursor: pointer;
   transition: transform 0.1s, background-color 0.1s;
+  box-shadow: 0 2px 6px rgba(56, 189, 248, 0.2);
 }
 
 .btn-help:active {
@@ -472,7 +474,7 @@ body {
   margin-top: 6px;
 }
 
-/* UPPSTÄLLNING SIDA (HJÄLPMODAL) */
+/* UPPSTÄLLNING (HJÄLPMODAL) */
 .vertical-setup {
   display: flex;
   justify-content: center;

@@ -163,7 +163,6 @@ export class HUD {
     const allCols = ['Hundratal', 'Tiotal', 'Ental'];
     const activeCols = allCols.slice(allCols.length - maxLen);
 
-    // Bygg uppställningsrutnätet
     let gridHTML = '<div class="setup-grid">';
     
     // Kolumnrubriker
@@ -191,11 +190,11 @@ export class HUD {
     }
     gridHTML += '</div>';
 
-    // Sträck under talen
+    // Linje
     gridHTML += '<div class="setup-line"></div>';
     gridHTML += '</div>';
 
-    // Skapa instruktionstext
+    // Instruktionstext
     let instructionsHTML = '<p><strong>Så här ställer du upp och räknar:</strong></p><ol class="instructions-list">';
     
     if (operator === '+') {
