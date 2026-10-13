@@ -71,7 +71,7 @@ body {
   display: none !important;
 }
 
-/* KUGGHJULSKNAPP (SYNS ALLTID LÄNGST UPP TILL HÖGER) */
+/* KUGGHJULSKNAPP */
 .btn-gear {
   position: absolute;
   top: 16px;
@@ -428,7 +428,7 @@ body {
 }
 
 .help-modal-content {
-  width: 380px;
+  width: 440px;
 }
 
 .modal-title {
@@ -474,7 +474,7 @@ body {
   margin-top: 6px;
 }
 
-/* UPPSTÄLLNING (HJÄLPMODAL) */
+/* UPPSTÄLLNING SIDA (HJÄLPMODAL) */
 .vertical-setup {
   display: flex;
   justify-content: center;
@@ -495,9 +495,10 @@ body {
   align-items: center;
 }
 
+/* Rutorna breddas till 64px för att rymma "Hundratal" */
 .cell {
-  width: 42px;
-  height: 42px;
+  width: 64px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -508,7 +509,8 @@ body {
 .col-header {
   font-size: 0.75rem;
   font-weight: bold;
-  height: 22px;
+  height: 24px;
+  white-space: nowrap;
 }
 
 .col-ental {
@@ -529,6 +531,7 @@ body {
 .op-cell {
   color: #475569;
   font-size: 1.4rem;
+  width: 32px;
 }
 
 .setup-line {

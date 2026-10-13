@@ -147,7 +147,7 @@ export class HUD {
   }
 
   /**
-   * Genererar den visuella uppställningen och instruktionstexten i hjälpmodalen.
+   * Genererar den visuella uppställningen och instruktionstexten i hjälpmodalen utan att avslöja svaret.
    */
   renderHelpModal() {
     if (!this.currentQuestion) return;
@@ -190,44 +190,44 @@ export class HUD {
     }
     gridHTML += '</div>';
 
-    // Linje
+    // Linje under talen
     gridHTML += '<div class="setup-line"></div>';
     gridHTML += '</div>';
 
-    // Instruktionstext
+    // Instruktionstext utan uträknat facit
     let instructionsHTML = '<p><strong>Så här ställer du upp och räknar:</strong></p><ol class="instructions-list">';
     
     if (operator === '+') {
       if (maxLen >= 1) {
         const e1 = parseInt(pad1[maxLen - 1] || '0', 10);
         const e2 = parseInt(pad2[maxLen - 1] || '0', 10);
-        instructionsHTML += `<li>Börja med entalen till höger (blå): ${e1} + ${e2} = ${e1 + e2}.</li>`;
+        instructionsHTML += `<li>Börja med entalen till höger (blå): <strong>${e1} + ${e2}</strong></li>`;
       }
       if (maxLen >= 2) {
         const t1 = parseInt(pad1[maxLen - 2] || '0', 10);
         const t2 = parseInt(pad2[maxLen - 2] || '0', 10);
-        instructionsHTML += `<li>Räkna sedan tiotalen (röd): ${t1} + ${t2} = ${t1 + t2}.</li>`;
+        instructionsHTML += `<li>Räkna sedan tiotalen (röd): <strong>${t1} + ${t2}</strong></li>`;
       }
       if (maxLen >= 3) {
         const h1 = parseInt(pad1[maxLen - 3] || '0', 10);
         const h2 = parseInt(pad2[maxLen - 3] || '0', 10);
-        instructionsHTML += `<li>Räkna sist hundratalen (grön): ${h1} + ${h2} = ${h1 + h2}.</li>`;
+        instructionsHTML += `<li>Räkna sist hundratalen (grön): <strong>${h1} + ${h2}</strong></li>`;
       }
     } else {
       if (maxLen >= 1) {
         const e1 = parseInt(pad1[maxLen - 1] || '0', 10);
         const e2 = parseInt(pad2[maxLen - 1] || '0', 10);
-        instructionsHTML += `<li>Börja med entalen till höger (blå): ${e1} - ${e2} = ${e1 - e2}.</li>`;
+        instructionsHTML += `<li>Börja med entalen till höger (blå): <strong>${e1} - ${e2}</strong></li>`;
       }
       if (maxLen >= 2) {
         const t1 = parseInt(pad1[maxLen - 2] || '0', 10);
         const t2 = parseInt(pad2[maxLen - 2] || '0', 10);
-        instructionsHTML += `<li>Räkna sedan tiotalen (röd): ${t1} - ${t2} = ${t1 - t2}.</li>`;
+        instructionsHTML += `<li>Räkna sedan tiotalen (röd): <strong>${t1} - ${t2}</strong></li>`;
       }
       if (maxLen >= 3) {
         const h1 = parseInt(pad1[maxLen - 3] || '0', 10);
         const h2 = parseInt(pad2[maxLen - 3] || '0', 10);
-        instructionsHTML += `<li>Räkna sist hundratalen (grön): ${h1} - ${h2} = ${h1 - h2}.</li>`;
+        instructionsHTML += `<li>Räkna sist hundratalen (grön): <strong>${h1} - ${h2}</strong></li>`;
       }
     }
     instructionsHTML += '</ol>';
