@@ -1,7 +1,7 @@
 /**
  * HUD.js
  * Hanterar gränssnitt, inställningsmeny, hjälpfunktionen för uppställning
- * samt tangentbordsinmatning (siffertangenter, Backspace, Enter).
+ * samt tangentbordsinmatning (siffertangenter, Numpad, Backspace, Enter).
  */
 export class HUD {
   constructor(onAnswerSubmit, onStartGame, onReturnToMenu, soundCallbacks) {
@@ -41,13 +41,13 @@ export class HUD {
   }
 
   initEventListeners() {
-    // Tangentbordslyssnare för fysiskt tangentbord
+    // Tangentbordslyssnare för fysiskt tangentbord och Numpad
     window.addEventListener('keydown', (e) => {
       const isGameVisible = !this.gameScreen.classList.contains('hidden');
       const isSettingsOpen = !this.settingsModal.classList.contains('hidden');
       const isHelpOpen = !this.helpModal.classList.contains('hidden');
 
-      // Hantera Escape för att stänga öppna rutor
+      // 1. Hantera Escape för att stänga öppna rutor
       if (isSettingsOpen || isHelpOpen) {
         if (e.key === 'Escape') {
           this.settingsModal.classList.add('hidden');
@@ -56,17 +56,56 @@ export class HUD {
         return;
       }
 
-      // Om spelskärmen inte är aktiv, lyssna inte på siffertangenter
+      // Om spelskärmen inte är aktiv, avbryt
       if (!isGameVisible) return;
 
+      // 2. Identifiera siffra (både vanliga sifferraden och Numpad)
+      let digit = null;
       if (e.key >= '0' && e.key <= '9') {
-        this.appendDigit(e.key);
-      } else if (e.key === 'Enter') {
+        digit = e.key;
+      } else if (e.code && e.code.startsWith('Numpad') && e.code.length === 7) {
+        const num = e.code.replace('Numpad', '');
+        if (num >= '0' && num <= '9') {
+          digit = num;
+        }
+      }
+
+      if (digit !== null) {
+        e.preventDefault();
+        this.appendDigit(digit);
+        return;
+      }
+
+      // 3. Hantera Enter (både vanlig Enter och NumpadEnter)
+      if (e.key === 'Enter' || e.code === 'NumpadEnter') {
+        e.preventDefault();
+        // Ta bort fokus från ev. klickad knapp så att Enter inte aktiverar den igen
+        if (document.activeElement && typeof document.activeElement.blur === 'function') {
+          document.activeElement.blur();
+        }
         this.submitAnswer();
-      } else if (e.key === 'Backspace') {
+        return;
+      }
+
+      // 4. Hantera Backspace (Sudd)
+      if (e.key === 'Backspace') {
+        e.preventDefault();
         this.backspace();
-      } else if (e.key === 'c' || e.key === 'C' || e.key === 'Delete') {
+        return;
+      }
+
+      // 5. Hantera Clear (C eller Delete)
+      if (e.key === 'c' || e.key === 'C' || e.key === 'Delete') {
+        e.preventDefault();
         this.clearInput();
+        return;
+      }
+    });
+
+    // Avfokusera knappar när man klickar på dem för att förhindra Enter-krockar
+    document.addEventListener('click', (e) => {
+      if (e.target && e.target.tagName === 'BUTTON') {
+        e.target.blur();
       }
     });
 

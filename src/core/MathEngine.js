@@ -1,11 +1,11 @@
 /**
  * MathEngine.js
- * Hanterar matematiklogik och svårighetsnivåer med en exakt positionsprogression:
+ * Hanterar matematiklogik och svårighetsnivåer med exakt positionsprogression:
  * 
- * Tiotal:
+ * Tiotal Addition:
  * - Brons: Jämna tiotal (20 + 30)
- * - Silver: Båda termerna har tiotal och ental, utan tiotalsövergång (43 + 32, 15 + 12, 87 + 11)
- * - Guld: Båda termerna har tiotal och ental, med tiotalsövergång (48 + 37, 59 + 43, 88 + 94)
+ * - Silver: Tvåsiffriga tal i båda termerna UTAN tiotalsövergång (43 + 32, 15 + 12, 87 + 11)
+ * - Guld: Tvåsiffriga tal i båda termerna MED garanterad tiotalsövergång (48 + 37, 59 + 43, 88 + 94)
  */
 export class MathEngine {
   constructor() {
@@ -60,7 +60,7 @@ export class MathEngine {
             const sum = this.rand(6, 10);
             num1 = this.rand(1, sum - 1);
             num2 = sum - num1;
-          } else { // Guld (över 10)
+          } else { // Guld (tiotalsövergång över 10)
             const sum = this.rand(11, 18);
             num1 = this.rand(sum - 9, 9);
             num2 = sum - num1;
@@ -72,7 +72,7 @@ export class MathEngine {
             num1 = this.rand(1, 4) * 10;
             num2 = this.rand(1, 5) * 10;
           } else if (this.tier === 'silver') {
-            // Silver: Tiotal + ental på båda termerna, utan tiotalsövergång (t.ex. 43 + 32 = 75)
+            // Silver: Tvåsiffriga tal i båda termerna UTAN tiotalsövergång (t.ex. 43 + 32 = 75, 15 + 12 = 27)
             const t1 = this.rand(1, 8);
             const t2 = this.rand(1, 9 - t1);
             const e1 = this.rand(1, 8);
@@ -80,11 +80,11 @@ export class MathEngine {
             num1 = t1 * 10 + e1;
             num2 = t2 * 10 + e2;
           } else {
-            // Guld: Tiotal + ental på båda termerna, med tiotalsövergång (t.ex. 48 + 37 = 85)
+            // Guld: Tvåsiffriga tal i båda termerna MED garanterad tiotalsövergång (t.ex. 48 + 37 = 85, 59 + 43 = 102)
             const t1 = this.rand(1, 8);
             const t2 = this.rand(1, 8);
             const e1 = this.rand(2, 9);
-            const e2 = this.rand(10 - e1, 9);
+            const e2 = this.rand(10 - e1, 9); // e1 + e2 blir alltid minst 10!
             num1 = t1 * 10 + e1;
             num2 = t2 * 10 + e2;
           }
@@ -144,11 +144,11 @@ export class MathEngine {
             num1 = t1 * 10 + e1;
             num2 = t2 * 10 + e2;
           } else {
-            // Guld: Tvåsiffriga tal med tiotalsväxling (t.ex. 43 - 27 = 16)
+            // Guld: Tvåsiffriga tal med garanterad tiotalsväxling (t.ex. 43 - 27 = 16)
             const t1 = this.rand(2, 9);
             const t2 = this.rand(1, t1 - 1);
-            const e1 = this.rand(1, 8);
-            const e2 = this.rand(e1 + 1, 9);
+            const e1 = this.rand(0, 8);
+            const e2 = this.rand(e1 + 1, 9); // e1 < e2 garanterar låning!
             num1 = t1 * 10 + e1;
             num2 = t2 * 10 + e2;
           }
