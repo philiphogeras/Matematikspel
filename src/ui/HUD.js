@@ -1,6 +1,7 @@
 /**
  * HUD.js
- * Hanterar gränssnitt, inställningsmeny samt hjälpfunktionen för uppställning.
+ * Hanterar gränssnitt, inställningsmeny, hjälpfunktionen för uppställning
+ * samt tangentbordsinmatning (siffertangenter, Backspace, Enter).
  */
 export class HUD {
   constructor(onAnswerSubmit, onStartGame, onReturnToMenu, soundCallbacks) {
@@ -40,6 +41,35 @@ export class HUD {
   }
 
   initEventListeners() {
+    // Tangentbordslyssnare för fysiskt tangentbord
+    window.addEventListener('keydown', (e) => {
+      const isGameVisible = !this.gameScreen.classList.contains('hidden');
+      const isSettingsOpen = !this.settingsModal.classList.contains('hidden');
+      const isHelpOpen = !this.helpModal.classList.contains('hidden');
+
+      // Hantera Escape för att stänga öppna rutor
+      if (isSettingsOpen || isHelpOpen) {
+        if (e.key === 'Escape') {
+          this.settingsModal.classList.add('hidden');
+          this.helpModal.classList.add('hidden');
+        }
+        return;
+      }
+
+      // Om spelskärmen inte är aktiv, lyssna inte på siffertangenter
+      if (!isGameVisible) return;
+
+      if (e.key >= '0' && e.key <= '9') {
+        this.appendDigit(e.key);
+      } else if (e.key === 'Enter') {
+        this.submitAnswer();
+      } else if (e.key === 'Backspace') {
+        this.backspace();
+      } else if (e.key === 'c' || e.key === 'C' || e.key === 'Delete') {
+        this.clearInput();
+      }
+    });
+
     // Inställningsmeny
     document.getElementById('btn-settings').onclick = () => {
       document.getElementById('reset-confirm-msg').classList.add('hidden');
@@ -349,6 +379,14 @@ export class HUD {
     if (this.isWaiting) return;
     if (this.currentInput.length < 4) {
       this.currentInput += digit;
+      this.updateDisplay();
+    }
+  }
+
+  backspace() {
+    if (this.isWaiting) return;
+    if (this.currentInput.length > 0) {
+      this.currentInput = this.currentInput.slice(0, -1);
       this.updateDisplay();
     }
   }
