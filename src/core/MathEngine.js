@@ -1,20 +1,21 @@
 /**
  * MathEngine.js
- * Hanterar matematiklogik för både Addition (+) och Subtraktion (-).
+ * Hanterar matematiklogik och svårighetsnivåer utan upprepade frågor.
  */
 export class MathEngine {
   constructor() {
-    this.operation = 'addition';  // 'addition' eller 'subtraction'
-    this.category = 'ental';       // 'ental', 'tiotal', 'hundratal'
-    this.tier = 'brons';           // 'brons', 'silver', 'guld'
+    this.operation = 'addition';
+    this.category = 'ental';
+    this.tier = 'brons';
     
-    this.currentRound = 1;         // 1..3
+    this.currentRound = 1;
     this.maxRounds = 3;
     
-    this.correctInRound = 0;       // 0..5
+    this.correctInRound = 0;
     this.questionsPerRound = 5;
 
     this.currentQuestion = null;
+    this.lastQuestionKey = '';
   }
 
   reset(operation = 'addition', category = 'ental', tier = 'brons') {
@@ -24,81 +25,125 @@ export class MathEngine {
     this.currentRound = 1;
     this.correctInRound = 0;
     this.currentQuestion = null;
+    this.lastQuestionKey = '';
   }
 
   getRoundProgressPercentage() {
     return Math.round((this.correctInRound / this.questionsPerRound) * 100);
   }
 
-  /**
-   * Genererar anpassade frågor för både Addition och Subtraktion.
-   */
+  rand(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
   generateQuestion() {
     let num1 = 0;
     let num2 = 0;
     const operator = this.operation === 'subtraction' ? '-' : '+';
+    let key = '';
 
-    if (this.operation === 'addition') {
-      // ADDITION LOGIK
-      if (this.category === 'ental') {
-        if (this.tier === 'brons') { num1 = this.rand(0, 5); num2 = this.rand(0, 4); }
-        else if (this.tier === 'silver') { num1 = this.rand(2, 7); num2 = this.rand(1, 6); }
-        else { num1 = this.rand(5, 9); num2 = this.rand(5, 9); }
-      } else if (this.category === 'tiotal') {
-        if (this.tier === 'brons') { num1 = this.rand(1, 4) * 10; num2 = this.rand(1, 5) * 10; }
-        else if (this.tier === 'silver') { num1 = this.rand(1, 5) * 10; num2 = this.rand(1, 9); }
-        else { num1 = this.rand(10, 40); num2 = this.rand(10, 40); }
-      } else if (this.category === 'hundratal') {
-        if (this.tier === 'brons') { num1 = this.rand(1, 4) * 100; num2 = this.rand(1, 4) * 100; }
-        else if (this.tier === 'silver') { num1 = this.rand(1, 4) * 100; num2 = this.rand(1, 8) * 10; }
-        else { num1 = this.rand(100, 300); num2 = this.rand(100, 300); }
+    // Förhindra att exakt samma fråga genereras två gånger i rad
+    for (let attempt = 0; attempt < 30; attempt++) {
+      if (this.operation === 'addition') {
+        if (this.category === 'ental') {
+          if (this.tier === 'brons') {
+            // Summa maximalt 10
+            const sum = this.rand(1, 10);
+            num1 = this.rand(0, sum);
+            num2 = sum - num1;
+          } else if (this.tier === 'silver') {
+            // Summa nära 10 (7-10)
+            const sum = this.rand(7, 10);
+            num1 = this.rand(1, sum - 1);
+            num2 = sum - num1;
+          } else {
+            // Guld: Över 10 men under 19 (11-18)
+            const sum = this.rand(11, 18);
+            num1 = this.rand(sum - 9, 9);
+            num2 = sum - num1;
+          }
+        } else if (this.category === 'tiotal') {
+          if (this.tier === 'brons') {
+            // Summa maximalt 100
+            const sum = this.rand(2, 10) * 10;
+            num1 = this.rand(1, (sum / 10) - 1) * 10;
+            num2 = sum - num1;
+          } else if (this.tier === 'silver') {
+            // Summa nära 100 (70-100)
+            const sum = this.rand(7, 10) * 10;
+            num1 = this.rand(1, (sum / 10) - 1) * 10;
+            num2 = sum - num1;
+          } else {
+            // Guld: Över 100 men under 190 (110-180)
+            const sum = this.rand(11, 18) * 10;
+            num1 = this.rand((sum / 10) - 9, 9) * 10;
+            num2 = sum - num1;
+          }
+        } else if (this.category === 'hundratal') {
+          if (this.tier === 'brons') {
+            const sum = this.rand(2, 10) * 100;
+            num1 = this.rand(1, (sum / 100) - 1) * 100;
+            num2 = sum - num1;
+          } else if (this.tier === 'silver') {
+            const sum = this.rand(7, 10) * 100;
+            num1 = this.rand(1, (sum / 100) - 1) * 100;
+            num2 = sum - num1;
+          } else {
+            const sum = this.rand(11, 18) * 100;
+            num1 = this.rand((sum / 100) - 9, 9) * 100;
+            num2 = sum - num1;
+          }
+        }
+      } else {
+        // Subtraktion
+        if (this.category === 'ental') {
+          if (this.tier === 'brons') {
+            num1 = this.rand(1, 10);
+            num2 = this.rand(0, num1);
+          } else if (this.tier === 'silver') {
+            num1 = this.rand(7, 10);
+            num2 = this.rand(1, num1);
+          } else {
+            // Guld: Minuend 11-18, subtrahend ger ental som svar (1-9)
+            num1 = this.rand(11, 18);
+            num2 = this.rand(num1 - 9, 9);
+          }
+        } else if (this.category === 'tiotal') {
+          if (this.tier === 'brons') {
+            num1 = this.rand(2, 10) * 10;
+            num2 = this.rand(1, num1 / 10) * 10;
+          } else if (this.tier === 'silver') {
+            num1 = this.rand(7, 10) * 10;
+            num2 = this.rand(1, num1 / 10) * 10;
+          } else {
+            // Guld: Minuend 110-180
+            num1 = this.rand(11, 18) * 10;
+            num2 = this.rand((num1 / 10) - 9, 9) * 10;
+          }
+        } else if (this.category === 'hundratal') {
+          if (this.tier === 'brons') {
+            num1 = this.rand(2, 10) * 100;
+            num2 = this.rand(1, num1 / 100) * 100;
+          } else if (this.tier === 'silver') {
+            num1 = this.rand(7, 10) * 100;
+            num2 = this.rand(1, num1 / 100) * 100;
+          } else {
+            num1 = this.rand(11, 18) * 100;
+            num2 = this.rand((num1 / 100) - 9, 9) * 100;
+          }
+        }
       }
-      this.currentQuestion = { num1, num2, operator, answer: num1 + num2 };
 
-    } else {
-      // SUBTRAKTION LOGIK (Alltid num1 >= num2 så svaret blir positivt)
-      if (this.category === 'ental') {
-        if (this.tier === 'brons') {
-          num1 = this.rand(1, 5);
-          num2 = this.rand(0, num1);
-        } else if (this.tier === 'silver') {
-          num1 = this.rand(4, 10);
-          num2 = this.rand(1, num1);
-        } else { // guld (tiotalsövergång, t.ex. 14 - 6)
-          num1 = this.rand(11, 18);
-          num2 = this.rand(2, 9);
-        }
-      } else if (this.category === 'tiotal') {
-        if (this.tier === 'brons') { // Jämna tiotal (50 - 20)
-          num1 = this.rand(2, 5) * 10;
-          num2 = this.rand(1, num1 / 10) * 10;
-        } else if (this.tier === 'silver') { // Tiotal - ental (48 - 5)
-          num1 = this.rand(2, 9) * 10 + this.rand(1, 9);
-          num2 = this.rand(1, num1 % 10 || 5);
-        } else { // Blandade tiotal (52 - 27)
-          num1 = this.rand(30, 99);
-          num2 = this.rand(10, num1 - 1);
-        }
-      } else if (this.category === 'hundratal') {
-        if (this.tier === 'brons') { // Jämna hundratal (500 - 200)
-          num1 = this.rand(2, 5) * 100;
-          num2 = this.rand(1, num1 / 100) * 100;
-        } else if (this.tier === 'silver') { // Hundratal - tiotal (400 - 30)
-          num1 = this.rand(2, 8) * 100;
-          num2 = this.rand(1, 9) * 10;
-        } else { // Blandade hundratal (450 - 180)
-          num1 = this.rand(200, 900);
-          num2 = this.rand(100, num1 - 1);
-        }
+      key = `${num1}_${operator}_${num2}`;
+      if (key !== this.lastQuestionKey) {
+        break;
       }
-      this.currentQuestion = { num1, num2, operator, answer: num1 - num2 };
     }
 
+    this.lastQuestionKey = key;
+    const answer = this.operation === 'subtraction' ? num1 - num2 : num1 + num2;
+    this.currentQuestion = { num1, num2, operator, answer };
     return this.currentQuestion;
-  }
-
-  rand(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
   checkAnswer(userAnswer) {
@@ -114,7 +159,7 @@ export class MathEngine {
             isCorrect: true,
             isRoundCompleted: true,
             isTierCompleted: true,
-            message: `🏆 FANTASTISKT! Du har klarat alla 3 omgångar i ${this.tier.toUpperCase()}! 🏆`
+            message: `Bra jobbat! Du har klarat alla 3 omgångar i ${this.tier.toUpperCase()}!`
           };
         }
 
@@ -125,7 +170,7 @@ export class MathEngine {
           isCorrect: true,
           isRoundCompleted: true,
           isTierCompleted: false,
-          message: `🌟 Omgång ${this.currentRound - 1} klar! Nu startar Omgång ${this.currentRound}! 🎉`
+          message: `Omgång ${this.currentRound - 1} klar! Nu startar Omgång ${this.currentRound}!`
         };
       }
 
@@ -133,7 +178,7 @@ export class MathEngine {
         isCorrect: true,
         isRoundCompleted: false,
         isTierCompleted: false,
-        message: 'Bra jobbat! Helt rätt! ⭐'
+        message: 'Bra jobbat! Helt rätt!'
       };
     } else {
       return {

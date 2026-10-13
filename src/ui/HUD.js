@@ -1,6 +1,6 @@
 /**
  * HUD.js
- * Hanterar menyväxlingar för både Addition och Subtraktion.
+ * Hanterar menyväxlingar och gränssnitt utan emojis.
  */
 export class HUD {
   constructor(onAnswerSubmit, onStartGame, onReturnToMenu) {
@@ -35,7 +35,6 @@ export class HUD {
   }
 
   initEventListeners() {
-    // Öppna Addition
     document.getElementById('btn-category-addition').onclick = () => {
       this.selectedOperation = 'addition';
       this.subcatMenuTitle.innerText = 'Addition (+)';
@@ -43,7 +42,6 @@ export class HUD {
       this.menuSubcats.classList.remove('hidden');
     };
 
-    // Öppna Subtraktion
     document.getElementById('btn-category-subtraction').onclick = () => {
       this.selectedOperation = 'subtraction';
       this.subcatMenuTitle.innerText = 'Subtraktion (-)';
@@ -51,13 +49,11 @@ export class HUD {
       this.menuSubcats.classList.remove('hidden');
     };
 
-    // Tillbaka till Huvudmeny
     document.getElementById('btn-back-to-main').onclick = () => {
       this.menuSubcats.classList.add('hidden');
       this.menuMain.classList.remove('hidden');
     };
 
-    // Klicka på Delmoment (Ental, Tiotal, Hundratal)
     const subcatBtns = document.querySelectorAll('.btn-subcat');
     subcatBtns.forEach((btn) => {
       btn.onclick = () => {
@@ -73,13 +69,11 @@ export class HUD {
       };
     });
 
-    // Tillbaka till Delmoment
     document.getElementById('btn-back-to-subcats').onclick = () => {
       this.menuTiers.classList.add('hidden');
       this.menuSubcats.classList.remove('hidden');
     };
 
-    // Klicka på Nivåknapp (Brons, Silver, Guld)
     const tierBtns = document.querySelectorAll('.btn-tier');
     tierBtns.forEach((btn) => {
       btn.onclick = () => {
@@ -90,21 +84,16 @@ export class HUD {
       };
     });
 
-    // Menyknapp under spelets gång
     document.getElementById('btn-menu').onclick = () => {
       this.showStartScreen();
       this.onReturnToMenu();
     };
   }
 
-  /**
-   * Uppdaterar låsstatus på Silver och Guld för den valda räknesättet och delmomentet.
-   */
   updateTierButtons() {
     const op = this.selectedOperation;
     const cat = this.selectedCategory;
 
-    // Bakåtkompatibilitet: Läser både nya 'completed_addition_ental_brons' och gamla 'completed_ental_brons'
     const isBronsDone = localStorage.getItem(`completed_${op}_${cat}_brons`) === 'true' || 
                        (op === 'addition' && localStorage.getItem(`completed_${cat}_brons`) === 'true');
     const isSilverDone = localStorage.getItem(`completed_${op}_${cat}_silver`) === 'true' || 
@@ -125,7 +114,7 @@ export class HUD {
       btn.disabled = false;
       btn.classList.remove('btn-locked');
       if (isCompleted) {
-        badge.innerText = '✓ Klarad!';
+        badge.innerText = 'Klarad';
         badge.className = 'tier-status status-completed';
       } else {
         badge.innerText = 'Öppen';
@@ -134,7 +123,7 @@ export class HUD {
     } else {
       btn.disabled = true;
       btn.classList.add('btn-locked');
-      badge.innerText = '🔒 Låst';
+      badge.innerText = 'Låst';
       badge.className = 'tier-status';
     }
   }
