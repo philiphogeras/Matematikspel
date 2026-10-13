@@ -1,6 +1,9 @@
 /**
  * MathEngine.js
- * Hanterar matematiklogik och svårighetsnivåer utan upprepade frågor.
+ * Hanterar matematiklogik med en exakt och tydlig positionsprogression:
+ * Brons = Jämna tal (t.ex. 100 + 200)
+ * Silver = Med tiotal (t.ex. 140 + 250)
+ * Guld = Med ental (t.ex. 347 + 112)
  */
 export class MathEngine {
   constructor() {
@@ -42,94 +45,113 @@ export class MathEngine {
     const operator = this.operation === 'subtraction' ? '-' : '+';
     let key = '';
 
-    // Förhindra att exakt samma fråga genereras två gånger i rad
     for (let attempt = 0; attempt < 30; attempt++) {
       if (this.operation === 'addition') {
+        
+        // --- ADDITION ---
         if (this.category === 'ental') {
           if (this.tier === 'brons') {
-            // Summa maximalt 10
-            const sum = this.rand(1, 10);
+            const sum = this.rand(1, 5);
             num1 = this.rand(0, sum);
             num2 = sum - num1;
           } else if (this.tier === 'silver') {
-            // Summa nära 10 (7-10)
-            const sum = this.rand(7, 10);
+            const sum = this.rand(6, 10);
             num1 = this.rand(1, sum - 1);
             num2 = sum - num1;
-          } else {
-            // Guld: Över 10 men under 19 (11-18)
+          } else { // Guld (över 10)
             const sum = this.rand(11, 18);
             num1 = this.rand(sum - 9, 9);
             num2 = sum - num1;
           }
+
         } else if (this.category === 'tiotal') {
           if (this.tier === 'brons') {
-            // Summa maximalt 100
-            const sum = this.rand(2, 10) * 10;
-            num1 = this.rand(1, (sum / 10) - 1) * 10;
-            num2 = sum - num1;
+            // Brons: Jämna tiotal (t.ex. 20 + 30 = 50)
+            num1 = this.rand(1, 4) * 10;
+            num2 = this.rand(1, 5) * 10;
           } else if (this.tier === 'silver') {
-            // Summa nära 100 (70-100)
-            const sum = this.rand(7, 10) * 10;
-            num1 = this.rand(1, (sum / 10) - 1) * 10;
-            num2 = sum - num1;
+            // Silver: Tiotal + ental (t.ex. 40 + 5 = 45)
+            num1 = this.rand(1, 8) * 10;
+            num2 = this.rand(1, 9);
           } else {
-            // Guld: Över 100 men under 190 (110-180)
-            const sum = this.rand(11, 18) * 10;
-            num1 = this.rand((sum / 10) - 9, 9) * 10;
-            num2 = sum - num1;
+            // Guld: Tvåsiffriga tal med ental (t.ex. 34 + 25 = 59)
+            num1 = this.rand(1, 4) * 10 + this.rand(1, 8);
+            num2 = this.rand(1, 4) * 10 + this.rand(1, 8);
           }
+
         } else if (this.category === 'hundratal') {
           if (this.tier === 'brons') {
-            const sum = this.rand(2, 10) * 100;
-            num1 = this.rand(1, (sum / 100) - 1) * 100;
-            num2 = sum - num1;
+            // Brons: Jämna hundratal (t.ex. 100 + 200 = 300)
+            num1 = this.rand(1, 4) * 100;
+            num2 = this.rand(1, 5) * 100;
           } else if (this.tier === 'silver') {
-            const sum = this.rand(7, 10) * 100;
-            num1 = this.rand(1, (sum / 100) - 1) * 100;
-            num2 = sum - num1;
+            // Silver: Hundratal + tiotal, slutar på 0 (t.ex. 140 + 250 = 390)
+            num1 = this.rand(1, 4) * 100 + this.rand(1, 8) * 10;
+            num2 = this.rand(1, 4) * 100 + this.rand(1, 8) * 10;
           } else {
-            const sum = this.rand(11, 18) * 100;
-            num1 = this.rand((sum / 100) - 9, 9) * 100;
-            num2 = sum - num1;
+            // Guld: Treställiga tal med alla tre positioner aktiva (t.ex. 347 + 112 = 459)
+            num1 = this.rand(1, 4) * 100 + this.rand(1, 8) * 10 + this.rand(1, 8);
+            num2 = this.rand(1, 4) * 100 + this.rand(1, 8) * 10 + this.rand(1, 8);
           }
         }
+
       } else {
-        // Subtraktion
+
+        // --- SUBTRAKTION ---
         if (this.category === 'ental') {
           if (this.tier === 'brons') {
-            num1 = this.rand(1, 10);
+            num1 = this.rand(1, 5);
             num2 = this.rand(0, num1);
           } else if (this.tier === 'silver') {
-            num1 = this.rand(7, 10);
+            num1 = this.rand(6, 10);
             num2 = this.rand(1, num1);
-          } else {
-            // Guld: Minuend 11-18, subtrahend ger ental som svar (1-9)
+          } else { // Guld
             num1 = this.rand(11, 18);
             num2 = this.rand(num1 - 9, 9);
           }
+
         } else if (this.category === 'tiotal') {
           if (this.tier === 'brons') {
-            num1 = this.rand(2, 10) * 10;
-            num2 = this.rand(1, num1 / 10) * 10;
+            // Brons: Jämna tiotal (t.ex. 50 - 20 = 30)
+            num1 = this.rand(2, 9) * 10;
+            num2 = this.rand(1, (num1 / 10) - 1) * 10;
           } else if (this.tier === 'silver') {
-            num1 = this.rand(7, 10) * 10;
-            num2 = this.rand(1, num1 / 10) * 10;
+            // Silver: Tvåsiffrigt minus ental (t.ex. 45 - 5 = 40)
+            num1 = this.rand(2, 9) * 10 + this.rand(1, 9);
+            num2 = num1 % 10;
           } else {
-            // Guld: Minuend 110-180
-            num1 = this.rand(11, 18) * 10;
-            num2 = this.rand((num1 / 10) - 9, 9) * 10;
+            // Guld: Tvåsiffriga tal (t.ex. 59 - 25 = 34)
+            const t1 = this.rand(3, 8);
+            const e1 = this.rand(2, 9);
+            const t2 = this.rand(1, t1 - 1);
+            const e2 = this.rand(1, e1 - 1);
+            num1 = t1 * 10 + e1;
+            num2 = t2 * 10 + e2;
           }
+
         } else if (this.category === 'hundratal') {
           if (this.tier === 'brons') {
-            num1 = this.rand(2, 10) * 100;
-            num2 = this.rand(1, num1 / 100) * 100;
+            // Brons: Jämna hundratal (t.ex. 300 - 100 = 200)
+            num1 = this.rand(2, 9) * 100;
+            num2 = this.rand(1, (num1 / 100) - 1) * 100;
           } else if (this.tier === 'silver') {
-            num1 = this.rand(7, 10) * 100;
-            num2 = this.rand(1, num1 / 100) * 100;
+            // Silver: Hundratal med tiotal (t.ex. 390 - 140 = 250)
+            const h1 = this.rand(3, 8);
+            const t1 = this.rand(2, 9);
+            const h2 = this.rand(1, h1 - 1);
+            const t2 = this.rand(1, t1 - 1);
+            num1 = h1 * 100 + t1 * 10;
+            num2 = h2 * 100 + t2 * 10;
           } else {
-            num1 = this.rand(11, 18) * 100;
-            num2 = this.rand((num1 / 100) - 9, 9) * 100;
+            // Guld: Treställiga tal med alla siffror aktiva (t.ex. 459 - 112 = 347)
+            const h1 = this.rand(3, 8);
+            const t1 = this.rand(2, 9);
+            const e1 = this.rand(2, 9);
+            const h2 = this.rand(1, h1 - 1);
+            const t2 = this.rand(1, t1 - 1);
+            const e2 = this.rand(1, e1 - 1);
+            num1 = h1 * 100 + t1 * 10 + e1;
+            num2 = h2 * 100 + t2 * 10 + e2;
           }
         }
       }
