@@ -27,36 +27,48 @@
           </div>
         </div>
 
-        <!-- NIVÅMENY FÖR ADDITION -->
-        <div id="menu-addition" class="menu-step hidden">
+        <!-- DELMOMENTSMENY (Ental, Tiotal, Hundratal) -->
+        <div id="menu-subcategories" class="menu-step hidden">
           <h2 class="game-title">Addition</h2>
-          <p class="game-subtitle">Välj svårighetsgrad:</p>
+          <p class="game-subtitle">Välj delmoment:</p>
           <div class="menu-buttons">
-            <button class="btn-tier btn-bronze" data-start="1" data-max="10" data-name="Brons">
+            <button class="btn-subcat" data-cat="ental">1️⃣ Ental</button>
+            <button class="btn-subcat" data-cat="tiotal">🔟 Tiotal</button>
+            <button class="btn-subcat" data-cat="hundratal">💯 Hundratal</button>
+            <button id="btn-back-to-main" class="btn-secondary">← Tillbaka</button>
+          </div>
+        </div>
+
+        <!-- NIVÅMENY (Brons, Silver, Guld) -->
+        <div id="menu-tiers" class="menu-step hidden">
+          <h2 id="tier-menu-title" class="game-title">Ental</h2>
+          <p class="game-subtitle">Klara varje nivå för att låsa upp nästa:</p>
+          <div class="menu-buttons">
+            <button id="btn-tier-brons" class="btn-tier btn-bronze" data-tier="brons">
               <div class="tier-info">
                 <span class="tier-title">🥉 Brons</span>
-                <span class="tier-sub">(Nivå 1 – 10)</span>
+                <span class="tier-sub">3 omgångar × 5 tal</span>
               </div>
-              <span id="badge-brons" class="tier-badge hidden">✓ Klarad!</span>
+              <span id="badge-brons" class="tier-status">Öppen</span>
             </button>
 
-            <button class="btn-tier btn-silver" data-start="11" data-max="20" data-name="Silver">
+            <button id="btn-tier-silver" class="btn-tier btn-silver btn-locked" data-tier="silver" disabled>
               <div class="tier-info">
                 <span class="tier-title">🥈 Silver</span>
-                <span class="tier-sub">(Nivå 11 – 20)</span>
+                <span class="tier-sub">3 omgångar × 5 tal</span>
               </div>
-              <span id="badge-silver" class="tier-badge hidden">✓ Klarad!</span>
+              <span id="badge-silver" class="tier-status">🔒 Låst</span>
             </button>
 
-            <button class="btn-tier btn-gold" data-start="21" data-max="30" data-name="Guld">
+            <button id="btn-tier-guld" class="btn-tier btn-gold btn-locked" data-tier="guld" disabled>
               <div class="tier-info">
                 <span class="tier-title">🥇 Guld</span>
-                <span class="tier-sub">(Nivå 21 – 30)</span>
+                <span class="tier-sub">3 omgångar × 5 tal</span>
               </div>
-              <span id="badge-guld" class="tier-badge hidden">✓ Klarad!</span>
+              <span id="badge-guld" class="tier-status">🔒 Låst</span>
             </button>
 
-            <button id="btn-back-to-main" class="btn-secondary">← Tillbaka</button>
+            <button id="btn-back-to-subcats" class="btn-secondary">← Tillbaka</button>
           </div>
         </div>
 
@@ -65,9 +77,9 @@
       <!-- SPELSKÄRM -->
       <div id="game-screen" class="screen-panel hidden">
         <div id="top-bar">
-          <div id="level-indicator">Nivå: 1</div>
+          <div id="level-indicator">Ental: Brons</div>
+          <div id="round-indicator">Omgång 1/3</div>
           
-          <!-- MÄTARE PLACERAD DIREKT BREDVID NIVÅINDIKATORN -->
           <div id="progress-container">
             <div id="progress-bar" class="progress-bronze"></div>
           </div>

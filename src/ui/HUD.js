@@ -1,6 +1,6 @@
 /**
  * HUD.js
- * Hanterar menyväxlingar, klarat-märken och mätaren under spelets gång.
+ * Hanterar menystrukturen (Delmoment -> Nivåer) samt upplåsning via localStorage.
  */
 export class HUD {
   constructor(onAnswerSubmit, onStartGame, onReturnToMenu) {
@@ -8,76 +8,130 @@ export class HUD {
     this.onStartGame = onStartGame;
     this.onReturnToMenu = onReturnToMenu;
 
+    this.selectedCategory = 'ental';
+
     this.startScreen = document.getElementById('start-screen');
     this.gameScreen = document.getElementById('game-screen');
+    
     this.menuMain = document.getElementById('menu-main');
-    this.menuAddition = document.getElementById('menu-addition');
+    this.menuSubcats = document.getElementById('menu-subcategories');
+    this.menuTiers = document.getElementById('menu-tiers');
 
+    this.tierMenuTitle = document.getElementById('tier-menu-title');
+    this.levelIndicator = document.getElementById('level-indicator');
+    this.roundIndicator = document.getElementById('round-indicator');
     this.questionElement = document.getElementById('question-box');
     this.inputArea = document.getElementById('input-area');
     this.feedbackElement = document.getElementById('feedback-message');
     this.progressBar = document.getElementById('progress-bar');
-    
+
     this.currentInput = '';
     this.isWaiting = false;
-    
+
     this.initEventListeners();
     this.initKeypad();
-    this.updateBadges();
   }
 
   initEventListeners() {
+    // Från Huvudmeny -> Delmoment
     document.getElementById('btn-category-addition').onclick = () => {
       this.menuMain.classList.add('hidden');
-      this.menuAddition.classList.remove('hidden');
-      this.updateBadges();
+      this.menuSubcats.classList.remove('hidden');
     };
 
+    // Tillbaka till Huvudmeny
     document.getElementById('btn-back-to-main').onclick = () => {
-      this.menuAddition.classList.add('hidden');
+      this.menuSubcats.classList.add('hidden');
       this.menuMain.classList.remove('hidden');
     };
 
-    const tierButtons = document.querySelectorAll('.btn-tier');
-    tierButtons.forEach((btn) => {
+    // Klicka på ett Delmoment (Ental, Tiotal, Hundratal)
+    const subcatBtns = document.querySelectorAll('.btn-subcat');
+    subcatBtns.forEach((btn) => {
       btn.onclick = () => {
-        const startLevel = parseInt(btn.getAttribute('data-start'), 10);
-        const maxLevel = parseInt(btn.getAttribute('data-max'), 10);
-        const tierName = btn.getAttribute('data-name');
+        this.selectedCategory = btn.getAttribute('data-cat');
+        const catNames = { ental: 'Ental', tiotal: 'Tiotal', hundratal: 'Hundratal' };
+        this.tierMenuTitle.innerText = `Addition – ${catNames[this.selectedCategory]}`;
 
-        this.showGameScreen();
-        this.onStartGame(startLevel, maxLevel, tierName);
+        this.menuSubcats.classList.add('hidden');
+        this.menuTiers.classList.remove('hidden');
+        this.updateTierButtons();
       };
     });
 
+    // Tillbaka till Delmoment
+    document.getElementById('btn-back-to-subcats').onclick = () => {
+      this.menuTiers.classList.add('hidden');
+      this.menuSubcats.classList.remove('hidden');
+    };
+
+    // Klicka på en Nivåknapp (Brons, Silver, Guld)
+    const tierBtns = document.querySelectorAll('.btn-tier');
+    tierBtns.forEach((btn) => {
+      btn.onclick = () => {
+        if (btn.disabled) return;
+        const tier = btn.getAttribute('data-tier');
+        this.showGameScreen();
+        this.onStartGame(this.selectedCategory, tier);
+      };
+    });
+
+    // Menyknapp under spelets gång
     document.getElementById('btn-menu').onclick = () => {
       this.showStartScreen();
       this.onReturnToMenu();
     };
   }
 
-  updateBadges() {
-    const tiers = ['Brons', 'Silver', 'Guld'];
-    tiers.forEach((tier) => {
-      const isCompleted = localStorage.getItem(`completed_${tier}`) === 'true';
-      const badgeElement = document.getElementById(`badge-${tier.toLowerCase()}`);
-      if (badgeElement) {
-        if (isCompleted) {
-          badgeElement.classList.remove('hidden');
-        } else {
-          badgeElement.classList.add('hidden');
-        }
+  /**
+   * Uppdaterar låsstatus på Silver och Guld baserat på sparade framsteg i localStorage.
+   */
+  updateTierButtons() {
+    const cat = this.selectedCategory;
+
+    const isBronsDone = localStorage.getItem(`completed_${cat}_brons`) === 'true';
+    const isSilverDone = localStorage.getItem(`completed_${cat}_silver`) === 'true';
+    const isGuldDone = localStorage.getItem(`completed_${cat}_guld`) === 'true';
+
+    // Brons är alltid öppen
+    this.setBtnState('btn-tier-brons', 'badge-brons', true, isBronsDone);
+
+    // Silver kräver Brons
+    this.setBtnState('btn-tier-silver', 'badge-silver', isBronsDone, isSilverDone);
+
+    // Guld kräver Silver
+    this.setBtnState('btn-tier-guld', 'badge-guld', isSilverDone, isGuldDone);
+  }
+
+  setBtnState(btnId, badgeId, isUnlocked, isCompleted) {
+    const btn = document.getElementById(btnId);
+    const badge = document.getElementById(badgeId);
+
+    if (isUnlocked) {
+      btn.disabled = false;
+      btn.classList.remove('btn-locked');
+      if (isCompleted) {
+        badge.innerText = '✓ Klarad!';
+        badge.className = 'tier-status status-completed';
+      } else {
+        badge.innerText = 'Öppen';
+        badge.className = 'tier-status';
       }
-    });
+    } else {
+      btn.disabled = true;
+      btn.classList.add('btn-locked');
+      badge.innerText = '🔒 Låst';
+      badge.className = 'tier-status';
+    }
   }
 
   showStartScreen() {
     this.startScreen.classList.remove('hidden');
     this.gameScreen.classList.add('hidden');
     this.menuMain.classList.remove('hidden');
-    this.menuAddition.classList.add('hidden');
+    this.menuSubcats.classList.add('hidden');
+    this.menuTiers.classList.add('hidden');
     this.isWaiting = false;
-    this.updateBadges();
   }
 
   showGameScreen() {
@@ -85,29 +139,16 @@ export class HUD {
     this.gameScreen.classList.remove('hidden');
   }
 
-  updateProgress(percentage, tierName) {
-    if (!this.progressBar) {
-      this.progressBar = document.getElementById('progress-bar');
-    }
-    if (!this.progressBar) return;
+  updateTopBar(category, tier, round, percentage) {
+    const catNames = { ental: 'Ental', tiotal: 'Tiotal', hundratal: 'Hundratal' };
+    const tierNames = { brons: 'Brons', silver: 'Silver', guld: 'Guld' };
 
-    const tierKey = tierName ? tierName.toLowerCase() : 'brons';
+    this.levelIndicator.innerText = `${catNames[category]}: ${tierNames[tier]}`;
+    this.roundIndicator.innerText = `Omgång ${round}/3`;
 
-    // Färgkoder för mjukare nyanser för respektive nivå
-    const colors = {
-      brons: '#e2a76f',
-      bronze: '#e2a76f',
-      silver: '#94a3b8',
-      guld: '#fcd34d',
-      gold: '#fcd34d'
-    };
-
-    const activeColor = colors[tierKey] || '#e2a76f';
-
-    // Sätt procent och färg direkt på mätarelementet
+    const colors = { brons: '#e2a76f', silver: '#94a3b8', guld: '#fcd34d' };
     this.progressBar.style.width = `${percentage}%`;
-    this.progressBar.style.backgroundColor = activeColor;
-    this.progressBar.className = `progress-${tierKey}`;
+    this.progressBar.style.backgroundColor = colors[tier] || '#3b82f6';
   }
 
   displayQuestion(question) {

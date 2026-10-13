@@ -4,7 +4,6 @@ import { HUD } from './ui/HUD.js';
 import { SoundManager } from './audio/SoundManager.js';
 
 const canvas = document.getElementById('gameCanvas');
-const levelIndicator = document.getElementById('level-indicator');
 
 const mathEngine = new MathEngine();
 const renderer = new VisualRenderer(canvas);
@@ -12,13 +11,13 @@ const soundManager = new SoundManager();
 
 const hud = new HUD(
   (userAnswer) => handleAnswerSubmitted(userAnswer),
-  (startLevel, maxLevel, tierName) => startGame(startLevel, maxLevel, tierName),
+  (category, tier) => startGame(category, tier),
   () => returnToMenu()
 );
 
-function startGame(startLevel, maxLevel, tierName) {
-  soundManager.init(); // Aktivera ljudmotorn
-  mathEngine.reset(startLevel, maxLevel, tierName);
+function startGame(category, tier) {
+  soundManager.init();
+  mathEngine.reset(category, tier);
   renderer.clear();
   loadNextQuestion();
 }
@@ -30,38 +29,56 @@ function returnToMenu() {
 
 function loadNextQuestion() {
   const question = mathEngine.generateQuestion();
-  
-  levelIndicator.innerText = `${mathEngine.tierName} – Nivå: ${mathEngine.level}`;
   hud.displayQuestion(question);
-  hud.updateProgress(mathEngine.getProgressPercentage(), mathEngine.tierName);
+  hud.updateTopBar(
+    mathEngine.category,
+    mathEngine.tier,
+    mathEngine.currentRound,
+    mathEngine.getRoundProgressPercentage()
+  );
   renderer.clear();
 }
 
 function handleAnswerSubmitted(userAnswer) {
   const result = mathEngine.checkAnswer(userAnswer);
 
-  hud.updateProgress(mathEngine.getProgressPercentage(), mathEngine.tierName);
+  hud.updateTopBar(
+    mathEngine.category,
+    mathEngine.tier,
+    mathEngine.currentRound,
+    mathEngine.getRoundProgressPercentage()
+  );
 
   if (result.isCorrect) {
     hud.showFeedback(true, result.message);
-    
-    if (result.isCompleted) {
-      // Vinst! Spara framsteg, spela fanfar och kasta konfetti
-      localStorage.setItem(`completed_${mathEngine.tierName}`, 'true');
+
+    if (result.isTierCompleted) {
+      // Hela nivån klarad -> Spara framsteg och spela vinst
+      localStorage.setItem(`completed_${mathEngine.category}_${mathEngine.tier}`, 'true');
       soundManager.playVictory();
       renderer.startConfetti();
 
       setTimeout(() => {
         returnToMenu();
       }, 3500);
+
+    } else if (result.isRoundCompleted) {
+      // Omgång klarad
+      soundManager.playVictory();
+
+      setTimeout(() => {
+        loadNextQuestion();
+      }, 2000);
+
     } else {
-      // Rätt svar
+      // Vanligt rätt svar
       soundManager.playCorrect();
 
       setTimeout(() => {
         loadNextQuestion();
-      }, 1200);
+      }, 1100);
     }
+
   } else {
     // Fel svar
     soundManager.playIncorrect();
