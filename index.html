@@ -15,7 +15,7 @@
     <!-- UI Overlay -->
     <div id="ui-overlay">
 
-      <!-- KUGGHJUL / INSTÄLLNINGSKNAPP (ÖVRE HÖGRA HÖRNET) -->
+      <!-- KUGGHJUL / INSTÄLLNINGSKNAPP (SYNS PÅ ALLA SKÄRMAR) -->
       <button id="btn-settings" class="btn-gear" aria-label="Inställningar">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"></circle>
@@ -96,8 +96,11 @@
           <button id="btn-menu" class="btn-secondary">Meny</button>
         </div>
 
-        <div id="question-box">0 + 0 = ?</div>
-        
+        <div class="question-container">
+          <div id="question-box">0 + 0 = ?</div>
+          <button id="btn-help" class="btn-help">Hjälp</button>
+        </div>
+
         <div id="input-area"></div>
         <div id="feedback-message"></div>
       </div>
@@ -125,6 +128,21 @@
 
           <div class="modal-actions">
             <button id="btn-close-settings" class="btn-primary btn-full">Stäng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- HJÄLPMODAL (VISUELL UPPSTÄLLNING) -->
+      <div id="help-modal" class="modal-overlay hidden">
+        <div class="modal-content help-modal-content">
+          <h2 class="modal-title">Hjälp med uppställning</h2>
+          
+          <div id="vertical-setup" class="vertical-setup"></div>
+
+          <div id="help-instructions" class="help-instructions"></div>
+
+          <div class="modal-actions">
+            <button id="btn-close-help" class="btn-primary btn-full">Jag förstår</button>
           </div>
         </div>
       </div>

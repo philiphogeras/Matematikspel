@@ -1,6 +1,6 @@
 /**
  * HUD.js
- * Hanterar menyväxlingar och inställningspanelen (volym, ljudlöst, nollställning).
+ * Hanterar gränssnitt, inställningsmeny samt hjälpfunktionen för uppställning.
  */
 export class HUD {
   constructor(onAnswerSubmit, onStartGame, onReturnToMenu, soundCallbacks) {
@@ -20,6 +20,7 @@ export class HUD {
     this.menuSubcats = document.getElementById('menu-subcategories');
     this.menuTiers = document.getElementById('menu-tiers');
     this.settingsModal = document.getElementById('settings-modal');
+    this.helpModal = document.getElementById('help-modal');
 
     this.subcatMenuTitle = document.getElementById('subcat-menu-title');
     this.tierMenuTitle = document.getElementById('tier-menu-title');
@@ -31,6 +32,7 @@ export class HUD {
     this.progressBar = document.getElementById('progress-bar');
 
     this.currentInput = '';
+    this.currentQuestion = null;
     this.isWaiting = false;
 
     this.initEventListeners();
@@ -38,7 +40,7 @@ export class HUD {
   }
 
   initEventListeners() {
-    // Inställningar modal öppna/stänga
+    // Inställningsmeny
     document.getElementById('btn-settings').onclick = () => {
       document.getElementById('reset-confirm-msg').classList.add('hidden');
       this.settingsModal.classList.remove('hidden');
@@ -46,6 +48,16 @@ export class HUD {
 
     document.getElementById('btn-close-settings').onclick = () => {
       this.settingsModal.classList.add('hidden');
+    };
+
+    // Hjälpmeny
+    document.getElementById('btn-help').onclick = () => {
+      this.renderHelpModal();
+      this.helpModal.classList.remove('hidden');
+    };
+
+    document.getElementById('btn-close-help').onclick = () => {
+      this.helpModal.classList.add('hidden');
     };
 
     // Volymreglage
@@ -69,13 +81,11 @@ export class HUD {
 
     // Nollställ framsteg
     document.getElementById('btn-reset-progress').onclick = () => {
-      // Rensa alla sparade framsteg ur localStorage
       Object.keys(localStorage).forEach((key) => {
         if (key.startsWith('completed_')) {
           localStorage.removeItem(key);
         }
       });
-
       this.updateTierButtons();
       document.getElementById('reset-confirm-msg').classList.remove('hidden');
     };
@@ -134,6 +144,97 @@ export class HUD {
       this.showStartScreen();
       this.onReturnToMenu();
     };
+  }
+
+  /**
+   * Genererar den visuella uppställningen och instruktionstexten i hjälpmodalen.
+   */
+  renderHelpModal() {
+    if (!this.currentQuestion) return;
+
+    const { num1, num2, operator } = this.currentQuestion;
+    const num1Str = num1.toString();
+    const num2Str = num2.toString();
+    const maxLen = Math.max(num1Str.length, num2Str.length);
+
+    const pad1 = num1Str.padStart(maxLen, ' ');
+    const pad2 = num2Str.padStart(maxLen, ' ');
+
+    const allCols = ['Hundratal', 'Tiotal', 'Ental'];
+    const activeCols = allCols.slice(allCols.length - maxLen);
+
+    // Bygg uppställningsrutnätet
+    let gridHTML = '<div class="setup-grid">';
+    
+    // Kolumnrubriker
+    gridHTML += '<div class="grid-row"><div class="cell op-cell"></div>';
+    activeCols.forEach(col => {
+      gridHTML += `<div class="cell col-header col-${col.toLowerCase()}">${col}</div>`;
+    });
+    gridHTML += '</div>';
+
+    // Rad 1 (Första talet)
+    gridHTML += '<div class="grid-row"><div class="cell op-cell"></div>';
+    for (let i = 0; i < maxLen; i++) {
+      const digit = pad1[i] === ' ' ? '' : pad1[i];
+      const colClass = `col-${activeCols[i].toLowerCase()}`;
+      gridHTML += `<div class="cell ${colClass}">${digit}</div>`;
+    }
+    gridHTML += '</div>';
+
+    // Rad 2 (Räknesätt + andra talet)
+    gridHTML += `<div class="grid-row"><div class="cell op-cell">${operator}</div>`;
+    for (let i = 0; i < maxLen; i++) {
+      const digit = pad2[i] === ' ' ? '' : pad2[i];
+      const colClass = `col-${activeCols[i].toLowerCase()}`;
+      gridHTML += `<div class="cell ${colClass}">${digit}</div>`;
+    }
+    gridHTML += '</div>';
+
+    // Sträck under talen
+    gridHTML += '<div class="setup-line"></div>';
+    gridHTML += '</div>';
+
+    // Skapa instruktionstext
+    let instructionsHTML = '<p><strong>Så här ställer du upp och räknar:</strong></p><ol class="instructions-list">';
+    
+    if (operator === '+') {
+      if (maxLen >= 1) {
+        const e1 = parseInt(pad1[maxLen - 1] || '0', 10);
+        const e2 = parseInt(pad2[maxLen - 1] || '0', 10);
+        instructionsHTML += `<li>Börja med entalen till höger (blå): ${e1} + ${e2} = ${e1 + e2}.</li>`;
+      }
+      if (maxLen >= 2) {
+        const t1 = parseInt(pad1[maxLen - 2] || '0', 10);
+        const t2 = parseInt(pad2[maxLen - 2] || '0', 10);
+        instructionsHTML += `<li>Räkna sedan tiotalen (röd): ${t1} + ${t2} = ${t1 + t2}.</li>`;
+      }
+      if (maxLen >= 3) {
+        const h1 = parseInt(pad1[maxLen - 3] || '0', 10);
+        const h2 = parseInt(pad2[maxLen - 3] || '0', 10);
+        instructionsHTML += `<li>Räkna sist hundratalen (grön): ${h1} + ${h2} = ${h1 + h2}.</li>`;
+      }
+    } else {
+      if (maxLen >= 1) {
+        const e1 = parseInt(pad1[maxLen - 1] || '0', 10);
+        const e2 = parseInt(pad2[maxLen - 1] || '0', 10);
+        instructionsHTML += `<li>Börja med entalen till höger (blå): ${e1} - ${e2} = ${e1 - e2}.</li>`;
+      }
+      if (maxLen >= 2) {
+        const t1 = parseInt(pad1[maxLen - 2] || '0', 10);
+        const t2 = parseInt(pad2[maxLen - 2] || '0', 10);
+        instructionsHTML += `<li>Räkna sedan tiotalen (röd): ${t1} - ${t2} = ${t1 - t2}.</li>`;
+      }
+      if (maxLen >= 3) {
+        const h1 = parseInt(pad1[maxLen - 3] || '0', 10);
+        const h2 = parseInt(pad2[maxLen - 3] || '0', 10);
+        instructionsHTML += `<li>Räkna sist hundratalen (grön): ${h1} - ${h2} = ${h1 - h2}.</li>`;
+      }
+    }
+    instructionsHTML += '</ol>';
+
+    document.getElementById('vertical-setup').innerHTML = gridHTML;
+    document.getElementById('help-instructions').innerHTML = instructionsHTML;
   }
 
   updateTierButtons() {
@@ -203,6 +304,7 @@ export class HUD {
 
   displayQuestion(question) {
     if (!question) return;
+    this.currentQuestion = question;
     this.isWaiting = false;
     this.questionElement.innerText = `${question.num1} ${question.operator} ${question.num2} = ?`;
     this.clearInput();
