@@ -1,13 +1,14 @@
 /**
  * SoundManager.js
- * Genererar mjuka och positiva ljudeffekter via Web Audio API.
- * Innehåller automatisk upplåsning för alla webbläsare och mobila enheter.
+ * Genererar ljudeffekter via Web Audio API med volymreglage och ljudlöst-läge.
  */
 export class SoundManager {
   constructor() {
     this.ctx = null;
+    this.masterGain = null;
+    this.volume = 0.7; // Standardvolym 70%
+    this.isMuted = false;
 
-    // Lås upp ljudmotorn automatiskt vid första klicket/touchen på skärmen
     const unlock = () => {
       this.init();
       if (this.ctx && this.ctx.state === 'running') {
@@ -22,14 +23,14 @@ export class SoundManager {
     window.addEventListener('keydown', unlock);
   }
 
-  /**
-   * Startar eller återupptar AudioContext.
-   */
   init() {
     if (!this.ctx) {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       if (AudioContextClass) {
         this.ctx = new AudioContextClass();
+        this.masterGain = this.ctx.createGain();
+        this.updateMasterGain();
+        this.masterGain.connect(this.ctx.destination);
       }
     }
     if (this.ctx && this.ctx.state === 'suspended') {
@@ -37,47 +38,57 @@ export class SoundManager {
     }
   }
 
-  /**
-   * Spelar en mjuk, glad tretonssignal vid rätt svar (C5 -> E5 -> G5).
-   */
+  setVolume(normalizedValue) {
+    this.volume = Math.max(0, Math.min(1, normalizedValue));
+    this.updateMasterGain();
+  }
+
+  setMuted(muted) {
+    this.isMuted = muted;
+    this.updateMasterGain();
+  }
+
+  updateMasterGain() {
+    if (!this.masterGain || !this.ctx) return;
+    const activeVolume = this.isMuted ? 0 : this.volume;
+    this.masterGain.gain.setValueAtTime(activeVolume, this.ctx.currentTime);
+  }
+
   playCorrect() {
     this.init();
-    if (!this.ctx) return;
+    if (!this.ctx || this.isMuted) return;
 
     const now = this.ctx.currentTime;
-    const notes = [523.25, 659.25, 783.99]; // Frekvenser för C, E, G
+    const notes = [523.25, 659.25, 783.99];
 
     notes.forEach((freq, index) => {
       const startTime = now + index * 0.08;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
 
-      osc.type = 'sine'; // Mjuk sinusvåg
+      osc.type = 'sine';
       osc.frequency.setValueAtTime(freq, startTime);
 
       gain.gain.setValueAtTime(0.2, startTime);
       gain.gain.linearRampToValueAtTime(0.001, startTime + 0.25);
 
       osc.connect(gain);
-      gain.connect(this.ctx.destination);
+      gain.connect(this.masterGain);
 
       osc.start(startTime);
       osc.stop(startTime + 0.25);
     });
   }
 
-  /**
-   * Spelar en mjuk, icke-bestraffande ton vid fel svar.
-   */
   playIncorrect() {
     this.init();
-    if (!this.ctx) return;
+    if (!this.ctx || this.isMuted) return;
 
     const now = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
 
-    osc.type = 'triangle'; // Mjuk triangelvåg
+    osc.type = 'triangle';
     osc.frequency.setValueAtTime(220, now);
     osc.frequency.linearRampToValueAtTime(160, now + 0.25);
 
@@ -85,18 +96,15 @@ export class SoundManager {
     gain.gain.linearRampToValueAtTime(0.001, now + 0.25);
 
     osc.connect(gain);
-    gain.connect(this.ctx.destination);
+    gain.connect(this.masterGain);
 
     osc.start(now);
     osc.stop(now + 0.25);
   }
 
-  /**
-   * Spelar en festlig fanfar när en hel trofénivå klaras av!
-   */
   playVictory() {
     this.init();
-    if (!this.ctx) return;
+    if (!this.ctx || this.isMuted) return;
 
     const now = this.ctx.currentTime;
     const notes = [
@@ -118,7 +126,7 @@ export class SoundManager {
       gain.gain.linearRampToValueAtTime(0.001, startTime + note.duration);
 
       osc.connect(gain);
-      gain.connect(this.ctx.destination);
+      gain.connect(this.masterGain);
 
       osc.start(startTime);
       osc.stop(startTime + note.duration);

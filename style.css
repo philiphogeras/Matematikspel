@@ -71,6 +71,31 @@ body {
   display: none !important;
 }
 
+/* KUGGHJULSKNAPP I ÖVRE HÖGRA HÖRNET */
+.btn-gear {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+  background-color: #ffffff;
+  color: #475569;
+  border: 2px solid #cbd5e1;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: transform 0.1s, background-color 0.1s;
+}
+
+.btn-gear:active {
+  transform: scale(0.92);
+  background-color: #f1f5f9;
+}
+
 /* STARTMENY STYLING */
 #start-screen {
   background-color: rgba(255, 255, 255, 0.96);
@@ -138,6 +163,25 @@ body {
   flex-shrink: 0;
 }
 
+.btn-danger {
+  font-size: 0.95rem;
+  font-weight: bold;
+  padding: 10px 16px;
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn-danger:active {
+  background-color: #fecaca;
+}
+
+.btn-full {
+  width: 100%;
+}
+
 /* TROFÉFÄRGER & LÅSTA NIVÅER */
 .btn-tier {
   font-size: 1.1rem;
@@ -188,7 +232,6 @@ body {
   color: #533804;
 }
 
-/* Låst läge */
 .btn-locked {
   background-color: #f1f5f9 !important;
   color: #94a3b8 !important;
@@ -216,6 +259,7 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
+  padding-right: 50px; /* Plats för inställningsknappen */
 }
 
 #level-indicator, #round-indicator {
@@ -283,7 +327,6 @@ body {
   text-align: center;
 }
 
-/* KALKYLATOR RUTNÄT (3x4) */
 .keypad-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -332,4 +375,72 @@ body {
 
 .feedback-hint {
   color: #c2410c;
+}
+
+/* INSTÄLLNINGSMODAL STYLING */
+.modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(15, 23, 42, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
+
+.modal-content {
+  background-color: #ffffff;
+  padding: 24px;
+  border-radius: 16px;
+  width: 320px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal-title {
+  font-size: 1.6rem;
+  color: #1e293b;
+  text-align: center;
+}
+
+.setting-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.setting-label {
+  font-size: 0.95rem;
+  font-weight: bold;
+  color: #475569;
+}
+
+.volume-slider {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  accent-color: #3b82f6;
+  cursor: pointer;
+}
+
+.modal-divider {
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  margin: 4px 0;
+}
+
+.setting-hint {
+  font-size: 0.85rem;
+  color: #166534;
+  text-align: center;
+  margin-top: 4px;
+}
+
+.modal-actions {
+  margin-top: 6px;
 }

@@ -12,7 +12,11 @@ const soundManager = new SoundManager();
 const hud = new HUD(
   (userAnswer) => handleAnswerSubmitted(userAnswer),
   (operation, category, tier) => startGame(operation, category, tier),
-  () => returnToMenu()
+  () => returnToMenu(),
+  {
+    onVolumeChange: (vol) => soundManager.setVolume(vol),
+    onMuteToggle: (isMuted) => soundManager.setMuted(isMuted)
+  }
 );
 
 function startGame(operation, category, tier) {
@@ -55,7 +59,6 @@ function handleAnswerSubmitted(userAnswer) {
     hud.showFeedback(true, result.message);
 
     if (result.isTierCompleted) {
-      // Spara framsteg unikt för räknesätt (t.ex. completed_subtraktion_ental_brons)
       localStorage.setItem(`completed_${mathEngine.operation}_${mathEngine.category}_${mathEngine.tier}`, 'true');
       soundManager.playVictory();
       renderer.startConfetti();

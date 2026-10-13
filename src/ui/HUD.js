@@ -1,15 +1,17 @@
 /**
  * HUD.js
- * Hanterar menyväxlingar och gränssnitt utan emojis.
+ * Hanterar menyväxlingar och inställningspanelen (volym, ljudlöst, nollställning).
  */
 export class HUD {
-  constructor(onAnswerSubmit, onStartGame, onReturnToMenu) {
+  constructor(onAnswerSubmit, onStartGame, onReturnToMenu, soundCallbacks) {
     this.onAnswerSubmit = onAnswerSubmit;
     this.onStartGame = onStartGame;
     this.onReturnToMenu = onReturnToMenu;
+    this.soundCallbacks = soundCallbacks || {};
 
     this.selectedOperation = 'addition';
     this.selectedCategory = 'ental';
+    this.isMuted = false;
 
     this.startScreen = document.getElementById('start-screen');
     this.gameScreen = document.getElementById('game-screen');
@@ -17,6 +19,7 @@ export class HUD {
     this.menuMain = document.getElementById('menu-main');
     this.menuSubcats = document.getElementById('menu-subcategories');
     this.menuTiers = document.getElementById('menu-tiers');
+    this.settingsModal = document.getElementById('settings-modal');
 
     this.subcatMenuTitle = document.getElementById('subcat-menu-title');
     this.tierMenuTitle = document.getElementById('tier-menu-title');
@@ -35,6 +38,49 @@ export class HUD {
   }
 
   initEventListeners() {
+    // Inställningar modal öppna/stänga
+    document.getElementById('btn-settings').onclick = () => {
+      document.getElementById('reset-confirm-msg').classList.add('hidden');
+      this.settingsModal.classList.remove('hidden');
+    };
+
+    document.getElementById('btn-close-settings').onclick = () => {
+      this.settingsModal.classList.add('hidden');
+    };
+
+    // Volymreglage
+    const volumeSlider = document.getElementById('volume-slider');
+    volumeSlider.oninput = (e) => {
+      const vol = parseFloat(e.target.value) / 100;
+      if (this.soundCallbacks.onVolumeChange) {
+        this.soundCallbacks.onVolumeChange(vol);
+      }
+    };
+
+    // Mute-knapp
+    const muteBtn = document.getElementById('btn-toggle-mute');
+    muteBtn.onclick = () => {
+      this.isMuted = !this.isMuted;
+      muteBtn.innerText = this.isMuted ? 'Ljud: Ljudlöst' : 'Ljud: På';
+      if (this.soundCallbacks.onMuteToggle) {
+        this.soundCallbacks.onMuteToggle(this.isMuted);
+      }
+    };
+
+    // Nollställ framsteg
+    document.getElementById('btn-reset-progress').onclick = () => {
+      // Rensa alla sparade framsteg ur localStorage
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith('completed_')) {
+          localStorage.removeItem(key);
+        }
+      });
+
+      this.updateTierButtons();
+      document.getElementById('reset-confirm-msg').classList.remove('hidden');
+    };
+
+    // Navigering i menyer
     document.getElementById('btn-category-addition').onclick = () => {
       this.selectedOperation = 'addition';
       this.subcatMenuTitle.innerText = 'Addition (+)';
