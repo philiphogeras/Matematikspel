@@ -1,7 +1,6 @@
 /**
  * HUD.js
- * Hanterar gränssnitt, inställningsmeny, hjälpfunktionen för uppställning
- * samt tangentbordsinmatning (siffertangenter, Numpad, Backspace, Enter).
+ * Hanterar gränssnitt, menyer, hjälp, tangentbordsinmatning och multiplikationsvy.
  */
 export class HUD {
   constructor(onAnswerSubmit, onStartGame, onReturnToMenu, soundCallbacks) {
@@ -41,13 +40,11 @@ export class HUD {
   }
 
   initEventListeners() {
-    // Tangentbordslyssnare för fysiskt tangentbord och Numpad
     window.addEventListener('keydown', (e) => {
       const isGameVisible = !this.gameScreen.classList.contains('hidden');
       const isSettingsOpen = !this.settingsModal.classList.contains('hidden');
       const isHelpOpen = !this.helpModal.classList.contains('hidden');
 
-      // 1. Hantera Escape för att stänga öppna rutor
       if (isSettingsOpen || isHelpOpen) {
         if (e.key === 'Escape') {
           this.settingsModal.classList.add('hidden');
@@ -56,10 +53,8 @@ export class HUD {
         return;
       }
 
-      // Om spelskärmen inte är aktiv, avbryt
       if (!isGameVisible) return;
 
-      // 2. Identifiera siffra (både vanliga sifferraden och Numpad)
       let digit = null;
       if (e.key >= '0' && e.key <= '9') {
         digit = e.key;
@@ -76,10 +71,8 @@ export class HUD {
         return;
       }
 
-      // 3. Hantera Enter (både vanlig Enter och NumpadEnter)
       if (e.key === 'Enter' || e.code === 'NumpadEnter') {
         e.preventDefault();
-        // Ta bort fokus från ev. klickad knapp så att Enter inte aktiverar den igen
         if (document.activeElement && typeof document.activeElement.blur === 'function') {
           document.activeElement.blur();
         }
@@ -87,14 +80,12 @@ export class HUD {
         return;
       }
 
-      // 4. Hantera Backspace (Sudd)
       if (e.key === 'Backspace') {
         e.preventDefault();
         this.backspace();
         return;
       }
 
-      // 5. Hantera Clear (C eller Delete)
       if (e.key === 'c' || e.key === 'C' || e.key === 'Delete') {
         e.preventDefault();
         this.clearInput();
@@ -102,14 +93,12 @@ export class HUD {
       }
     });
 
-    // Avfokusera knappar när man klickar på dem för att förhindra Enter-krockar
     document.addEventListener('click', (e) => {
       if (e.target && e.target.tagName === 'BUTTON') {
         e.target.blur();
       }
     });
 
-    // Inställningsmeny
     document.getElementById('btn-settings').onclick = () => {
       document.getElementById('reset-confirm-msg').classList.add('hidden');
       this.settingsModal.classList.remove('hidden');
@@ -119,7 +108,6 @@ export class HUD {
       this.settingsModal.classList.add('hidden');
     };
 
-    // Hjälpmeny
     document.getElementById('btn-help').onclick = () => {
       this.renderHelpModal();
       this.helpModal.classList.remove('hidden');
@@ -129,7 +117,6 @@ export class HUD {
       this.helpModal.classList.add('hidden');
     };
 
-    // Volymreglage
     const volumeSlider = document.getElementById('volume-slider');
     volumeSlider.oninput = (e) => {
       const vol = parseFloat(e.target.value) / 100;
@@ -138,7 +125,6 @@ export class HUD {
       }
     };
 
-    // Mute-knapp
     const muteBtn = document.getElementById('btn-toggle-mute');
     muteBtn.onclick = () => {
       this.isMuted = !this.isMuted;
@@ -148,7 +134,6 @@ export class HUD {
       }
     };
 
-    // Nollställ framsteg
     document.getElementById('btn-reset-progress').onclick = () => {
       Object.keys(localStorage).forEach((key) => {
         if (key.startsWith('completed_')) {
@@ -159,19 +144,29 @@ export class HUD {
       document.getElementById('reset-confirm-msg').classList.remove('hidden');
     };
 
-    // Navigering i menyer
+    // Navigering huvudmeny
     document.getElementById('btn-category-addition').onclick = () => {
-      this.selectedOperation = 'addition';
-      this.subcatMenuTitle.innerText = 'Addition (+)';
-      this.menuMain.classList.add('hidden');
-      this.menuSubcats.classList.remove('hidden');
+      this.setupSubcategoryMenu('addition', 'Addition (+)', [
+        { label: 'Ental', key: 'ental' },
+        { label: 'Tiotal', key: 'tiotal' },
+        { label: 'Hundratal', key: 'hundratal' }
+      ]);
     };
 
     document.getElementById('btn-category-subtraction').onclick = () => {
-      this.selectedOperation = 'subtraction';
-      this.subcatMenuTitle.innerText = 'Subtraktion (-)';
-      this.menuMain.classList.add('hidden');
-      this.menuSubcats.classList.remove('hidden');
+      this.setupSubcategoryMenu('subtraction', 'Subtraktion (–)', [
+        { label: 'Ental', key: 'ental' },
+        { label: 'Tiotal', key: 'tiotal' },
+        { label: 'Hundratal', key: 'hundratal' }
+      ]);
+    };
+
+    document.getElementById('btn-category-multiplication').onclick = () => {
+      this.setupSubcategoryMenu('multiplication', 'Multiplikation (×)', [
+        { label: '2, 5 & 10:an', key: 'tabell_2_5_10' },
+        { label: '3, 4 & 6:an', key: 'tabell_3_4_6' },
+        { label: '7, 8 & 9:an', key: 'tabell_7_8_9' }
+      ]);
     };
 
     document.getElementById('btn-back-to-main').onclick = () => {
@@ -179,14 +174,22 @@ export class HUD {
       this.menuMain.classList.remove('hidden');
     };
 
-    const subcatBtns = document.querySelectorAll('.btn-subcat');
+    const subcatBtns = [
+      document.getElementById('btn-subcat-1'),
+      document.getElementById('btn-subcat-2'),
+      document.getElementById('btn-subcat-3')
+    ];
+
     subcatBtns.forEach((btn) => {
       btn.onclick = () => {
         this.selectedCategory = btn.getAttribute('data-cat');
-        const opNames = { addition: 'Addition', subtraction: 'Subtraktion' };
-        const catNames = { ental: 'Ental', tiotal: 'Tiotal', hundratal: 'Hundratal' };
+        const catLabels = {
+          ental: 'Ental', tiotal: 'Tiotal', hundratal: 'Hundratal',
+          tabell_2_5_10: '2, 5 & 10:an', tabell_3_4_6: '3, 4 & 6:an', tabell_7_8_9: '7, 8 & 9:an'
+        };
+        const opLabels = { addition: 'Addition', subtraction: 'Subtraktion', multiplication: 'Multiplikation' };
         
-        this.tierMenuTitle.innerText = `${opNames[this.selectedOperation]} – ${catNames[this.selectedCategory]}`;
+        this.tierMenuTitle.innerText = `${opLabels[this.selectedOperation]} – ${catLabels[this.selectedCategory]}`;
 
         this.menuSubcats.classList.add('hidden');
         this.menuTiers.classList.remove('hidden');
@@ -215,106 +218,141 @@ export class HUD {
     };
   }
 
-  /**
-   * Genererar den visuella uppställningen och instruktionstexten i hjälpmodalen utan att avslöja svaret.
-   */
+  setupSubcategoryMenu(operationKey, titleText, subcatList) {
+    this.selectedOperation = operationKey;
+    this.subcatMenuTitle.innerText = titleText;
+
+    const b1 = document.getElementById('btn-subcat-1');
+    const b2 = document.getElementById('btn-subcat-2');
+    const b3 = document.getElementById('btn-subcat-3');
+
+    b1.innerText = subcatList[0].label;
+    b1.setAttribute('data-cat', subcatList[0].key);
+
+    b2.innerText = subcatList[1].label;
+    b2.setAttribute('data-cat', subcatList[1].key);
+
+    b3.innerText = subcatList[2].label;
+    b3.setAttribute('data-cat', subcatList[2].key);
+
+    this.menuMain.classList.add('hidden');
+    this.menuSubcats.classList.remove('hidden');
+  }
+
   renderHelpModal() {
     if (!this.currentQuestion) return;
 
     const { num1, num2, operator } = this.currentQuestion;
-    const num1Str = num1.toString();
-    const num2Str = num2.toString();
-    const maxLen = Math.max(num1Str.length, num2Str.length);
+    const titleElem = document.getElementById('help-modal-title');
 
-    const pad1 = num1Str.padStart(maxLen, ' ');
-    const pad2 = num2Str.padStart(maxLen, ' ');
+    if (operator === '×') {
+      titleElem.innerText = 'Hjälp med multiplikation';
 
-    const allCols = ['Hundratal', 'Tiotal', 'Ental'];
-    const activeCols = allCols.slice(allCols.length - maxLen);
+      // Visa upprepad addition för multiplikation
+      const count = num1;
+      const value = num2;
+      const additionArray = Array(count).fill(value);
+      const additionString = additionArray.join(' + ');
 
-    let gridHTML = '<div class="setup-grid">';
-    
-    // Kolumnrubriker
-    gridHTML += '<div class="grid-row"><div class="cell op-cell"></div>';
-    activeCols.forEach(col => {
-      gridHTML += `<div class="cell col-header col-${col.toLowerCase()}">${col}</div>`;
-    });
-    gridHTML += '</div>';
+      document.getElementById('vertical-setup').innerHTML = `
+        <div class="repeated-addition-box">${additionString}</div>
+      `;
 
-    // Rad 1 (Första talet)
-    gridHTML += '<div class="grid-row"><div class="cell op-cell"></div>';
-    for (let i = 0; i < maxLen; i++) {
-      const digit = pad1[i] === ' ' ? '' : pad1[i];
-      const colClass = `col-${activeCols[i].toLowerCase()}`;
-      gridHTML += `<div class="cell ${colClass}">${digit}</div>`;
-    }
-    gridHTML += '</div>';
+      document.getElementById('help-instructions').innerHTML = `
+        <p><strong>Så här kan du tänka:</strong></p>
+        <p style="margin-top: 6px;"><strong>${num1} × ${num2}</strong> betyder att du har <strong>${num1} grupper</strong> med <strong>${num2}</strong> i varje group.</p>
+        <p style="margin-top: 6px;">Du kan räkna det genom att addera <strong>${value}</strong> med sig självt <strong>${count} gånger</strong>.</p>
+      `;
 
-    // Rad 2 (Räknesätt + andra talet)
-    gridHTML += `<div class="grid-row"><div class="cell op-cell">${operator}</div>`;
-    for (let i = 0; i < maxLen; i++) {
-      const digit = pad2[i] === ' ' ? '' : pad2[i];
-      const colClass = `col-${activeCols[i].toLowerCase()}`;
-      gridHTML += `<div class="cell ${colClass}">${digit}</div>`;
-    }
-    gridHTML += '</div>';
-
-    // Linje under talen
-    gridHTML += '<div class="setup-line"></div>';
-    gridHTML += '</div>';
-
-    // Instruktionstext utan uträknat facit
-    let instructionsHTML = '<p><strong>Så här ställer du upp och räknar:</strong></p><ol class="instructions-list">';
-    
-    if (operator === '+') {
-      if (maxLen >= 1) {
-        const e1 = parseInt(pad1[maxLen - 1] || '0', 10);
-        const e2 = parseInt(pad2[maxLen - 1] || '0', 10);
-        instructionsHTML += `<li>Börja med entalen till höger (blå): <strong>${e1} + ${e2}</strong></li>`;
-      }
-      if (maxLen >= 2) {
-        const t1 = parseInt(pad1[maxLen - 2] || '0', 10);
-        const t2 = parseInt(pad2[maxLen - 2] || '0', 10);
-        instructionsHTML += `<li>Räkna sedan tiotalen (röd): <strong>${t1} + ${t2}</strong></li>`;
-      }
-      if (maxLen >= 3) {
-        const h1 = parseInt(pad1[maxLen - 3] || '0', 10);
-        const h2 = parseInt(pad2[maxLen - 3] || '0', 10);
-        instructionsHTML += `<li>Räkna sist hundratalen (grön): <strong>${h1} + ${h2}</strong></li>`;
-      }
     } else {
-      if (maxLen >= 1) {
-        const e1 = parseInt(pad1[maxLen - 1] || '0', 10);
-        const e2 = parseInt(pad2[maxLen - 1] || '0', 10);
-        instructionsHTML += `<li>Börja med entalen till höger (blå): <strong>${e1} - ${e2}</strong></li>`;
-      }
-      if (maxLen >= 2) {
-        const t1 = parseInt(pad1[maxLen - 2] || '0', 10);
-        const t2 = parseInt(pad2[maxLen - 2] || '0', 10);
-        instructionsHTML += `<li>Räkna sedan tiotalen (röd): <strong>${t1} - ${t2}</strong></li>`;
-      }
-      if (maxLen >= 3) {
-        const h1 = parseInt(pad1[maxLen - 3] || '0', 10);
-        const h2 = parseInt(pad2[maxLen - 3] || '0', 10);
-        instructionsHTML += `<li>Räkna sist hundratalen (grön): <strong>${h1} - ${h2}</strong></li>`;
-      }
-    }
-    instructionsHTML += '</ol>';
+      titleElem.innerText = 'Hjälp med uppställning';
 
-    document.getElementById('vertical-setup').innerHTML = gridHTML;
-    document.getElementById('help-instructions').innerHTML = instructionsHTML;
+      const num1Str = num1.toString();
+      const num2Str = num2.toString();
+      const maxLen = Math.max(num1Str.length, num2Str.length);
+
+      const pad1 = num1Str.padStart(maxLen, ' ');
+      const pad2 = num2Str.padStart(maxLen, ' ');
+
+      const allCols = ['Hundratal', 'Tiotal', 'Ental'];
+      const activeCols = allCols.slice(allCols.length - maxLen);
+
+      let gridHTML = '<div class="setup-grid">';
+      
+      gridHTML += '<div class="grid-row"><div class="cell op-cell"></div>';
+      activeCols.forEach(col => {
+        gridHTML += `<div class="cell col-header col-${col.toLowerCase()}">${col}</div>`;
+      });
+      gridHTML += '</div>';
+
+      gridHTML += '<div class="grid-row"><div class="cell op-cell"></div>';
+      for (let i = 0; i < maxLen; i++) {
+        const digit = pad1[i] === ' ' ? '' : pad1[i];
+        const colClass = `col-${activeCols[i].toLowerCase()}`;
+        gridHTML += `<div class="cell ${colClass}">${digit}</div>`;
+      }
+      gridHTML += '</div>';
+
+      gridHTML += `<div class="grid-row"><div class="cell op-cell">${operator}</div>`;
+      for (let i = 0; i < maxLen; i++) {
+        const digit = pad2[i] === ' ' ? '' : pad2[i];
+        const colClass = `col-${activeCols[i].toLowerCase()}`;
+        gridHTML += `<div class="cell ${colClass}">${digit}</div>`;
+      }
+      gridHTML += '</div>';
+
+      gridHTML += '<div class="setup-line"></div>';
+      gridHTML += '</div>';
+
+      let instructionsHTML = '<p><strong>Så här ställer du upp och räknar:</strong></p><ol class="instructions-list">';
+      
+      if (operator === '+') {
+        if (maxLen >= 1) {
+          const e1 = parseInt(pad1[maxLen - 1] || '0', 10);
+          const e2 = parseInt(pad2[maxLen - 1] || '0', 10);
+          instructionsHTML += `<li>Börja med entalen till höger (blå): <strong>${e1} + ${e2}</strong></li>`;
+        }
+        if (maxLen >= 2) {
+          const t1 = parseInt(pad1[maxLen - 2] || '0', 10);
+          const t2 = parseInt(pad2[maxLen - 2] || '0', 10);
+          instructionsHTML += `<li>Räkna sedan tiotalen (röd): <strong>${t1} + ${t2}</strong></li>`;
+        }
+        if (maxLen >= 3) {
+          const h1 = parseInt(pad1[maxLen - 3] || '0', 10);
+          const h2 = parseInt(pad2[maxLen - 3] || '0', 10);
+          instructionsHTML += `<li>Räkna sist hundratalen (grön): <strong>${h1} + ${h2}</strong></li>`;
+        }
+      } else {
+        if (maxLen >= 1) {
+          const e1 = parseInt(pad1[maxLen - 1] || '0', 10);
+          const e2 = parseInt(pad2[maxLen - 1] || '0', 10);
+          instructionsHTML += `<li>Börja med entalen till höger (blå): <strong>${e1} - ${e2}</strong></li>`;
+        }
+        if (maxLen >= 2) {
+          const t1 = parseInt(pad1[maxLen - 2] || '0', 10);
+          const t2 = parseInt(pad2[maxLen - 2] || '0', 10);
+          instructionsHTML += `<li>Räkna sedan tiotalen (röd): <strong>${t1} - ${t2}</strong></li>`;
+        }
+        if (maxLen >= 3) {
+          const h1 = parseInt(pad1[maxLen - 3] || '0', 10);
+          const h2 = parseInt(pad2[maxLen - 3] || '0', 10);
+          instructionsHTML += `<li>Räkna sist hundratalen (grön): <strong>${h1} - ${h2}</strong></li>`;
+        }
+      }
+      instructionsHTML += '</ol>';
+
+      document.getElementById('vertical-setup').innerHTML = gridHTML;
+      document.getElementById('help-instructions').innerHTML = instructionsHTML;
+    }
   }
 
   updateTierButtons() {
     const op = this.selectedOperation;
     const cat = this.selectedCategory;
 
-    const isBronsDone = localStorage.getItem(`completed_${op}_${cat}_brons`) === 'true' || 
-                       (op === 'addition' && localStorage.getItem(`completed_${cat}_brons`) === 'true');
-    const isSilverDone = localStorage.getItem(`completed_${op}_${cat}_silver`) === 'true' || 
-                        (op === 'addition' && localStorage.getItem(`completed_${cat}_silver`) === 'true');
-    const isGuldDone = localStorage.getItem(`completed_${op}_${cat}_guld`) === 'true' || 
-                      (op === 'addition' && localStorage.getItem(`completed_${cat}_guld`) === 'true');
+    const isBronsDone = localStorage.getItem(`completed_${op}_${cat}_brons`) === 'true';
+    const isSilverDone = localStorage.getItem(`completed_${op}_${cat}_silver`) === 'true';
+    const isGuldDone = localStorage.getItem(`completed_${op}_${cat}_guld`) === 'true';
 
     this.setBtnState('btn-tier-brons', 'badge-brons', true, isBronsDone);
     this.setBtnState('btn-tier-silver', 'badge-silver', isBronsDone, isSilverDone);
@@ -358,11 +396,17 @@ export class HUD {
   }
 
   updateTopBar(operation, category, tier, round, percentage) {
-    const catNames = { ental: 'Ental', tiotal: 'Tiotal', hundratal: 'Hundratal' };
+    const catLabels = {
+      ental: 'Ental', tiotal: 'Tiotal', hundratal: 'Hundratal',
+      tabell_2_5_10: '2, 5 & 10:an', tabell_3_4_6: '3, 4 & 6:an', tabell_7_8_9: '7, 8 & 9:an'
+    };
     const tierNames = { brons: 'Brons', silver: 'Silver', guld: 'Guld' };
-    const symbol = operation === 'subtraction' ? '–' : '+';
+    
+    let symbol = '+';
+    if (operation === 'subtraction') symbol = '–';
+    if (operation === 'multiplication') symbol = '×';
 
-    this.levelIndicator.innerText = `${catNames[category]} (${symbol}): ${tierNames[tier]}`;
+    this.levelIndicator.innerText = `${catLabels[category]} (${symbol}): ${tierNames[tier]}`;
     this.roundIndicator.innerText = `Omgång ${round}/3`;
 
     const colors = { brons: '#e2a76f', silver: '#94a3b8', guld: '#fcd34d' };

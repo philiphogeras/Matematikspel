@@ -1,11 +1,6 @@
 /**
  * MathEngine.js
- * Hanterar matematiklogik och svårighetsnivåer med exakt positionsprogression:
- * 
- * Tiotal Addition:
- * - Brons: Jämna tiotal (20 + 30)
- * - Silver: Tvåsiffriga tal i båda termerna UTAN tiotalsövergång (43 + 32, 15 + 12, 87 + 11)
- * - Guld: Tvåsiffriga tal i båda termerna MED garanterad tiotalsövergång (48 + 37, 59 + 43, 88 + 94)
+ * Hanterar matematiklogik och svårighetsnivåer för Addition, Subtraktion och Multiplikation.
  */
 export class MathEngine {
   constructor() {
@@ -44,8 +39,11 @@ export class MathEngine {
   generateQuestion() {
     let num1 = 0;
     let num2 = 0;
-    const operator = this.operation === 'subtraction' ? '-' : '+';
+    let operator = '+';
     let key = '';
+
+    if (this.operation === 'subtraction') operator = '-';
+    if (this.operation === 'multiplication') operator = '×';
 
     for (let attempt = 0; attempt < 30; attempt++) {
       if (this.operation === 'addition') {
@@ -60,7 +58,7 @@ export class MathEngine {
             const sum = this.rand(6, 10);
             num1 = this.rand(1, sum - 1);
             num2 = sum - num1;
-          } else { // Guld (tiotalsövergång över 10)
+          } else { // Guld
             const sum = this.rand(11, 18);
             num1 = this.rand(sum - 9, 9);
             num2 = sum - num1;
@@ -68,42 +66,36 @@ export class MathEngine {
 
         } else if (this.category === 'tiotal') {
           if (this.tier === 'brons') {
-            // Brons: Jämna tiotal (t.ex. 20 + 30 = 50)
             num1 = this.rand(1, 4) * 10;
             num2 = this.rand(1, 5) * 10;
           } else if (this.tier === 'silver') {
-            // Silver: Tvåsiffriga tal i båda termerna UTAN tiotalsövergång (t.ex. 43 + 32 = 75, 15 + 12 = 27)
             const t1 = this.rand(1, 8);
             const t2 = this.rand(1, 9 - t1);
             const e1 = this.rand(1, 8);
             const e2 = this.rand(1, 9 - e1);
             num1 = t1 * 10 + e1;
             num2 = t2 * 10 + e2;
-          } else {
-            // Guld: Tvåsiffriga tal i båda termerna MED garanterad tiotalsövergång (t.ex. 48 + 37 = 85, 59 + 43 = 102)
+          } else { // Guld
             const t1 = this.rand(1, 8);
             const t2 = this.rand(1, 8);
             const e1 = this.rand(2, 9);
-            const e2 = this.rand(10 - e1, 9); // e1 + e2 blir alltid minst 10!
+            const e2 = this.rand(10 - e1, 9);
             num1 = t1 * 10 + e1;
             num2 = t2 * 10 + e2;
           }
 
         } else if (this.category === 'hundratal') {
           if (this.tier === 'brons') {
-            // Brons: Jämna hundratal (t.ex. 100 + 200 = 300)
             num1 = this.rand(1, 4) * 100;
             num2 = this.rand(1, 5) * 100;
           } else if (this.tier === 'silver') {
-            // Silver: Hundratal + tiotal, slutar på 0 (t.ex. 140 + 250 = 390)
             const h1 = this.rand(1, 4);
             const h2 = this.rand(1, 4);
             const t1 = this.rand(1, 8);
             const t2 = this.rand(1, 9 - t1);
             num1 = h1 * 100 + t1 * 10;
             num2 = h2 * 100 + t2 * 10;
-          } else {
-            // Guld: Treställiga tal med alla tre positioner aktiva (t.ex. 347 + 112 = 459)
+          } else { // Guld
             const h1 = this.rand(1, 4);
             const h2 = this.rand(1, 4);
             const t1 = this.rand(1, 8);
@@ -115,7 +107,7 @@ export class MathEngine {
           }
         }
 
-      } else {
+      } else if (this.operation === 'subtraction') {
 
         // --- SUBTRAKTION ---
         if (this.category === 'ental') {
@@ -132,42 +124,36 @@ export class MathEngine {
 
         } else if (this.category === 'tiotal') {
           if (this.tier === 'brons') {
-            // Brons: Jämna tiotal (t.ex. 50 - 20 = 30)
             num1 = this.rand(2, 9) * 10;
             num2 = this.rand(1, Math.floor(num1 / 10) - 1) * 10;
           } else if (this.tier === 'silver') {
-            // Silver: Tvåsiffriga tal utan tiotalsväxling (t.ex. 45 - 12 = 33)
             const t1 = this.rand(2, 9);
             const t2 = this.rand(1, t1 - 1);
             const e1 = this.rand(2, 9);
             const e2 = this.rand(1, e1);
             num1 = t1 * 10 + e1;
             num2 = t2 * 10 + e2;
-          } else {
-            // Guld: Tvåsiffriga tal med garanterad tiotalsväxling (t.ex. 43 - 27 = 16)
+          } else { // Guld
             const t1 = this.rand(2, 9);
             const t2 = this.rand(1, t1 - 1);
             const e1 = this.rand(0, 8);
-            const e2 = this.rand(e1 + 1, 9); // e1 < e2 garanterar låning!
+            const e2 = this.rand(e1 + 1, 9);
             num1 = t1 * 10 + e1;
             num2 = t2 * 10 + e2;
           }
 
         } else if (this.category === 'hundratal') {
           if (this.tier === 'brons') {
-            // Brons: Jämna hundratal (t.ex. 300 - 100 = 200)
             num1 = this.rand(2, 9) * 100;
             num2 = this.rand(1, Math.floor(num1 / 100) - 1) * 100;
           } else if (this.tier === 'silver') {
-            // Silver: Hundratal med tiotal (t.ex. 390 - 140 = 250)
             const h1 = this.rand(3, 8);
             const t1 = this.rand(2, 9);
             const h2 = this.rand(1, h1 - 1);
             const t2 = this.rand(1, t1 - 1);
             num1 = h1 * 100 + t1 * 10;
             num2 = h2 * 100 + t2 * 10;
-          } else {
-            // Guld: Treställiga tal (t.ex. 459 - 112 = 347)
+          } else { // Guld
             const h1 = this.rand(3, 8);
             const t1 = this.rand(2, 9);
             const e1 = this.rand(2, 9);
@@ -178,6 +164,33 @@ export class MathEngine {
             num2 = h2 * 100 + t2 * 10 + e2;
           }
         }
+
+      } else if (this.operation === 'multiplication') {
+
+        // --- MULTIPLIKATION ---
+        let tables = [2, 5, 10];
+        if (this.category === 'tabell_3_4_6') tables = [3, 4, 6];
+        if (this.category === 'tabell_7_8_9') tables = [7, 8, 9];
+
+        const baseTable = tables[this.rand(0, tables.length - 1)];
+        let factor = 1;
+
+        if (this.tier === 'brons') {
+          factor = this.rand(1, 5);
+        } else if (this.tier === 'silver') {
+          factor = this.rand(6, 10);
+        } else { // Guld
+          factor = this.rand(1, 10);
+        }
+
+        // Slumpa ordningen (faktorn först eller sist)
+        if (this.rand(0, 1) === 0) {
+          num1 = baseTable;
+          num2 = factor;
+        } else {
+          num1 = factor;
+          num2 = baseTable;
+        }
       }
 
       key = `${num1}_${operator}_${num2}`;
@@ -187,7 +200,11 @@ export class MathEngine {
     }
 
     this.lastQuestionKey = key;
-    const answer = this.operation === 'subtraction' ? num1 - num2 : num1 + num2;
+    
+    let answer = num1 + num2;
+    if (this.operation === 'subtraction') answer = num1 - num2;
+    if (this.operation === 'multiplication') answer = num1 * num2;
+
     this.currentQuestion = { num1, num2, operator, answer };
     return this.currentQuestion;
   }
@@ -216,7 +233,7 @@ export class MathEngine {
           isCorrect: true,
           isRoundCompleted: true,
           isTierCompleted: false,
-          message: `Omgång ${this.currentRound - 1} klar! Nu startar Omgång ${this.currentRound}!`
+          message: `Omgång ${this.currentRound - 1} klar! Nu startar Omggång ${this.currentRound}!`
         };
       }
 

@@ -24,7 +24,8 @@
           <p class="game-subtitle">Välj vad du vill öva på:</p>
           <div class="menu-buttons">
             <button id="btn-category-addition" class="btn-primary btn-add">Addition (+)</button>
-            <button id="btn-category-subtraction" class="btn-primary btn-sub">Subtraktion (-)</button>
+            <button id="btn-category-subtraction" class="btn-primary btn-sub">Subtraktion (–)</button>
+            <button id="btn-category-multiplication" class="btn-primary btn-mult">Multiplikation (×)</button>
           </div>
         </div>
 
@@ -33,9 +34,9 @@
           <h2 id="subcat-menu-title" class="game-title">Addition</h2>
           <p class="game-subtitle">Välj delmoment:</p>
           <div class="menu-buttons">
-            <button class="btn-subcat" data-cat="ental">Ental</button>
-            <button class="btn-subcat" data-cat="tiotal">Tiotal</button>
-            <button class="btn-subcat" data-cat="hundratal">Hundratal</button>
+            <button id="btn-subcat-1" class="btn-subcat" data-cat="ental">Ental</button>
+            <button id="btn-subcat-2" class="btn-subcat" data-cat="tiotal">Tiotal</button>
+            <button id="btn-subcat-3" class="btn-subcat" data-cat="hundratal">Hundratal</button>
             <button id="btn-back-to-main" class="btn-secondary">Tillbaka</button>
           </div>
         </div>
@@ -90,7 +91,7 @@
 
         <div class="question-wrapper">
           <div id="question-box">0 + 0 = ?</div>
-          <button id="btn-help" class="btn-help">Hjälp med uppställning</button>
+          <button id="btn-help" class="btn-help">Hjälp med uträkning</button>
         </div>
 
         <div id="input-area"></div>
@@ -124,10 +125,10 @@
         </div>
       </div>
 
-      <!-- HJÄLPMODAL (VISUELL UPPSTÄLLNING) -->
+      <!-- HJÄLPMODAL -->
       <div id="help-modal" class="modal-overlay hidden">
         <div class="modal-content help-modal-content">
-          <h2 class="modal-title">Hjälp med uppställning</h2>
+          <h2 id="help-modal-title" class="modal-title">Hjälp med uträkning</h2>
           
           <div id="vertical-setup" class="vertical-setup"></div>
 
@@ -139,7 +140,7 @@
         </div>
       </div>
 
-      <!-- KUGGHJULSKNAPP (PLACERAD LÄNGST NED FÖR ATT ALLTID LIGGA ÖVERST) -->
+      <!-- KUGGHJULSKNAPP -->
       <button id="btn-settings" class="btn-gear" aria-label="Inställningar">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"></circle>
