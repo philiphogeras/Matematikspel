@@ -1,6 +1,6 @@
 /**
  * HUD.js
- * Hanterar menystrukturen (Delmoment -> Nivåer) samt upplåsning via localStorage.
+ * Hanterar menyväxlingar för både Addition och Subtraktion.
  */
 export class HUD {
   constructor(onAnswerSubmit, onStartGame, onReturnToMenu) {
@@ -8,6 +8,7 @@ export class HUD {
     this.onStartGame = onStartGame;
     this.onReturnToMenu = onReturnToMenu;
 
+    this.selectedOperation = 'addition';
     this.selectedCategory = 'ental';
 
     this.startScreen = document.getElementById('start-screen');
@@ -17,6 +18,7 @@ export class HUD {
     this.menuSubcats = document.getElementById('menu-subcategories');
     this.menuTiers = document.getElementById('menu-tiers');
 
+    this.subcatMenuTitle = document.getElementById('subcat-menu-title');
     this.tierMenuTitle = document.getElementById('tier-menu-title');
     this.levelIndicator = document.getElementById('level-indicator');
     this.roundIndicator = document.getElementById('round-indicator');
@@ -33,8 +35,18 @@ export class HUD {
   }
 
   initEventListeners() {
-    // Från Huvudmeny -> Delmoment
+    // Öppna Addition
     document.getElementById('btn-category-addition').onclick = () => {
+      this.selectedOperation = 'addition';
+      this.subcatMenuTitle.innerText = 'Addition (+)';
+      this.menuMain.classList.add('hidden');
+      this.menuSubcats.classList.remove('hidden');
+    };
+
+    // Öppna Subtraktion
+    document.getElementById('btn-category-subtraction').onclick = () => {
+      this.selectedOperation = 'subtraction';
+      this.subcatMenuTitle.innerText = 'Subtraktion (-)';
       this.menuMain.classList.add('hidden');
       this.menuSubcats.classList.remove('hidden');
     };
@@ -45,13 +57,15 @@ export class HUD {
       this.menuMain.classList.remove('hidden');
     };
 
-    // Klicka på ett Delmoment (Ental, Tiotal, Hundratal)
+    // Klicka på Delmoment (Ental, Tiotal, Hundratal)
     const subcatBtns = document.querySelectorAll('.btn-subcat');
     subcatBtns.forEach((btn) => {
       btn.onclick = () => {
         this.selectedCategory = btn.getAttribute('data-cat');
+        const opNames = { addition: 'Addition', subtraction: 'Subtraktion' };
         const catNames = { ental: 'Ental', tiotal: 'Tiotal', hundratal: 'Hundratal' };
-        this.tierMenuTitle.innerText = `Addition – ${catNames[this.selectedCategory]}`;
+        
+        this.tierMenuTitle.innerText = `${opNames[this.selectedOperation]} – ${catNames[this.selectedCategory]}`;
 
         this.menuSubcats.classList.add('hidden');
         this.menuTiers.classList.remove('hidden');
@@ -65,14 +79,14 @@ export class HUD {
       this.menuSubcats.classList.remove('hidden');
     };
 
-    // Klicka på en Nivåknapp (Brons, Silver, Guld)
+    // Klicka på Nivåknapp (Brons, Silver, Guld)
     const tierBtns = document.querySelectorAll('.btn-tier');
     tierBtns.forEach((btn) => {
       btn.onclick = () => {
         if (btn.disabled) return;
         const tier = btn.getAttribute('data-tier');
         this.showGameScreen();
-        this.onStartGame(this.selectedCategory, tier);
+        this.onStartGame(this.selectedOperation, this.selectedCategory, tier);
       };
     });
 
@@ -84,22 +98,22 @@ export class HUD {
   }
 
   /**
-   * Uppdaterar låsstatus på Silver och Guld baserat på sparade framsteg i localStorage.
+   * Uppdaterar låsstatus på Silver och Guld för den valda räknesättet och delmomentet.
    */
   updateTierButtons() {
+    const op = this.selectedOperation;
     const cat = this.selectedCategory;
 
-    const isBronsDone = localStorage.getItem(`completed_${cat}_brons`) === 'true';
-    const isSilverDone = localStorage.getItem(`completed_${cat}_silver`) === 'true';
-    const isGuldDone = localStorage.getItem(`completed_${cat}_guld`) === 'true';
+    // Bakåtkompatibilitet: Läser både nya 'completed_addition_ental_brons' och gamla 'completed_ental_brons'
+    const isBronsDone = localStorage.getItem(`completed_${op}_${cat}_brons`) === 'true' || 
+                       (op === 'addition' && localStorage.getItem(`completed_${cat}_brons`) === 'true');
+    const isSilverDone = localStorage.getItem(`completed_${op}_${cat}_silver`) === 'true' || 
+                        (op === 'addition' && localStorage.getItem(`completed_${cat}_silver`) === 'true');
+    const isGuldDone = localStorage.getItem(`completed_${op}_${cat}_guld`) === 'true' || 
+                      (op === 'addition' && localStorage.getItem(`completed_${cat}_guld`) === 'true');
 
-    // Brons är alltid öppen
     this.setBtnState('btn-tier-brons', 'badge-brons', true, isBronsDone);
-
-    // Silver kräver Brons
     this.setBtnState('btn-tier-silver', 'badge-silver', isBronsDone, isSilverDone);
-
-    // Guld kräver Silver
     this.setBtnState('btn-tier-guld', 'badge-guld', isSilverDone, isGuldDone);
   }
 
@@ -139,11 +153,12 @@ export class HUD {
     this.gameScreen.classList.remove('hidden');
   }
 
-  updateTopBar(category, tier, round, percentage) {
+  updateTopBar(operation, category, tier, round, percentage) {
     const catNames = { ental: 'Ental', tiotal: 'Tiotal', hundratal: 'Hundratal' };
     const tierNames = { brons: 'Brons', silver: 'Silver', guld: 'Guld' };
+    const symbol = operation === 'subtraction' ? '–' : '+';
 
-    this.levelIndicator.innerText = `${catNames[category]}: ${tierNames[tier]}`;
+    this.levelIndicator.innerText = `${catNames[category]} (${symbol}): ${tierNames[tier]}`;
     this.roundIndicator.innerText = `Omgång ${round}/3`;
 
     const colors = { brons: '#e2a76f', silver: '#94a3b8', guld: '#fcd34d' };

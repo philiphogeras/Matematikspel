@@ -11,13 +11,13 @@ const soundManager = new SoundManager();
 
 const hud = new HUD(
   (userAnswer) => handleAnswerSubmitted(userAnswer),
-  (category, tier) => startGame(category, tier),
+  (operation, category, tier) => startGame(operation, category, tier),
   () => returnToMenu()
 );
 
-function startGame(category, tier) {
+function startGame(operation, category, tier) {
   soundManager.init();
-  mathEngine.reset(category, tier);
+  mathEngine.reset(operation, category, tier);
   renderer.clear();
   loadNextQuestion();
 }
@@ -31,6 +31,7 @@ function loadNextQuestion() {
   const question = mathEngine.generateQuestion();
   hud.displayQuestion(question);
   hud.updateTopBar(
+    mathEngine.operation,
     mathEngine.category,
     mathEngine.tier,
     mathEngine.currentRound,
@@ -43,6 +44,7 @@ function handleAnswerSubmitted(userAnswer) {
   const result = mathEngine.checkAnswer(userAnswer);
 
   hud.updateTopBar(
+    mathEngine.operation,
     mathEngine.category,
     mathEngine.tier,
     mathEngine.currentRound,
@@ -53,8 +55,8 @@ function handleAnswerSubmitted(userAnswer) {
     hud.showFeedback(true, result.message);
 
     if (result.isTierCompleted) {
-      // Hela nivån klarad -> Spara framsteg och spela vinst
-      localStorage.setItem(`completed_${mathEngine.category}_${mathEngine.tier}`, 'true');
+      // Spara framsteg unikt för räknesätt (t.ex. completed_subtraktion_ental_brons)
+      localStorage.setItem(`completed_${mathEngine.operation}_${mathEngine.category}_${mathEngine.tier}`, 'true');
       soundManager.playVictory();
       renderer.startConfetti();
 
@@ -63,7 +65,6 @@ function handleAnswerSubmitted(userAnswer) {
       }, 3500);
 
     } else if (result.isRoundCompleted) {
-      // Omgång klarad
       soundManager.playVictory();
 
       setTimeout(() => {
@@ -71,7 +72,6 @@ function handleAnswerSubmitted(userAnswer) {
       }, 2000);
 
     } else {
-      // Vanligt rätt svar
       soundManager.playCorrect();
 
       setTimeout(() => {
@@ -80,7 +80,6 @@ function handleAnswerSubmitted(userAnswer) {
     }
 
   } else {
-    // Fel svar
     soundManager.playIncorrect();
     hud.showFeedback(false, result.message);
     hud.unlockInput();

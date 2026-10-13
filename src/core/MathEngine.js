@@ -1,23 +1,24 @@
 /**
  * MathEngine.js
- * Styr delmoment (Ental, Tiotal, Hundratal), nivåer (Brons, Silver, Guld),
- * samt omgångssystemet (3 omgångar × 5 tal).
+ * Hanterar matematiklogik för både Addition (+) och Subtraktion (-).
  */
 export class MathEngine {
   constructor() {
-    this.category = 'ental';  // 'ental', 'tiotal', 'hundratal'
-    this.tier = 'brons';      // 'brons', 'silver', 'guld'
+    this.operation = 'addition';  // 'addition' eller 'subtraction'
+    this.category = 'ental';       // 'ental', 'tiotal', 'hundratal'
+    this.tier = 'brons';           // 'brons', 'silver', 'guld'
     
-    this.currentRound = 1;    // 1..3
+    this.currentRound = 1;         // 1..3
     this.maxRounds = 3;
     
-    this.correctInRound = 0;  // 0..5
+    this.correctInRound = 0;       // 0..5
     this.questionsPerRound = 5;
 
     this.currentQuestion = null;
   }
 
-  reset(category = 'ental', tier = 'brons') {
+  reset(operation = 'addition', category = 'ental', tier = 'brons') {
+    this.operation = operation;
     this.category = category;
     this.tier = tier;
     this.currentRound = 1;
@@ -25,80 +26,81 @@ export class MathEngine {
     this.currentQuestion = null;
   }
 
-  /**
-   * Beräknar procentuell framgång för mätaren i aktuell omgång (0-100%).
-   */
   getRoundProgressPercentage() {
     return Math.round((this.correctInRound / this.questionsPerRound) * 100);
   }
 
   /**
-   * Genererar anpassade tal baserat på delmoment och trofénivå.
+   * Genererar anpassade frågor för både Addition och Subtraktion.
    */
   generateQuestion() {
-    let min1 = 0, max1 = 5, min2 = 0, max2 = 5;
+    let num1 = 0;
+    let num2 = 0;
+    const operator = this.operation === 'subtraction' ? '-' : '+';
 
-    if (this.category === 'ental') {
-      if (this.tier === 'brons') {
-        min1 = 0; max1 = 5; min2 = 0; max2 = 4;
-      } else if (this.tier === 'silver') {
-        min1 = 2; max1 = 7; min2 = 1; max2 = 6;
-      } else { // guld (tiotalsövergång)
-        min1 = 5; max1 = 9; min2 = 5; max2 = 9;
+    if (this.operation === 'addition') {
+      // ADDITION LOGIK
+      if (this.category === 'ental') {
+        if (this.tier === 'brons') { num1 = this.rand(0, 5); num2 = this.rand(0, 4); }
+        else if (this.tier === 'silver') { num1 = this.rand(2, 7); num2 = this.rand(1, 6); }
+        else { num1 = this.rand(5, 9); num2 = this.rand(5, 9); }
+      } else if (this.category === 'tiotal') {
+        if (this.tier === 'brons') { num1 = this.rand(1, 4) * 10; num2 = this.rand(1, 5) * 10; }
+        else if (this.tier === 'silver') { num1 = this.rand(1, 5) * 10; num2 = this.rand(1, 9); }
+        else { num1 = this.rand(10, 40); num2 = this.rand(10, 40); }
+      } else if (this.category === 'hundratal') {
+        if (this.tier === 'brons') { num1 = this.rand(1, 4) * 100; num2 = this.rand(1, 4) * 100; }
+        else if (this.tier === 'silver') { num1 = this.rand(1, 4) * 100; num2 = this.rand(1, 8) * 10; }
+        else { num1 = this.rand(100, 300); num2 = this.rand(100, 300); }
       }
-    } else if (this.category === 'tiotal') {
-      if (this.tier === 'brons') { // Jämna tiotal
-        min1 = 1; max1 = 4; min2 = 1; max2 = 5;
-        const num1 = Math.floor(Math.random() * (max1 - min1 + 1) + min1) * 10;
-        const num2 = Math.floor(Math.random() * (max2 - min2 + 1) + min2) * 10;
-        this.currentQuestion = { num1, num2, operator: '+', answer: num1 + num2 };
-        return this.currentQuestion;
-      } else if (this.tier === 'silver') { // Tiotal + ental
-        const num1 = Math.floor(Math.random() * 5 + 1) * 10;
-        const num2 = Math.floor(Math.random() * 9 + 1);
-        this.currentQuestion = { num1, num2, operator: '+', answer: num1 + num2 };
-        return this.currentQuestion;
-      } else { // Guld (Blandade tiotal)
-        const num1 = Math.floor(Math.random() * 40 + 10);
-        const num2 = Math.floor(Math.random() * 40 + 10);
-        this.currentQuestion = { num1, num2, operator: '+', answer: num1 + num2 };
-        return this.currentQuestion;
+      this.currentQuestion = { num1, num2, operator, answer: num1 + num2 };
+
+    } else {
+      // SUBTRAKTION LOGIK (Alltid num1 >= num2 så svaret blir positivt)
+      if (this.category === 'ental') {
+        if (this.tier === 'brons') {
+          num1 = this.rand(1, 5);
+          num2 = this.rand(0, num1);
+        } else if (this.tier === 'silver') {
+          num1 = this.rand(4, 10);
+          num2 = this.rand(1, num1);
+        } else { // guld (tiotalsövergång, t.ex. 14 - 6)
+          num1 = this.rand(11, 18);
+          num2 = this.rand(2, 9);
+        }
+      } else if (this.category === 'tiotal') {
+        if (this.tier === 'brons') { // Jämna tiotal (50 - 20)
+          num1 = this.rand(2, 5) * 10;
+          num2 = this.rand(1, num1 / 10) * 10;
+        } else if (this.tier === 'silver') { // Tiotal - ental (48 - 5)
+          num1 = this.rand(2, 9) * 10 + this.rand(1, 9);
+          num2 = this.rand(1, num1 % 10 || 5);
+        } else { // Blandade tiotal (52 - 27)
+          num1 = this.rand(30, 99);
+          num2 = this.rand(10, num1 - 1);
+        }
+      } else if (this.category === 'hundratal') {
+        if (this.tier === 'brons') { // Jämna hundratal (500 - 200)
+          num1 = this.rand(2, 5) * 100;
+          num2 = this.rand(1, num1 / 100) * 100;
+        } else if (this.tier === 'silver') { // Hundratal - tiotal (400 - 30)
+          num1 = this.rand(2, 8) * 100;
+          num2 = this.rand(1, 9) * 10;
+        } else { // Blandade hundratal (450 - 180)
+          num1 = this.rand(200, 900);
+          num2 = this.rand(100, num1 - 1);
+        }
       }
-    } else if (this.category === 'hundratal') {
-      if (this.tier === 'brons') { // Jämna hundratal
-        const num1 = Math.floor(Math.random() * 4 + 1) * 100;
-        const num2 = Math.floor(Math.random() * 4 + 1) * 100;
-        this.currentQuestion = { num1, num2, operator: '+', answer: num1 + num2 };
-        return this.currentQuestion;
-      } else if (this.tier === 'silver') { // Hundratal + tiotal
-        const num1 = Math.floor(Math.random() * 4 + 1) * 100;
-        const num2 = Math.floor(Math.random() * 8 + 1) * 10;
-        this.currentQuestion = { num1, num2, operator: '+', answer: num1 + num2 };
-        return this.currentQuestion;
-      } else { // Guld (Blandade hundratal)
-        const num1 = Math.floor(Math.random() * 300 + 100);
-        const num2 = Math.floor(Math.random() * 300 + 100);
-        this.currentQuestion = { num1, num2, operator: '+', answer: num1 + num2 };
-        return this.currentQuestion;
-      }
+      this.currentQuestion = { num1, num2, operator, answer: num1 - num2 };
     }
-
-    const num1 = Math.floor(Math.random() * (max1 - min1 + 1)) + min1;
-    const num2 = Math.floor(Math.random() * (max2 - min2 + 1)) + min2;
-
-    this.currentQuestion = {
-      num1,
-      num2,
-      operator: '+',
-      answer: num1 + num2
-    };
 
     return this.currentQuestion;
   }
 
-  /**
-   * Rättar svaret och hanterar omgångar.
-   */
+  rand(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
   checkAnswer(userAnswer) {
     const numericAnswer = parseInt(userAnswer, 10);
     const isCorrect = numericAnswer === this.currentQuestion.answer;
@@ -106,10 +108,7 @@ export class MathEngine {
     if (isCorrect) {
       this.correctInRound++;
 
-      // Är omgången klar? (5 rätt)
       if (this.correctInRound >= this.questionsPerRound) {
-        
-        // Är alla 3 omgångar klarade? -> VINST FÖR HELA NIVÅN
         if (this.currentRound >= this.maxRounds) {
           return {
             isCorrect: true,
@@ -119,7 +118,6 @@ export class MathEngine {
           };
         }
 
-        // Annars gå till nästa omgång
         this.currentRound++;
         this.correctInRound = 0;
 
@@ -138,7 +136,6 @@ export class MathEngine {
         message: 'Bra jobbat! Helt rätt! ⭐'
       };
     } else {
-      // Fel svar påverkar inte tidigare framsteg
       return {
         isCorrect: false,
         isRoundCompleted: false,

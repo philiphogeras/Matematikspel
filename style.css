@@ -98,17 +98,27 @@ body {
   font-size: 1.3rem;
   font-weight: bold;
   padding: 14px 20px;
-  background-color: #3b82f6;
-  color: #ffffff;
   border: none;
   border-radius: 12px;
   cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.btn-add {
+  background-color: #3b82f6;
+  color: #ffffff;
   box-shadow: 0 4px 10px rgba(59, 130, 246, 0.25);
-  transition: transform 0.1s, background-color 0.1s;
+}
+
+.btn-sub {
+  background-color: #8b5cf6;
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(139, 92, 246, 0.25);
 }
 
 .btn-subcat {
   background-color: #0ea5e9;
+  color: #ffffff;
   box-shadow: 0 4px 10px rgba(14, 165, 233, 0.25);
 }
 

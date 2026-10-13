@@ -23,13 +23,14 @@
           <h1 class="game-title">Matematikspelet</h1>
           <p class="game-subtitle">Välj vad du vill öva på:</p>
           <div class="menu-buttons">
-            <button id="btn-category-addition" class="btn-primary">Addition (+)</button>
+            <button id="btn-category-addition" class="btn-primary btn-add">Addition (+)</button>
+            <button id="btn-category-subtraction" class="btn-primary btn-sub">Subtraktion (-)</button>
           </div>
         </div>
 
         <!-- DELMOMENTSMENY (Ental, Tiotal, Hundratal) -->
         <div id="menu-subcategories" class="menu-step hidden">
-          <h2 class="game-title">Addition</h2>
+          <h2 id="subcat-menu-title" class="game-title">Addition</h2>
           <p class="game-subtitle">Välj delmoment:</p>
           <div class="menu-buttons">
             <button class="btn-subcat" data-cat="ental">1️⃣ Ental</button>
@@ -87,7 +88,7 @@
           <button id="btn-menu" class="btn-secondary">Meny</button>
         </div>
 
-        <div id="question-box">0 + 0 = ?</div>
+        <div id="question-box">0 - 0 = ?</div>
         
         <div id="input-area"></div>
         <div id="feedback-message"></div>
