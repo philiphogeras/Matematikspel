@@ -172,11 +172,6 @@ export class HUD {
       ]);
     };
 
-    document.getElementById('btn-back-to-main').onclick = () => {
-      this.menuSubcats.classList.add('hidden');
-      this.menuMain.classList.remove('hidden');
-    };
-
     document.getElementById('btn-back-to-subcats').onclick = () => {
       this.menuTiers.classList.add('hidden');
       this.menuSubcats.classList.remove('hidden');
@@ -230,6 +225,7 @@ export class HUD {
       container.appendChild(btn);
     });
 
+    // Tillbaka-knappen skapas dynamiskt här och får sin klick-händelse
     const backBtn = document.createElement('button');
     backBtn.id = 'btn-back-to-main';
     backBtn.className = 'btn-secondary';
