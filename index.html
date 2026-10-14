@@ -10,7 +10,7 @@
 
   <div id="game-container">
     <!-- Canvas för konfetti -->
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <canvas id="gameCanvas" width="900" height="660"></canvas>
     
     <!-- UI Overlay -->
     <div id="ui-overlay">
@@ -34,10 +34,7 @@
           <h2 id="subcat-menu-title" class="game-title">Addition</h2>
           <p class="game-subtitle">Välj delmoment:</p>
           <div class="menu-buttons">
-            <button id="btn-subcat-1" class="btn-subcat" data-cat="ental">Ental</button>
-            <button id="btn-subcat-2" class="btn-subcat" data-cat="tiotal">Tiotal</button>
-            <button id="btn-subcat-3" class="btn-subcat" data-cat="hundratal">Hundratal</button>
-            <button id="btn-back-to-main" class="btn-secondary">Tillbaka</button>
+            <!-- Skapas dynamiskt i HUD.js -->
           </div>
         </div>
 
@@ -49,7 +46,7 @@
             <button id="btn-tier-brons" class="btn-tier btn-bronze" data-tier="brons">
               <div class="tier-info">
                 <span class="tier-title">Brons</span>
-                <span class="tier-sub">3 omgångar × 5 tal</span>
+                <span class="tier-sub">3 omgångar</span>
               </div>
               <span id="badge-brons" class="tier-status">Öppen</span>
             </button>
@@ -57,7 +54,7 @@
             <button id="btn-tier-silver" class="btn-tier btn-silver btn-locked" data-tier="silver" disabled>
               <div class="tier-info">
                 <span class="tier-title">Silver</span>
-                <span class="tier-sub">3 omgångar × 5 tal</span>
+                <span class="tier-sub">3 omgångar</span>
               </div>
               <span id="badge-silver" class="tier-status">Låst</span>
             </button>
@@ -65,7 +62,7 @@
             <button id="btn-tier-guld" class="btn-tier btn-gold btn-locked" data-tier="guld" disabled>
               <div class="tier-info">
                 <span class="tier-title">Guld</span>
-                <span class="tier-sub">3 omgångar × 5 tal</span>
+                <span class="tier-sub">3 omgångar</span>
               </div>
               <span id="badge-guld" class="tier-status">Låst</span>
             </button>

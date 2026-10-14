@@ -15,10 +15,10 @@ body {
 
 #game-container {
   position: relative;
-  width: 800px;
-  height: 600px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
-  border-radius: 16px;
+  width: 900px;
+  height: 660px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+  border-radius: 18px;
   overflow: hidden;
   background-color: #ffffff;
 }
@@ -54,7 +54,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: 24px;
+  padding: 28px;
 }
 
 .menu-step {
@@ -74,15 +74,15 @@ body {
 /* KUGGHJULSKNAPP */
 .btn-gear {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 18px;
+  right: 18px;
   z-index: 999;
   background-color: #ffffff;
   color: #475569;
   border: 2px solid #cbd5e1;
   border-radius: 50%;
-  width: 44px;
-  height: 44px;
+  width: 46px;
+  height: 46px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -103,12 +103,12 @@ body {
 }
 
 .game-title {
-  font-size: 2.6rem;
+  font-size: 2.8rem;
   color: #334155;
 }
 
 .game-subtitle {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   color: #64748b;
 }
 
@@ -116,7 +116,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  width: 320px;
+  width: 340px;
 }
 
 .btn-primary, .btn-subcat {
@@ -151,6 +151,12 @@ body {
   background-color: #0ea5e9;
   color: #ffffff;
   box-shadow: 0 4px 10px rgba(14, 165, 233, 0.25);
+}
+
+.btn-problem {
+  background-color: #8b5cf6 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 10px rgba(139, 92, 246, 0.25) !important;
 }
 
 .btn-primary:active, .btn-subcat:active {
@@ -188,11 +194,11 @@ body {
   width: 100%;
 }
 
-/* TROFÉFÄRGER & LÅSTA NIVÅER */
+/* NIVÅKNAPPAR */
 .btn-tier {
   font-size: 1.1rem;
   font-weight: bold;
-  padding: 12px 18px;
+  padding: 14px 20px;
   border: none;
   border-radius: 12px;
   cursor: pointer;
@@ -214,11 +220,11 @@ body {
 }
 
 .tier-title {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
 }
 
 .tier-sub {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: normal;
   opacity: 0.8;
 }
@@ -264,17 +270,17 @@ body {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding-right: 50px;
+  gap: 12px;
+  padding-right: 54px;
 }
 
 #level-indicator, #round-indicator {
   background-color: #f1f5f9;
   color: #334155;
-  padding: 6px 14px;
+  padding: 8px 16px;
   border-radius: 16px;
   font-weight: bold;
-  font-size: 0.95rem;
+  font-size: 1rem;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -286,7 +292,7 @@ body {
 
 #progress-container {
   flex: 1;
-  height: 14px;
+  height: 16px;
   background-color: #e2e8f0;
   border-radius: 8px;
   overflow: hidden;
@@ -306,24 +312,26 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  margin-top: 4px;
+  gap: 10px;
+  margin-top: 6px;
+  width: 100%;
 }
 
 #question-box {
-  font-size: 3.2rem;
+  font-size: 3.4rem;
   font-weight: bold;
   color: #1e293b;
   text-align: center;
-  background-color: rgba(255, 255, 255, 0.9);
-  padding: 6px 24px;
-  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 12px 28px;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .btn-help {
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: bold;
-  padding: 6px 16px;
+  padding: 8px 18px;
   background-color: #e0f2fe;
   color: #0369a1;
   border: 2px solid #38bdf8;
@@ -342,36 +350,36 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   margin-top: auto;
 }
 
 .answer-display {
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: bold;
   color: #2563eb;
   background-color: #ffffff;
-  padding: 4px 20px;
-  border-radius: 8px;
+  padding: 6px 24px;
+  border-radius: 10px;
   border: 2px solid #cbd5e1;
-  min-width: 100px;
+  min-width: 120px;
   text-align: center;
 }
 
 .keypad-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  width: 210px;
+  gap: 10px;
+  width: 230px;
 }
 
 .keypad-btn {
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   font-weight: bold;
-  padding: 10px;
+  padding: 12px;
   background-color: #ffffff;
   border: 2px solid #cbd5e1;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
   color: #1e293b;
 }
@@ -394,9 +402,9 @@ body {
 }
 
 #feedback-message {
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   font-weight: bold;
-  min-height: 28px;
+  min-height: 32px;
   text-align: center;
 }
 
@@ -424,9 +432,9 @@ body {
 
 .modal-content {
   background-color: #ffffff;
-  padding: 24px;
+  padding: 26px;
   border-radius: 16px;
-  width: 320px;
+  width: 340px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
@@ -434,7 +442,7 @@ body {
 }
 
 .help-modal-content {
-  width: 440px;
+  width: 520px;
 }
 
 .modal-title {
@@ -493,7 +501,7 @@ body {
   align-items: center;
   font-family: Arial, sans-serif;
   font-weight: bold;
-  font-size: 1.6rem;
+  font-size: 1.7rem;
 }
 
 .grid-row {
@@ -502,8 +510,8 @@ body {
 }
 
 .cell {
-  width: 64px;
-  height: 44px;
+  width: 68px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -512,9 +520,9 @@ body {
 }
 
 .col-header {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: bold;
-  height: 24px;
+  height: 26px;
   white-space: nowrap;
 }
 
@@ -535,8 +543,8 @@ body {
 
 .op-cell {
   color: #475569;
-  font-size: 1.4rem;
-  width: 32px;
+  font-size: 1.5rem;
+  width: 36px;
 }
 
 .setup-line {
@@ -550,8 +558,8 @@ body {
   background-color: #ecfdf5;
   border: 2px solid #a7f3d0;
   border-radius: 12px;
-  padding: 12px 20px;
-  font-size: 1.6rem;
+  padding: 14px 22px;
+  font-size: 1.7rem;
   font-weight: bold;
   color: #065f46;
   text-align: center;
@@ -562,10 +570,10 @@ body {
   background-color: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
-  padding: 12px;
-  font-size: 0.9rem;
+  padding: 14px;
+  font-size: 0.95rem;
   color: #334155;
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
 .instructions-list {
@@ -575,10 +583,4 @@ body {
 
 .instructions-list li {
   margin-bottom: 4px;
-}
-
-.btn-problem {
-  background-color: #8b5cf6 !important;
-  color: #ffffff !important;
-  box-shadow: 0 4px 10px rgba(139, 92, 246, 0.25) !important;
 }

@@ -1,6 +1,6 @@
 /**
  * HUD.js
- * Hanterar gränssnitt, menyer, hjäp, tangentbordsinmatning och problemlösning.
+ * Hanterar gränssnitt, menyer, hjälp, tangentbordsinmatning och problemlösning.
  */
 export class HUD {
   constructor(onAnswerSubmit, onStartGame, onReturnToMenu, soundCallbacks) {
@@ -426,12 +426,12 @@ export class HUD {
 
     if (question.isTextProblem) {
       this.questionElement.innerText = question.text;
-      this.questionElement.style.fontSize = '1.3rem';
-      this.questionElement.style.lineHeight = '1.4';
-      this.questionElement.style.maxWidth = '600px';
+      this.questionElement.style.fontSize = '1.35rem';
+      this.questionElement.style.lineHeight = '1.5';
+      this.questionElement.style.maxWidth = '750px';
     } else {
       this.questionElement.innerText = `${question.num1} ${question.operator} ${question.num2} = ?`;
-      this.questionElement.style.fontSize = '3.2rem';
+      this.questionElement.style.fontSize = '3.4rem';
       this.questionElement.style.lineHeight = 'normal';
       this.questionElement.style.maxWidth = 'none';
     }
