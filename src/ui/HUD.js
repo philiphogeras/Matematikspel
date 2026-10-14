@@ -1,6 +1,6 @@
 /**
  * HUD.js
- * Hanterar gränssnitt, menyer, hjälp, tangentbordsinmatning och multiplikationsvy.
+ * Hanterar gränssnitt, menyer, hjäp, tangentbordsinmatning och problemlösning.
  */
 export class HUD {
   constructor(onAnswerSubmit, onStartGame, onReturnToMenu, soundCallbacks) {
@@ -149,7 +149,8 @@ export class HUD {
       this.setupSubcategoryMenu('addition', 'Addition (+)', [
         { label: 'Ental', key: 'ental' },
         { label: 'Tiotal', key: 'tiotal' },
-        { label: 'Hundratal', key: 'hundratal' }
+        { label: 'Hundratal', key: 'hundratal' },
+        { label: 'Problemlösning', key: 'problemlosning' }
       ]);
     };
 
@@ -157,7 +158,8 @@ export class HUD {
       this.setupSubcategoryMenu('subtraction', 'Subtraktion (–)', [
         { label: 'Ental', key: 'ental' },
         { label: 'Tiotal', key: 'tiotal' },
-        { label: 'Hundratal', key: 'hundratal' }
+        { label: 'Hundratal', key: 'hundratal' },
+        { label: 'Problemlösning', key: 'problemlosning' }
       ]);
     };
 
@@ -165,7 +167,8 @@ export class HUD {
       this.setupSubcategoryMenu('multiplication', 'Multiplikation (×)', [
         { label: '2, 5 & 10:an', key: 'tabell_2_5_10' },
         { label: '3, 4 & 6:an', key: 'tabell_3_4_6' },
-        { label: '7, 8 & 9:an', key: 'tabell_7_8_9' }
+        { label: '7, 8 & 9:an', key: 'tabell_7_8_9' },
+        { label: 'Problemlösning', key: 'problemlosning' }
       ]);
     };
 
@@ -173,29 +176,6 @@ export class HUD {
       this.menuSubcats.classList.add('hidden');
       this.menuMain.classList.remove('hidden');
     };
-
-    const subcatBtns = [
-      document.getElementById('btn-subcat-1'),
-      document.getElementById('btn-subcat-2'),
-      document.getElementById('btn-subcat-3')
-    ];
-
-    subcatBtns.forEach((btn) => {
-      btn.onclick = () => {
-        this.selectedCategory = btn.getAttribute('data-cat');
-        const catLabels = {
-          ental: 'Ental', tiotal: 'Tiotal', hundratal: 'Hundratal',
-          tabell_2_5_10: '2, 5 & 10:an', tabell_3_4_6: '3, 4 & 6:an', tabell_7_8_9: '7, 8 & 9:an'
-        };
-        const opLabels = { addition: 'Addition', subtraction: 'Subtraktion', multiplication: 'Multiplikation' };
-        
-        this.tierMenuTitle.innerText = `${opLabels[this.selectedOperation]} – ${catLabels[this.selectedCategory]}`;
-
-        this.menuSubcats.classList.add('hidden');
-        this.menuTiers.classList.remove('hidden');
-        this.updateTierButtons();
-      };
-    });
 
     document.getElementById('btn-back-to-subcats').onclick = () => {
       this.menuTiers.classList.add('hidden');
@@ -222,18 +202,43 @@ export class HUD {
     this.selectedOperation = operationKey;
     this.subcatMenuTitle.innerText = titleText;
 
-    const b1 = document.getElementById('btn-subcat-1');
-    const b2 = document.getElementById('btn-subcat-2');
-    const b3 = document.getElementById('btn-subcat-3');
+    const container = this.menuSubcats.querySelector('.menu-buttons');
+    container.innerHTML = '';
 
-    b1.innerText = subcatList[0].label;
-    b1.setAttribute('data-cat', subcatList[0].key);
+    subcatList.forEach((item) => {
+      const btn = document.createElement('button');
+      btn.className = 'btn-subcat';
+      if (item.key === 'problemlosning') {
+        btn.classList.add('btn-problem');
+      }
+      btn.innerText = item.label;
+      btn.onclick = () => {
+        this.selectedCategory = item.key;
+        const catLabels = {
+          ental: 'Ental', tiotal: 'Tiotal', hundratal: 'Hundratal',
+          tabell_2_5_10: '2, 5 & 10:an', tabell_3_4_6: '3, 4 & 6:an', tabell_7_8_9: '7, 8 & 9:an',
+          problemlosning: 'Problemlösning'
+        };
+        const opLabels = { addition: 'Addition', subtraction: 'Subtraktion', multiplication: 'Multiplikation' };
+        
+        this.tierMenuTitle.innerText = `${opLabels[this.selectedOperation]} – ${catLabels[this.selectedCategory]}`;
 
-    b2.innerText = subcatList[1].label;
-    b2.setAttribute('data-cat', subcatList[1].key);
+        this.menuSubcats.classList.add('hidden');
+        this.menuTiers.classList.remove('hidden');
+        this.updateTierButtons();
+      };
+      container.appendChild(btn);
+    });
 
-    b3.innerText = subcatList[2].label;
-    b3.setAttribute('data-cat', subcatList[2].key);
+    const backBtn = document.createElement('button');
+    backBtn.id = 'btn-back-to-main';
+    backBtn.className = 'btn-secondary';
+    backBtn.innerText = 'Tillbaka';
+    backBtn.onclick = () => {
+      this.menuSubcats.classList.add('hidden');
+      this.menuMain.classList.remove('hidden');
+    };
+    container.appendChild(backBtn);
 
     this.menuMain.classList.add('hidden');
     this.menuSubcats.classList.remove('hidden');
@@ -248,7 +253,6 @@ export class HUD {
     if (operator === '×') {
       titleElem.innerText = 'Hjälp med multiplikation';
 
-      // Visa upprepad addition för multiplikation
       const count = num1;
       const value = num2;
       const additionArray = Array(count).fill(value);
@@ -260,7 +264,7 @@ export class HUD {
 
       document.getElementById('help-instructions').innerHTML = `
         <p><strong>Så här kan du tänka:</strong></p>
-        <p style="margin-top: 6px;"><strong>${num1} × ${num2}</strong> betyder att du har <strong>${num1} grupper</strong> med <strong>${num2}</strong> i varje group.</p>
+        <p style="margin-top: 6px;"><strong>${num1} × ${num2}</strong> betyder att du har <strong>${num1} grupper</strong> med <strong>${num2}</strong> i varje grupp.</p>
         <p style="margin-top: 6px;">Du kan räkna det genom att addera <strong>${value}</strong> med sig självt <strong>${count} gånger</strong>.</p>
       `;
 
@@ -398,7 +402,8 @@ export class HUD {
   updateTopBar(operation, category, tier, round, percentage) {
     const catLabels = {
       ental: 'Ental', tiotal: 'Tiotal', hundratal: 'Hundratal',
-      tabell_2_5_10: '2, 5 & 10:an', tabell_3_4_6: '3, 4 & 6:an', tabell_7_8_9: '7, 8 & 9:an'
+      tabell_2_5_10: '2, 5 & 10:an', tabell_3_4_6: '3, 4 & 6:an', tabell_7_8_9: '7, 8 & 9:an',
+      problemlosning: 'Problemlösning'
     };
     const tierNames = { brons: 'Brons', silver: 'Silver', guld: 'Guld' };
     
@@ -418,7 +423,19 @@ export class HUD {
     if (!question) return;
     this.currentQuestion = question;
     this.isWaiting = false;
-    this.questionElement.innerText = `${question.num1} ${question.operator} ${question.num2} = ?`;
+
+    if (question.isTextProblem) {
+      this.questionElement.innerText = question.text;
+      this.questionElement.style.fontSize = '1.3rem';
+      this.questionElement.style.lineHeight = '1.4';
+      this.questionElement.style.maxWidth = '600px';
+    } else {
+      this.questionElement.innerText = `${question.num1} ${question.operator} ${question.num2} = ?`;
+      this.questionElement.style.fontSize = '3.2rem';
+      this.questionElement.style.lineHeight = 'normal';
+      this.questionElement.style.maxWidth = 'none';
+    }
+
     this.clearInput();
     this.clearFeedback();
   }

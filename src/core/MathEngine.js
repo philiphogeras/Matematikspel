@@ -1,7 +1,8 @@
+import { WORD_PROBLEMS } from '../data/wordProblems.js';
+
 /**
  * MathEngine.js
- * Hanterar matematiklogik och svårighetsnivåer för Addition, Subtraktion och Multiplikation.
- * Garanti: Inga upprepade frågor inom samma omgång (5 frågor).
+ * Hanterar matematiklogik, nivåer samt textbaserad problemlösning.
  */
 export class MathEngine {
   constructor() {
@@ -16,7 +17,7 @@ export class MathEngine {
     this.questionsPerRound = 5;
 
     this.currentQuestion = null;
-    this.usedQuestionsInRound = []; // Sparar alla unika frågor i nuvarande omgång
+    this.usedQuestionsInRound = [];
   }
 
   reset(operation = 'addition', category = 'ental', tier = 'brons') {
@@ -27,6 +28,13 @@ export class MathEngine {
     this.correctInRound = 0;
     this.currentQuestion = null;
     this.usedQuestionsInRound = [];
+    
+    // Problemlösning har 3 frågor per omgång istället för 5
+    if (this.category === 'problemlosning') {
+      this.questionsPerRound = 3;
+    } else {
+      this.questionsPerRound = 5;
+    }
   }
 
   getRoundProgressPercentage() {
@@ -38,6 +46,37 @@ export class MathEngine {
   }
 
   generateQuestion() {
+    // KONTROLL: Om kategorin är problemlösning hämtas frågan från WORD_PROBLEMS
+    if (this.category === 'problemlosning') {
+      const problemList = WORD_PROBLEMS[this.operation] || WORD_PROBLEMS.addition;
+      let selectedProblem = null;
+
+      for (let attempt = 0; attempt < 30; attempt++) {
+        const randomIndex = this.rand(0, problemList.length - 1);
+        if (!this.usedQuestionsInRound.includes(randomIndex)) {
+          this.usedQuestionsInRound.push(randomIndex);
+          selectedProblem = problemList[randomIndex]();
+          break;
+        }
+      }
+
+      if (!selectedProblem) {
+        selectedProblem = problemList[0]();
+      }
+
+      this.currentQuestion = {
+        isTextProblem: true,
+        text: selectedProblem.text,
+        num1: selectedProblem.num1,
+        num2: selectedProblem.num2,
+        operator: selectedProblem.operator,
+        answer: selectedProblem.answer
+      };
+
+      return this.currentQuestion;
+    }
+
+    // --- STANDARD RÄKNEFRÅGOR (När det inte är problemlösning) ---
     let num1 = 0;
     let num2 = 0;
     let operator = '+';
@@ -46,11 +85,8 @@ export class MathEngine {
     if (this.operation === 'subtraction') operator = '-';
     if (this.operation === 'multiplication') operator = '×';
 
-    // Försök hitta en fråga som inte redan ställts under denna omgång
     for (let attempt = 0; attempt < 50; attempt++) {
       if (this.operation === 'addition') {
-        
-        // --- ADDITION ---
         if (this.category === 'ental') {
           if (this.tier === 'brons') {
             const sum = this.rand(1, 5);
@@ -60,12 +96,11 @@ export class MathEngine {
             const sum = this.rand(6, 10);
             num1 = this.rand(1, sum - 1);
             num2 = sum - num1;
-          } else { // Guld
+          } else {
             const sum = this.rand(11, 18);
             num1 = this.rand(sum - 9, 9);
             num2 = sum - num1;
           }
-
         } else if (this.category === 'tiotal') {
           if (this.tier === 'brons') {
             num1 = this.rand(1, 4) * 10;
@@ -77,7 +112,7 @@ export class MathEngine {
             const e2 = this.rand(1, 9 - e1);
             num1 = t1 * 10 + e1;
             num2 = t2 * 10 + e2;
-          } else { // Guld
+          } else {
             const t1 = this.rand(1, 8);
             const t2 = this.rand(1, 8);
             const e1 = this.rand(2, 9);
@@ -85,7 +120,6 @@ export class MathEngine {
             num1 = t1 * 10 + e1;
             num2 = t2 * 10 + e2;
           }
-
         } else if (this.category === 'hundratal') {
           if (this.tier === 'brons') {
             num1 = this.rand(1, 4) * 100;
@@ -97,7 +131,7 @@ export class MathEngine {
             const t2 = this.rand(1, 9 - t1);
             num1 = h1 * 100 + t1 * 10;
             num2 = h2 * 100 + t2 * 10;
-          } else { // Guld
+          } else {
             const h1 = this.rand(1, 4);
             const h2 = this.rand(1, 4);
             const t1 = this.rand(1, 8);
@@ -108,10 +142,7 @@ export class MathEngine {
             num2 = h2 * 100 + t2 * 10 + e2;
           }
         }
-
       } else if (this.operation === 'subtraction') {
-
-        // --- SUBTRAKTION ---
         if (this.category === 'ental') {
           if (this.tier === 'brons') {
             num1 = this.rand(1, 5);
@@ -119,11 +150,10 @@ export class MathEngine {
           } else if (this.tier === 'silver') {
             num1 = this.rand(6, 10);
             num2 = this.rand(1, num1);
-          } else { // Guld
+          } else {
             num1 = this.rand(11, 18);
             num2 = this.rand(num1 - 9, 9);
           }
-
         } else if (this.category === 'tiotal') {
           if (this.tier === 'brons') {
             num1 = this.rand(2, 9) * 10;
@@ -135,7 +165,7 @@ export class MathEngine {
             const e2 = this.rand(1, e1);
             num1 = t1 * 10 + e1;
             num2 = t2 * 10 + e2;
-          } else { // Guld
+          } else {
             const t1 = this.rand(2, 9);
             const t2 = this.rand(1, t1 - 1);
             const e1 = this.rand(0, 8);
@@ -143,7 +173,6 @@ export class MathEngine {
             num1 = t1 * 10 + e1;
             num2 = t2 * 10 + e2;
           }
-
         } else if (this.category === 'hundratal') {
           if (this.tier === 'brons') {
             num1 = this.rand(2, 9) * 100;
@@ -155,7 +184,7 @@ export class MathEngine {
             const t2 = this.rand(1, t1 - 1);
             num1 = h1 * 100 + t1 * 10;
             num2 = h2 * 100 + t2 * 10;
-          } else { // Guld
+          } else {
             const h1 = this.rand(3, 8);
             const t1 = this.rand(2, 9);
             const e1 = this.rand(2, 9);
@@ -166,10 +195,7 @@ export class MathEngine {
             num2 = h2 * 100 + t2 * 10 + e2;
           }
         }
-
       } else if (this.operation === 'multiplication') {
-
-        // --- MULTIPLIKATION ---
         let tables = [2, 5, 10];
         if (this.category === 'tabell_3_4_6') tables = [3, 4, 6];
         if (this.category === 'tabell_7_8_9') tables = [7, 8, 9];
@@ -181,7 +207,7 @@ export class MathEngine {
           factor = this.rand(1, 5);
         } else if (this.tier === 'silver') {
           factor = this.rand(6, 10);
-        } else { // Guld
+        } else {
           factor = this.rand(1, 10);
         }
 
@@ -195,21 +221,21 @@ export class MathEngine {
       }
 
       key = `${num1}_${operator}_${num2}`;
-      
-      // Om nyckel inte finns i historiken för denna omgång, välj denna fråga!
       if (!this.usedQuestionsInRound.includes(key)) {
         break;
       }
     }
 
-    // Registrera frågan i omgångens historik
     this.usedQuestionsInRound.push(key);
 
     let answer = num1 + num2;
     if (this.operation === 'subtraction') answer = num1 - num2;
     if (this.operation === 'multiplication') answer = num1 * num2;
 
-    this.currentQuestion = { num1, num2, operator, answer };
+    this.currentQuestion = {
+      isTextProblem: false,
+      num1, num2, operator, answer
+    };
     return this.currentQuestion;
   }
 
@@ -230,7 +256,6 @@ export class MathEngine {
           };
         }
 
-        // Nollställ omgångshistoriken inför nästa omgång
         this.currentRound++;
         this.correctInRound = 0;
         this.usedQuestionsInRound = [];

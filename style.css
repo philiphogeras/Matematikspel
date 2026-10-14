@@ -576,3 +576,9 @@ body {
 .instructions-list li {
   margin-bottom: 4px;
 }
+
+.btn-problem {
+  background-color: #8b5cf6 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 10px rgba(139, 92, 246, 0.25) !important;
+}
