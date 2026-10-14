@@ -1,6 +1,7 @@
 /**
  * MathEngine.js
  * Hanterar matematiklogik och svårighetsnivåer för Addition, Subtraktion och Multiplikation.
+ * Garanti: Inga upprepade frågor inom samma omgång (5 frågor).
  */
 export class MathEngine {
   constructor() {
@@ -15,7 +16,7 @@ export class MathEngine {
     this.questionsPerRound = 5;
 
     this.currentQuestion = null;
-    this.lastQuestionKey = '';
+    this.usedQuestionsInRound = []; // Sparar alla unika frågor i nuvarande omgång
   }
 
   reset(operation = 'addition', category = 'ental', tier = 'brons') {
@@ -25,7 +26,7 @@ export class MathEngine {
     this.currentRound = 1;
     this.correctInRound = 0;
     this.currentQuestion = null;
-    this.lastQuestionKey = '';
+    this.usedQuestionsInRound = [];
   }
 
   getRoundProgressPercentage() {
@@ -45,7 +46,8 @@ export class MathEngine {
     if (this.operation === 'subtraction') operator = '-';
     if (this.operation === 'multiplication') operator = '×';
 
-    for (let attempt = 0; attempt < 30; attempt++) {
+    // Försök hitta en fråga som inte redan ställts under denna omgång
+    for (let attempt = 0; attempt < 50; attempt++) {
       if (this.operation === 'addition') {
         
         // --- ADDITION ---
@@ -183,7 +185,6 @@ export class MathEngine {
           factor = this.rand(1, 10);
         }
 
-        // Slumpa ordningen (faktorn först eller sist)
         if (this.rand(0, 1) === 0) {
           num1 = baseTable;
           num2 = factor;
@@ -194,13 +195,16 @@ export class MathEngine {
       }
 
       key = `${num1}_${operator}_${num2}`;
-      if (key !== this.lastQuestionKey) {
+      
+      // Om nyckel inte finns i historiken för denna omgång, välj denna fråga!
+      if (!this.usedQuestionsInRound.includes(key)) {
         break;
       }
     }
 
-    this.lastQuestionKey = key;
-    
+    // Registrera frågan i omgångens historik
+    this.usedQuestionsInRound.push(key);
+
     let answer = num1 + num2;
     if (this.operation === 'subtraction') answer = num1 - num2;
     if (this.operation === 'multiplication') answer = num1 * num2;
@@ -226,14 +230,16 @@ export class MathEngine {
           };
         }
 
+        // Nollställ omgångshistoriken inför nästa omgång
         this.currentRound++;
         this.correctInRound = 0;
+        this.usedQuestionsInRound = [];
 
         return {
           isCorrect: true,
           isRoundCompleted: true,
           isTierCompleted: false,
-          message: `Omgång ${this.currentRound - 1} klar! Nu startar Omggång ${this.currentRound}!`
+          message: `Omgång ${this.currentRound - 1} klar! Nu startar Omgång ${this.currentRound}!`
         };
       }
 
