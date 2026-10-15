@@ -52,7 +52,6 @@ export class HUD {
       };
     }
 
-    // Stäng inställningar med Escape
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && this.settingsModal && !this.settingsModal.classList.contains('hidden')) {
         this.settingsModal.classList.add('hidden');
@@ -88,7 +87,7 @@ export class HUD {
             localStorage.removeItem(key);
           }
         });
-        this.menuManager.updateTierButtons();
+        this.updateTierButtons();
         const msg = document.getElementById('reset-confirm-msg');
         if (msg) msg.classList.remove('hidden');
       };
@@ -111,13 +110,30 @@ export class HUD {
     }
   }
 
+  // DELEGATMETODER (för bakåtkompatibilitet med main.js)
+  updateTierButtons() {
+    if (this.menuManager) {
+      this.menuManager.updateTierButtons();
+    }
+  }
+
+  setupSubcategoryMenu(operationKey, titleText, subcatList) {
+    if (this.menuManager) {
+      this.menuManager.setupSubcategoryMenu(operationKey, titleText, subcatList);
+    }
+  }
+
   showStartScreen() {
-    this.menuManager.showStartScreen();
-    this.keypad.unlockInput();
+    if (this.menuManager) {
+      this.menuManager.showStartScreen();
+    }
+    this.unlockInput();
   }
 
   showGameScreen() {
-    this.menuManager.showGameScreen();
+    if (this.menuManager) {
+      this.menuManager.showGameScreen();
+    }
   }
 
   updateTopBar(operation, category, tier, round, percentage) {
@@ -133,7 +149,7 @@ export class HUD {
     if (operation === 'multiplication') symbol = '×';
 
     if (this.levelIndicator) {
-      this.levelIndicator.innerText = `${catLabels[category]} (${symbol}): ${tierNames[tier]}`;
+      this.levelIndicator.innerText = `${catLabels[category] || category} (${symbol}): ${tierNames[tier] || tier}`;
     }
     if (this.roundIndicator) {
       this.roundIndicator.innerText = `Omgång ${round}/3`;
@@ -149,8 +165,10 @@ export class HUD {
   displayQuestion(question) {
     if (!question) return;
 
-    this.helpModal.setCurrentQuestion(question);
-    this.keypad.unlockInput();
+    if (this.helpModal) {
+      this.helpModal.setCurrentQuestion(question);
+    }
+    this.unlockInput();
 
     if (this.questionElement) {
       if (question.isTextProblem) {
@@ -166,12 +184,16 @@ export class HUD {
       }
     }
 
-    this.keypad.clearInput();
+    if (this.keypad) {
+      this.keypad.clearInput();
+    }
     this.clearFeedback();
   }
 
   unlockInput() {
-    this.keypad.unlockInput();
+    if (this.keypad) {
+      this.keypad.unlockInput();
+    }
   }
 
   showFeedback(isCorrect, message) {

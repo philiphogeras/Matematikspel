@@ -31,7 +31,6 @@ export class HelpModal {
       };
     }
 
-    // Stäng med Escape-tangenten
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && this.helpModal && !this.helpModal.classList.contains('hidden')) {
         this.helpModal.classList.add('hidden');

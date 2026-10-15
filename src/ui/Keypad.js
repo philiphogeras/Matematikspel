@@ -133,7 +133,9 @@ export class Keypad {
   submitAnswer() {
     if (this.currentInput === '' || this.isWaiting) return;
     this.isWaiting = true;
-    this.onSubmitAnswer(this.currentInput);
+    if (this.onSubmitAnswer) {
+      this.onSubmitAnswer(this.currentInput);
+    }
   }
 
   unlockInput() {

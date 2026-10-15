@@ -23,63 +23,83 @@ export class MenuManager {
   }
 
   initEventListeners() {
-    // Huvudmeny-knappar
-    document.getElementById('btn-category-addition').onclick = () => {
-      this.setupSubcategoryMenu('addition', 'Addition (+)', [
-        { label: 'Ental', key: 'ental' },
-        { label: 'Tiotal', key: 'tiotal' },
-        { label: 'Hundratal', key: 'hundratal' },
-        { label: 'Problemlösning', key: 'problemlosning' }
-      ]);
-    };
+    const btnAdd = document.getElementById('btn-category-addition');
+    if (btnAdd) {
+      btnAdd.onclick = () => {
+        this.setupSubcategoryMenu('addition', 'Addition (+)', [
+          { label: 'Ental', key: 'ental' },
+          { label: 'Tiotal', key: 'tiotal' },
+          { label: 'Hundratal', key: 'hundratal' },
+          { label: 'Problemlösning', key: 'problemlosning' }
+        ]);
+      };
+    }
 
-    document.getElementById('btn-category-subtraction').onclick = () => {
-      this.setupSubcategoryMenu('subtraction', 'Subtraktion (–)', [
-        { label: 'Ental', key: 'ental' },
-        { label: 'Tiotal', key: 'tiotal' },
-        { label: 'Hundratal', key: 'hundratal' },
-        { label: 'Problemlösning', key: 'problemlosning' }
-      ]);
-    };
+    const btnSub = document.getElementById('btn-category-subtraction');
+    if (btnSub) {
+      btnSub.onclick = () => {
+        this.setupSubcategoryMenu('subtraction', 'Subtraktion (–)', [
+          { label: 'Ental', key: 'ental' },
+          { label: 'Tiotal', key: 'tiotal' },
+          { label: 'Hundratal', key: 'hundratal' },
+          { label: 'Problemlösning', key: 'problemlosning' }
+        ]);
+      };
+    }
 
-    document.getElementById('btn-category-multiplication').onclick = () => {
-      this.setupSubcategoryMenu('multiplication', 'Multiplikation (×)', [
-        { label: '2, 5 & 10:an', key: 'tabell_2_5_10' },
-        { label: '3, 4 & 6:an', key: 'tabell_3_4_6' },
-        { label: '7, 8 & 9:an', key: 'tabell_7_8_9' },
-        { label: 'Problemlösning', key: 'problemlosning' }
-      ]);
-    };
+    const btnMult = document.getElementById('btn-category-multiplication');
+    if (btnMult) {
+      btnMult.onclick = () => {
+        this.setupSubcategoryMenu('multiplication', 'Multiplikation (×)', [
+          { label: '2, 5 & 10:an', key: 'tabell_2_5_10' },
+          { label: '3, 4 & 6:an', key: 'tabell_3_4_6' },
+          { label: '7, 8 & 9:an', key: 'tabell_7_8_9' },
+          { label: 'Problemlösning', key: 'problemlosning' }
+        ]);
+      };
+    }
 
-    // Tillbaka-knapp från nivåmeny
-    document.getElementById('btn-back-to-subcats').onclick = () => {
-      this.menuTiers.classList.add('hidden');
-      this.menuSubcats.classList.remove('hidden');
-    };
+    const btnBackSubcats = document.getElementById('btn-back-to-subcats');
+    if (btnBackSubcats) {
+      btnBackSubcats.onclick = () => {
+        if (this.menuTiers) this.menuTiers.classList.add('hidden');
+        if (this.menuSubcats) this.menuSubcats.classList.remove('hidden');
+      };
+    }
 
-    // Nivåknappar (Brons, Silver, Guld)
     const tierBtns = document.querySelectorAll('.btn-tier');
     tierBtns.forEach((btn) => {
       btn.onclick = () => {
         if (btn.disabled) return;
         const tier = btn.getAttribute('data-tier');
         this.showGameScreen();
-        this.onStartGame(this.selectedOperation, this.selectedCategory, tier);
+        if (this.onStartGame) {
+          this.onStartGame(this.selectedOperation, this.selectedCategory, tier);
+        }
       };
     });
 
-    // Tillbaka till startmeny från spelskärmen
-    document.getElementById('btn-menu').onclick = () => {
-      this.showStartScreen();
-      this.onReturnToMenu();
-    };
+    const btnMenu = document.getElementById('btn-menu');
+    if (btnMenu) {
+      btnMenu.onclick = () => {
+        this.showStartScreen();
+        if (this.onReturnToMenu) {
+          this.onReturnToMenu();
+        }
+      };
+    }
   }
 
   setupSubcategoryMenu(operationKey, titleText, subcatList) {
     this.selectedOperation = operationKey;
-    this.subcatMenuTitle.innerText = titleText;
+    if (this.subcatMenuTitle) {
+      this.subcatMenuTitle.innerText = titleText;
+    }
 
+    if (!this.menuSubcats) return;
     const container = this.menuSubcats.querySelector('.menu-buttons');
+    if (!container) return;
+
     container.innerHTML = '';
 
     subcatList.forEach((item) => {
@@ -98,10 +118,12 @@ export class MenuManager {
         };
         const opLabels = { addition: 'Addition', subtraction: 'Subtraktion', multiplication: 'Multiplikation' };
         
-        this.tierMenuTitle.innerText = `${opLabels[this.selectedOperation]} – ${catLabels[this.selectedCategory]}`;
+        if (this.tierMenuTitle) {
+          this.tierMenuTitle.innerText = `${opLabels[this.selectedOperation]} – ${catLabels[this.selectedCategory]}`;
+        }
 
-        this.menuSubcats.classList.add('hidden');
-        this.menuTiers.classList.remove('hidden');
+        if (this.menuSubcats) this.menuSubcats.classList.add('hidden');
+        if (this.menuTiers) this.menuTiers.classList.remove('hidden');
         this.updateTierButtons();
       };
       container.appendChild(btn);
@@ -112,13 +134,13 @@ export class MenuManager {
     backBtn.className = 'btn-secondary';
     backBtn.innerText = 'Tillbaka';
     backBtn.onclick = () => {
-      this.menuSubcats.classList.add('hidden');
-      this.menuMain.classList.remove('hidden');
+      if (this.menuSubcats) this.menuSubcats.classList.add('hidden');
+      if (this.menuMain) this.menuMain.classList.remove('hidden');
     };
     container.appendChild(backBtn);
 
-    this.menuMain.classList.add('hidden');
-    this.menuSubcats.classList.remove('hidden');
+    if (this.menuMain) this.menuMain.classList.add('hidden');
+    if (this.menuSubcats) this.menuSubcats.classList.remove('hidden');
   }
 
   updateTierButtons() {
@@ -159,15 +181,15 @@ export class MenuManager {
   }
 
   showStartScreen() {
-    this.startScreen.classList.remove('hidden');
-    this.gameScreen.classList.add('hidden');
-    this.menuMain.classList.remove('hidden');
-    this.menuSubcats.classList.add('hidden');
-    this.menuTiers.classList.add('hidden');
+    if (this.startScreen) this.startScreen.classList.remove('hidden');
+    if (this.gameScreen) this.gameScreen.classList.add('hidden');
+    if (this.menuMain) this.menuMain.classList.remove('hidden');
+    if (this.menuSubcats) this.menuSubcats.classList.add('hidden');
+    if (this.menuTiers) this.menuTiers.classList.add('hidden');
   }
 
   showGameScreen() {
-    this.startScreen.classList.add('hidden');
-    this.gameScreen.classList.remove('hidden');
+    if (this.startScreen) this.startScreen.classList.add('hidden');
+    if (this.gameScreen) this.gameScreen.classList.remove('hidden');
   }
 }
