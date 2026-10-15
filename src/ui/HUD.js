@@ -1,6 +1,8 @@
+import { Sketchpad } from './Sketchpad.js';
+
 /**
  * HUD.js
- * Hanterar gränssnitt, menyer, hjälp, tangentbordsinmatning och problemlösning.
+ * Hanterar gränssnitt, menyer, hjälp, tangentbordsinmatning och skissruta.
  */
 export class HUD {
   constructor(onAnswerSubmit, onStartGame, onReturnToMenu, soundCallbacks) {
@@ -31,9 +33,15 @@ export class HUD {
     this.feedbackElement = document.getElementById('feedback-message');
     this.progressBar = document.getElementById('progress-bar');
 
+    this.sketchpadPanel = document.getElementById('sketchpad-panel');
+    this.btnSketch = document.getElementById('btn-sketch');
+
     this.currentInput = '';
     this.currentQuestion = null;
     this.isWaiting = false;
+
+    // Initiera skissrutan
+    this.sketchpad = new Sketchpad('sketchCanvas', 'btn-clear-sketch');
 
     this.initEventListeners();
     this.initKeypad();
@@ -98,6 +106,20 @@ export class HUD {
         e.target.blur();
       }
     });
+
+    // Växla skissruta on/off
+    this.btnSketch.onclick = () => {
+      const isHidden = this.sketchpadPanel.classList.contains('hidden');
+      if (isHidden) {
+        this.sketchpadPanel.classList.remove('hidden');
+        this.btnSketch.classList.add('btn-top-active');
+        // Anpassa rit-ytan till nya panelstorleken
+        setTimeout(() => this.sketchpad.resize(), 50);
+      } else {
+        this.sketchpadPanel.classList.add('hidden');
+        this.btnSketch.classList.remove('btn-top-active');
+      }
+    };
 
     document.getElementById('btn-settings').onclick = () => {
       document.getElementById('reset-confirm-msg').classList.add('hidden');
@@ -225,7 +247,6 @@ export class HUD {
       container.appendChild(btn);
     });
 
-    // Tillbaka-knappen skapas dynamiskt här och får sin klick-händelse
     const backBtn = document.createElement('button');
     backBtn.id = 'btn-back-to-main';
     backBtn.className = 'btn-secondary';
@@ -427,7 +448,7 @@ export class HUD {
       this.questionElement.style.maxWidth = '750px';
     } else {
       this.questionElement.innerText = `${question.num1} ${question.operator} ${question.num2} = ?`;
-      this.questionElement.style.fontSize = '3.4rem';
+      this.questionElement.style.fontSize = '3.2rem';
       this.questionElement.style.lineHeight = 'normal';
       this.questionElement.style.maxWidth = 'none';
     }
