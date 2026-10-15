@@ -59,6 +59,18 @@ export class MenuManager {
       };
     }
 
+    const btnDiv = document.getElementById('btn-category-division');
+    if (btnDiv) {
+      btnDiv.onclick = () => {
+        this.setupSubcategoryMenu('division', 'Division (÷)', [
+          { label: '2, 5 & 10:an', key: 'tabell_2_5_10' },
+          { label: '3, 4 & 6:an', key: 'tabell_3_4_6' },
+          { label: '7, 8 & 9:an', key: 'tabell_7_8_9' },
+          { label: 'Problemlösning', key: 'problemlosning' }
+        ]);
+      };
+    }
+
     const btnBackSubcats = document.getElementById('btn-back-to-subcats');
     if (btnBackSubcats) {
       btnBackSubcats.onclick = () => {
@@ -116,7 +128,12 @@ export class MenuManager {
           tabell_2_5_10: '2, 5 & 10:an', tabell_3_4_6: '3, 4 & 6:an', tabell_7_8_9: '7, 8 & 9:an',
           problemlosning: 'Problemlösning'
         };
-        const opLabels = { addition: 'Addition', subtraction: 'Subtraktion', multiplication: 'Multiplikation' };
+        const opLabels = { 
+          addition: 'Addition', 
+          subtraction: 'Subtraktion', 
+          multiplication: 'Multiplikation',
+          division: 'Division'
+        };
         
         if (this.tierMenuTitle) {
           this.tierMenuTitle.innerText = `${opLabels[this.selectedOperation]} – ${catLabels[this.selectedCategory]}`;

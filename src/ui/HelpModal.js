@@ -1,6 +1,6 @@
 /**
  * HelpModal.js
- * Hanterar hjälpfönstret med färgkodad uppställning och upprepad addition.
+ * Hanterar hjälpfönstret med färgkodad uppställning, upprepad addition och baklänges multiplikation.
  */
 export class HelpModal {
   constructor() {
@@ -48,7 +48,26 @@ export class HelpModal {
     const { num1, num2, operator } = this.currentQuestion;
     const titleElem = document.getElementById('help-modal-title');
 
-    if (operator === '×') {
+    if (operator === '÷') {
+      if (titleElem) titleElem.innerText = 'Hjälp med division';
+
+      const setupContainer = document.getElementById('vertical-setup');
+      if (setupContainer) {
+        setupContainer.innerHTML = `
+          <div class="repeated-addition-box">? × ${num2} = ${num1}</div>
+        `;
+      }
+
+      const instructionsContainer = document.getElementById('help-instructions');
+      if (instructionsContainer) {
+        instructionsContainer.innerHTML = `
+          <p><strong>Tänk multiplikation baklänges:</strong></p>
+          <p style="margin-top: 6px;"><strong>${num1} ÷ ${num2}</strong> betyder: <em>"Hur många gånger får <strong>${num2}</strong> plats i <strong>${num1}</strong>?"</em></p>
+          <p style="margin-top: 6px;">Vilket tal ska du multiplicera med <strong>${num2}</strong> för att få <strong>${num1}</strong>?</p>
+        `;
+      }
+
+    } else if (operator === '×') {
       if (titleElem) titleElem.innerText = 'Hjälp med multiplikation';
 
       const count = num1;

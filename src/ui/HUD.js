@@ -12,20 +12,17 @@ export class HUD {
     this.soundCallbacks = soundCallbacks || {};
     this.isMuted = false;
 
-    // Skapa undermoduler
     this.menuManager = new MenuManager(onStartGame, onReturnToMenu);
     this.keypad = new Keypad('input-area', onAnswerSubmit);
     this.helpModal = new HelpModal();
     this.sketchpad = new Sketchpad('sketchCanvas', 'btn-clear-sketch');
 
-    // UI-element för spelskärmen
     this.levelIndicator = document.getElementById('level-indicator');
     this.roundIndicator = document.getElementById('round-indicator');
     this.questionElement = document.getElementById('question-box');
     this.feedbackElement = document.getElementById('feedback-message');
     this.progressBar = document.getElementById('progress-bar');
 
-    // Inställningar & Skissknapp
     this.settingsModal = document.getElementById('settings-modal');
     this.sketchpadPanel = document.getElementById('sketchpad-panel');
     this.btnSketch = document.getElementById('btn-sketch');
@@ -110,7 +107,6 @@ export class HUD {
     }
   }
 
-  // DELEGATMETODER (för bakåtkompatibilitet med main.js)
   updateTierButtons() {
     if (this.menuManager) {
       this.menuManager.updateTierButtons();
@@ -147,6 +143,7 @@ export class HUD {
     let symbol = '+';
     if (operation === 'subtraction') symbol = '–';
     if (operation === 'multiplication') symbol = '×';
+    if (operation === 'division') symbol = '÷';
 
     if (this.levelIndicator) {
       this.levelIndicator.innerText = `${catLabels[category] || category} (${symbol}): ${tierNames[tier] || tier}`;

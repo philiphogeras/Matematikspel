@@ -65,7 +65,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 20px;
+  gap: 16px;
   width: 100%;
   height: 100%;
 }
@@ -129,14 +129,14 @@ body {
 .menu-buttons {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   width: 420px;
 }
 
 .btn-primary, .btn-subcat {
   font-size: 1.45rem;
   font-weight: bold;
-  padding: 18px 24px;
+  padding: 16px 24px;
   border: none;
   border-radius: 14px;
   cursor: pointer;
@@ -159,6 +159,12 @@ body {
   background-color: #10b981;
   color: #ffffff;
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+.btn-div {
+  background-color: #f59e0b;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
 }
 
 .btn-subcat {
@@ -275,7 +281,7 @@ body {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding-right: 120px; /* Plats för båda topp-knapparna */
+  padding-right: 120px;
 }
 
 #level-indicator, #round-indicator {
@@ -311,7 +317,7 @@ body {
   transition: width 0.3s ease-in-out, background-color 0.3s ease;
 }
 
-/* SPELMOMENT LAYOUT (VÄNSTER + HÖGER SKISSRUTA) */
+/* SPELMOMENT LAYOUT */
 #game-body {
   display: flex;
   width: 100%;
@@ -329,7 +335,7 @@ body {
   justify-content: space-between;
 }
 
-/* FÖRMINSKAD OCH KOMPAKT KALKYLATOR */
+/* KALKYLATOR STYLING */
 .question-wrapper {
   display: flex;
   flex-direction: column;
@@ -386,7 +392,7 @@ body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
-  width: 230px; /* Något mer kompakt */
+  width: 230px;
 }
 
 .keypad-btn {
@@ -449,7 +455,7 @@ body {
   flex: 1;
   width: 100%;
   height: 100%;
-  touch-action: none; /* Förhindrar skärmscroll under ritning på pekskärm */
+  touch-action: none;
   background-color: #fcfcfc;
   cursor: crosshair;
 }

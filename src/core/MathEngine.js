@@ -1,9 +1,13 @@
 import { AdditionEngine } from './generators/AdditionEngine.js';
 import { SubtractionEngine } from './generators/SubtractionEngine.js';
 import { MultiplicationEngine } from './generators/MultiplicationEngine.js';
-import { DivisionEngine } from './generators/DivisionEngine.js'; // <-- NY IMPORTS
+import { DivisionEngine } from './generators/DivisionEngine.js';
 import { WORD_PROBLEMS } from '../data/wordProblems.js';
 
+/**
+ * MathEngine.js
+ * Huvudmotor som styr spelsessioner, omgångar samt anropar rätt delmotor för frågor.
+ */
 export class MathEngine {
   constructor() {
     this.operation = 'addition';
@@ -84,7 +88,7 @@ export class MathEngine {
         generatedData = SubtractionEngine.generate(this.category, this.tier);
       } else if (this.operation === 'multiplication') {
         generatedData = MultiplicationEngine.generate(this.category, this.tier);
-      } else if (this.operation === 'division') { // <-- NY DIVISION-GENERATION
+      } else if (this.operation === 'division') {
         generatedData = DivisionEngine.generate(this.category, this.tier);
       }
 
@@ -99,7 +103,7 @@ export class MathEngine {
     let answer = generatedData.num1 + generatedData.num2;
     if (this.operation === 'subtraction') answer = generatedData.num1 - generatedData.num2;
     if (this.operation === 'multiplication') answer = generatedData.num1 * generatedData.num2;
-    if (this.operation === 'division') answer = generatedData.num1 / generatedData.num2; // <-- NY SVARENS-KONTROLL
+    if (this.operation === 'division') answer = generatedData.num1 / generatedData.num2;
 
     this.currentQuestion = {
       isTextProblem: false,
@@ -137,7 +141,7 @@ export class MathEngine {
           isCorrect: true,
           isRoundCompleted: true,
           isTierCompleted: false,
-          message: `Omgång ${this.currentRound - 1} klar! Nu startar Omggång ${this.currentRound}!`
+          message: `Omgång ${this.currentRound - 1} klar! Nu startar Omgång ${this.currentRound}!`
         };
       }
 
