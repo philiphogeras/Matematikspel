@@ -137,18 +137,25 @@
         </div>
       </div>
 
-      <!-- HJÄLPMODAL -->
+      <!-- HJÄLPMODAL MED SIDBLÄDDRING -->
       <div id="help-modal" class="modal-overlay hidden">
         <div class="modal-content help-modal-content">
-          <h2 id="help-modal-title" class="modal-title">Hjälp med uträkning</h2>
+          
+          <div class="help-modal-header">
+            <button id="btn-help-prev" class="btn-help-nav" aria-label="Föregående sida">←</button>
+            <h2 id="help-modal-title" class="modal-title">Hjälp med uträkning</h2>
+            <button id="btn-help-next" class="btn-help-nav" aria-label="Nästa sida">→</button>
+          </div>
           
           <div id="vertical-setup" class="vertical-setup"></div>
 
           <div id="help-instructions" class="help-instructions"></div>
 
-          <div class="modal-actions">
-            <button id="btn-close-help" class="btn-primary btn-full">Jag förstår</button>
+          <div class="help-modal-footer">
+            <span id="help-page-indicator" class="help-page-indicator">Sida 1 av 2</span>
+            <button id="btn-close-help" class="btn-primary">Jag förstår</button>
           </div>
+
         </div>
       </div>
 
