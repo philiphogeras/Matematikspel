@@ -1,12 +1,12 @@
 /**
  * SpeechManager.js
  * Hanterar text-till-tal (talsyntes) via webbläsarens inbyggda Web Speech API.
- * Innehåller anpassade uttal för matematiksymboler (+, -, ×, ÷).
  */
 export class SpeechManager {
   constructor() {
     this.synth = window.speechSynthesis;
-    this.isEnabled = localStorage.getItem('tts_enabled') !== 'false'; // På som standard
+    const savedSetting = localStorage.getItem('tts_enabled');
+    this.isEnabled = savedSetting === null ? true : savedSetting === 'true';
     this.voice = null;
 
     this.initVoice();
@@ -16,9 +16,12 @@ export class SpeechManager {
     if (!this.synth) return;
     
     const loadVoices = () => {
-      const voices = this.synth.getVoices();
-      // Sök i första hand efter en svensk röst (sv-SE)
-      this.voice = voices.find(v => v.lang && v.lang.startsWith('sv')) || null;
+      try {
+        const voices = this.synth.getVoices();
+        this.voice = voices.find(v => v.lang && v.lang.startsWith('sv')) || null;
+      } catch (e) {
+        console.warn('Röster kunde inte laddas:', e);
+      }
     };
 
     loadVoices();
@@ -28,24 +31,36 @@ export class SpeechManager {
   }
 
   speak(text) {
-    if (!this.synth || !this.isEnabled || !text) return;
-
-    // Stoppa eventuell pågående uppläsning så att röster inte krockar
-    this.cancel();
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'sv-SE';
-    if (this.voice) {
-      utterance.voice = this.voice;
+    if (!this.synth || !this.isEnabled || !text) {
+      this.cancel();
+      return;
     }
-    utterance.rate = 0.9; // Lite lugnare tempo för anpassat gymnasium
 
-    this.synth.speak(utterance);
+    try {
+      this.cancel();
+
+      if (this.synth.paused) {
+        this.synth.resume();
+      }
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'sv-SE';
+      if (this.voice) {
+        utterance.voice = this.voice;
+      }
+      utterance.rate = 0.9; // Lugnt och tydligt tempo
+
+      this.synth.speak(utterance);
+    } catch (e) {
+      console.error('Talsyntesfel:', e);
+    }
   }
 
   cancel() {
     if (this.synth) {
-      this.synth.cancel();
+      try {
+        this.synth.cancel();
+      } catch (e) {}
     }
   }
 

@@ -38,6 +38,7 @@ export class HUD {
     this.initSettingsEvents();
     this.initSketchpadEvents();
     this.initSpeechEvents();
+    this.updateSpeakerButtonVisibility();
   }
 
   initSettingsEvents() {
@@ -87,16 +88,12 @@ export class HUD {
 
     const ttsBtn = document.getElementById('btn-toggle-tts');
     if (ttsBtn) {
-      // Sätt inledande text baserat på sparad inställning
-      ttsBtn.innerText = this.speechManager.isEnabled 
-        ? 'Uppläsning (Text-till-tal): På' 
-        : 'Uppläsning (Text-till-tal): Av';
+      this.updateTTSButtonText(ttsBtn);
 
       ttsBtn.onclick = () => {
-        const isEnabled = this.speechManager.toggleEnabled();
-        ttsBtn.innerText = isEnabled 
-          ? 'Uppläsning (Text-till-tal): På' 
-          : 'Uppläsning (Text-till-tal): Av';
+        this.speechManager.toggleEnabled();
+        this.updateTTSButtonText(ttsBtn);
+        this.updateSpeakerButtonVisibility();
       };
     }
 
@@ -112,6 +109,23 @@ export class HUD {
         const msg = document.getElementById('reset-confirm-msg');
         if (msg) msg.classList.remove('hidden');
       };
+    }
+  }
+
+  updateTTSButtonText(btn) {
+    if (!btn) return;
+    btn.innerText = this.speechManager.isEnabled 
+      ? 'Uppläsning (Text-till-tal): På' 
+      : 'Uppläsning (Text-till-tal): Av';
+  }
+
+  updateSpeakerButtonVisibility() {
+    if (this.btnReadAloud) {
+      if (this.speechManager.isEnabled) {
+        this.btnReadAloud.classList.remove('hidden');
+      } else {
+        this.btnReadAloud.classList.add('hidden');
+      }
     }
   }
 
@@ -134,7 +148,7 @@ export class HUD {
   initSpeechEvents() {
     if (this.btnReadAloud) {
       this.btnReadAloud.onclick = () => {
-        if (this.currentQuestion) {
+        if (this.currentQuestion && this.speechManager.isEnabled) {
           const textToRead = this.speechManager.formatQuestionForSpeech(this.currentQuestion);
           this.speechManager.speak(textToRead);
         }
@@ -221,10 +235,12 @@ export class HUD {
       }
     }
 
-    // Automatisk uppläsning om funktionen är aktiverad
+    // Automatisk uppläsning endast om aktiverad
     if (this.speechManager && this.speechManager.isEnabled) {
       const textToRead = this.speechManager.formatQuestionForSpeech(question);
       this.speechManager.speak(textToRead);
+    } else if (this.speechManager) {
+      this.speechManager.cancel();
     }
 
     if (this.keypad) {

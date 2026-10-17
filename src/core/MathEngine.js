@@ -49,21 +49,33 @@ export class MathEngine {
   }
 
   generateQuestion() {
+    // 1. PROBLEMLÖSNING (Anpassad efter nivå: brons, silver, guld)
     if (this.category === 'problemlosning') {
-      const problemList = WORD_PROBLEMS[this.operation] || WORD_PROBLEMS.addition;
+      const opProblems = WORD_PROBLEMS[this.operation] || WORD_PROBLEMS.addition;
+      const problemList = (opProblems && opProblems[this.tier]) ? opProblems[this.tier] : (opProblems.brons || []);
+
       let selectedProblem = null;
 
-      for (let attempt = 0; attempt < 30; attempt++) {
-        const randomIndex = this.rand(0, problemList.length - 1);
-        if (!this.usedQuestionsInRound.includes(randomIndex)) {
-          this.usedQuestionsInRound.push(randomIndex);
-          selectedProblem = problemList[randomIndex]();
-          break;
+      if (problemList.length > 0) {
+        for (let attempt = 0; attempt < 30; attempt++) {
+          const randomIndex = this.rand(0, problemList.length - 1);
+          if (!this.usedQuestionsInRound.includes(randomIndex)) {
+            this.usedQuestionsInRound.push(randomIndex);
+            selectedProblem = problemList[randomIndex]();
+            break;
+          }
+        }
+
+        if (!selectedProblem) {
+          selectedProblem = problemList[0]();
         }
       }
 
       if (!selectedProblem) {
-        selectedProblem = problemList[0]();
+        selectedProblem = {
+          text: 'Maja har 2 äpplen och får 3 till. Hur många äpplen har Maja?',
+          num1: 2, num2: 3, operator: '+', answer: 5
+        };
       }
 
       this.currentQuestion = {
@@ -72,12 +84,16 @@ export class MathEngine {
         num1: selectedProblem.num1,
         num2: selectedProblem.num2,
         operator: selectedProblem.operator,
-        answer: selectedProblem.answer
+        answer: selectedProblem.answer,
+        isMultiStep: selectedProblem.isMultiStep || false,
+        step1: selectedProblem.step1 || '',
+        step2: selectedProblem.step2 || ''
       };
 
       return this.currentQuestion;
     }
 
+    // 2. STANDARD RÄKNEFRÅGOR (via undermoduler)
     let generatedData = null;
     let key = '';
 
