@@ -2,33 +2,42 @@ import { MenuManager } from './MenuManager.js';
 import { Keypad } from './Keypad.js';
 import { HelpModal } from './HelpModal.js';
 import { Sketchpad } from './Sketchpad.js';
+import { SpeechManager } from '../audio/SpeechManager.js';
 
 /**
  * HUD.js
- * Huvudkoordinator för gränssnittet. Delegerar till MenuManager, Keypad, HelpModal och Sketchpad.
+ * Huvudkoordinator för gränssnittet. Delegerar till undermoduler samt hanterar talsyntes.
  */
 export class HUD {
   constructor(onAnswerSubmit, onStartGame, onReturnToMenu, soundCallbacks) {
     this.soundCallbacks = soundCallbacks || {};
     this.isMuted = false;
 
+    // Skapa undermoduler
     this.menuManager = new MenuManager(onStartGame, onReturnToMenu);
     this.keypad = new Keypad('input-area', onAnswerSubmit);
     this.helpModal = new HelpModal();
     this.sketchpad = new Sketchpad('sketchCanvas', 'btn-clear-sketch');
+    this.speechManager = new SpeechManager();
 
+    // UI-element för spelskärmen
     this.levelIndicator = document.getElementById('level-indicator');
     this.roundIndicator = document.getElementById('round-indicator');
     this.questionElement = document.getElementById('question-box');
     this.feedbackElement = document.getElementById('feedback-message');
     this.progressBar = document.getElementById('progress-bar');
 
+    // Inställningar & Skissknapp & Högtalare
     this.settingsModal = document.getElementById('settings-modal');
     this.sketchpadPanel = document.getElementById('sketchpad-panel');
     this.btnSketch = document.getElementById('btn-sketch');
+    this.btnReadAloud = document.getElementById('btn-read-aloud');
+
+    this.currentQuestion = null;
 
     this.initSettingsEvents();
     this.initSketchpadEvents();
+    this.initSpeechEvents();
   }
 
   initSettingsEvents() {
@@ -69,10 +78,25 @@ export class HUD {
     if (muteBtn) {
       muteBtn.onclick = () => {
         this.isMuted = !this.isMuted;
-        muteBtn.innerText = this.isMuted ? 'Ljud: Ljudlöst' : 'Ljud: På';
+        muteBtn.innerText = this.isMuted ? 'Ljudeffekter: Av' : 'Ljudeffekter: På';
         if (this.soundCallbacks.onMuteToggle) {
           this.soundCallbacks.onMuteToggle(this.isMuted);
         }
+      };
+    }
+
+    const ttsBtn = document.getElementById('btn-toggle-tts');
+    if (ttsBtn) {
+      // Sätt inledande text baserat på sparad inställning
+      ttsBtn.innerText = this.speechManager.isEnabled 
+        ? 'Uppläsning (Text-till-tal): På' 
+        : 'Uppläsning (Text-till-tal): Av';
+
+      ttsBtn.onclick = () => {
+        const isEnabled = this.speechManager.toggleEnabled();
+        ttsBtn.innerText = isEnabled 
+          ? 'Uppläsning (Text-till-tal): På' 
+          : 'Uppläsning (Text-till-tal): Av';
       };
     }
 
@@ -107,6 +131,17 @@ export class HUD {
     }
   }
 
+  initSpeechEvents() {
+    if (this.btnReadAloud) {
+      this.btnReadAloud.onclick = () => {
+        if (this.currentQuestion) {
+          const textToRead = this.speechManager.formatQuestionForSpeech(this.currentQuestion);
+          this.speechManager.speak(textToRead);
+        }
+      };
+    }
+  }
+
   updateTierButtons() {
     if (this.menuManager) {
       this.menuManager.updateTierButtons();
@@ -120,6 +155,9 @@ export class HUD {
   }
 
   showStartScreen() {
+    if (this.speechManager) {
+      this.speechManager.cancel();
+    }
     if (this.menuManager) {
       this.menuManager.showStartScreen();
     }
@@ -162,6 +200,8 @@ export class HUD {
   displayQuestion(question) {
     if (!question) return;
 
+    this.currentQuestion = question;
+
     if (this.helpModal) {
       this.helpModal.setCurrentQuestion(question);
     }
@@ -172,13 +212,19 @@ export class HUD {
         this.questionElement.innerText = question.text;
         this.questionElement.style.fontSize = '1.35rem';
         this.questionElement.style.lineHeight = '1.5';
-        this.questionElement.style.maxWidth = '750px';
+        this.questionElement.style.maxWidth = '700px';
       } else {
         this.questionElement.innerText = `${question.num1} ${question.operator} ${question.num2} = ?`;
         this.questionElement.style.fontSize = '3.2rem';
         this.questionElement.style.lineHeight = 'normal';
         this.questionElement.style.maxWidth = 'none';
       }
+    }
+
+    // Automatisk uppläsning om funktionen är aktiverad
+    if (this.speechManager && this.speechManager.isEnabled) {
+      const textToRead = this.speechManager.formatQuestionForSpeech(question);
+      this.speechManager.speak(textToRead);
     }
 
     if (this.keypad) {

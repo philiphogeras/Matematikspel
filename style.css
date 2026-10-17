@@ -345,15 +345,41 @@ body {
   width: 100%;
 }
 
+.question-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 8px 20px;
+  border-radius: 18px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+}
+
 #question-box {
   font-size: 3.2rem;
   font-weight: bold;
   color: #1e293b;
   text-align: center;
-  background-color: rgba(255, 255, 255, 0.95);
-  padding: 12px 28px;
-  border-radius: 16px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+}
+
+.btn-speak-icon {
+  background-color: #f0f9ff;
+  color: #0284c7;
+  border: 2px solid #38bdf8;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.1s, background-color 0.1s;
+}
+
+.btn-speak-icon:active {
+  transform: scale(0.92);
+  background-color: #bae6fd;
 }
 
 .btn-help {
@@ -491,7 +517,7 @@ body {
 }
 
 .modal-divider { border: none; border-top: 1px solid #e2e8f0; margin: 6px 0; }
-.setting-hint { font-size: 0.95rem; color: #166534; text-align: center; margin-top: 4px; }
+.setting-hint { font-size: 0.95rem; color: #64748b; text-align: center; margin-top: 2px; }
 .modal-actions { margin-top: 8px; }
 
 /* UPPSTÄLLNING OCH UPPREPAD ADDITION */
