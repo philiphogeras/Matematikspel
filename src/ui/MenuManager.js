@@ -116,7 +116,7 @@ export class MenuManager {
     const btnMenu = document.getElementById('btn-menu');
     if (btnMenu) {
       btnMenu.onclick = () => {
-        this.showStartScreen();
+        this.showTierMenu();
         if (this.onReturnToMenu) {
           this.onReturnToMenu();
         }
@@ -226,6 +226,16 @@ export class MenuManager {
     if (this.menuOperations) this.menuOperations.classList.add('hidden');
     if (this.menuSubcats) this.menuSubcats.classList.add('hidden');
     if (this.menuTiers) this.menuTiers.classList.add('hidden');
+  }
+
+  showTierMenu() {
+    if (this.startScreen) this.startScreen.classList.remove('hidden');
+    if (this.gameScreen) this.gameScreen.classList.add('hidden');
+    if (this.menuMain) this.menuMain.classList.add('hidden');
+    if (this.menuOperations) this.menuOperations.classList.add('hidden');
+    if (this.menuSubcats) this.menuSubcats.classList.add('hidden');
+    if (this.menuTiers) this.menuTiers.classList.remove('hidden');
+    this.updateTierButtons();
   }
 
   showGameScreen() {

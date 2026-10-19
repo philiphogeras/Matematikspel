@@ -93,19 +93,19 @@ export class MathEngine {
       return this.currentQuestion;
     }
 
-    // 2. STANDARD RÄKNEFRÅGOR (via undermoduler)
+    // 2. STANDARD RÄKNEFRÅGOR (med omgångsprogression: 1, 2, 3)
     let generatedData = null;
     let key = '';
 
     for (let attempt = 0; attempt < 50; attempt++) {
       if (this.operation === 'addition') {
-        generatedData = AdditionEngine.generate(this.category, this.tier);
+        generatedData = AdditionEngine.generate(this.category, this.tier, this.currentRound);
       } else if (this.operation === 'subtraction') {
-        generatedData = SubtractionEngine.generate(this.category, this.tier);
+        generatedData = SubtractionEngine.generate(this.category, this.tier, this.currentRound);
       } else if (this.operation === 'multiplication') {
-        generatedData = MultiplicationEngine.generate(this.category, this.tier);
+        generatedData = MultiplicationEngine.generate(this.category, this.tier, this.currentRound);
       } else if (this.operation === 'division') {
-        generatedData = DivisionEngine.generate(this.category, this.tier);
+        generatedData = DivisionEngine.generate(this.category, this.tier, this.currentRound);
       }
 
       key = `${generatedData.num1}_${generatedData.operator}_${generatedData.num2}`;

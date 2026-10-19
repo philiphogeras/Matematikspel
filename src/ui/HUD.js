@@ -41,10 +41,6 @@ export class HUD {
     this.updateSpeakerButtonVisibility();
   }
 
-  /**
-   * Omvandlar ett tal till HTML med färglagda siffror baserat på positionssystemet.
-   * Ental = Blå, Tiotal = Röd, Hundratal = Grön.
-   */
   formatColoredNumber(num) {
     const str = num.toString();
     const len = str.length;
@@ -53,7 +49,7 @@ export class HUD {
     let html = '';
     for (let i = 0; i < len; i++) {
       const digit = str[i];
-      const posIndex = len - 1 - i; // 0 = ental, 1 = tiotal, 2 = hundratal
+      const posIndex = len - 1 - i;
       const cls = posClasses[posIndex] || 'digit-ental';
       html += `<span class="${cls}">${digit}</span>`;
     }
@@ -197,6 +193,16 @@ export class HUD {
     this.unlockInput();
   }
 
+  showTierMenu() {
+    if (this.speechManager) {
+      this.speechManager.cancel();
+    }
+    if (this.menuManager) {
+      this.menuManager.showTierMenu();
+    }
+    this.unlockInput();
+  }
+
   showGameScreen() {
     if (this.menuManager) {
       this.menuManager.showGameScreen();
@@ -257,7 +263,6 @@ export class HUD {
       }
     }
 
-    // Automatisk uppläsning endast om aktiverad
     if (this.speechManager && this.speechManager.isEnabled) {
       const textToRead = this.speechManager.formatQuestionForSpeech(question);
       this.speechManager.speak(textToRead);
