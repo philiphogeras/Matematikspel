@@ -281,6 +281,14 @@ export class HUD {
     }
   }
 
+  clearInputAndUnlock() {
+    if (this.keypad) {
+      this.keypad.clearInput();
+      this.keypad.unlockInput();
+    }
+    this.clearFeedback();
+  }
+
   showFeedback(isCorrect, message) {
     if (this.feedbackElement) {
       this.feedbackElement.innerText = message;

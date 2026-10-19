@@ -5,7 +5,7 @@ import { VisualRenderer } from './graphics/VisualRenderer.js';
 
 /**
  * main.js
- * Huvudövergripande applikationsinitiering. Helt fri från setTimeout för CSP-säkerhet.
+ * Huvudövergripande applikationsinitiering.
  */
 class Game {
   constructor() {
@@ -26,7 +26,7 @@ class Game {
     this.hud.showStartScreen();
   }
 
-  // Timer-fri fördröjning via requestAnimationFrame
+  // Timer-fri fördröjning via requestAnimationFrame (CSP-säker)
   delayCall(callback, ms) {
     const start = performance.now();
     const frame = (now) => {
@@ -101,8 +101,14 @@ class Game {
       }
 
     } else {
+      // FELAKTIGT SVAR:
       this.soundManager.playIncorrect();
       this.hud.showFeedback(false, result.message);
+
+      // Nollställ svaret och lås upp tangentbordet automatiskt efter 3 sekunder (3000 ms)
+      this.delayCall(() => {
+        this.hud.clearInputAndUnlock();
+      }, 3000);
     }
   }
 
