@@ -26,19 +26,6 @@ class Game {
     this.hud.showStartScreen();
   }
 
-  // Timer-fri fördröjning via requestAnimationFrame (CSP-säker)
-  delayCall(callback, ms) {
-    const start = performance.now();
-    const frame = (now) => {
-      if (now - start >= ms) {
-        callback();
-      } else {
-        requestAnimationFrame(frame);
-      }
-    };
-    requestAnimationFrame(frame);
-  }
-
   startNewGame(operation, category, tier) {
     this.mathEngine.reset(operation, category, tier);
     this.nextQuestion();
@@ -84,18 +71,18 @@ class Game {
           this.visualRenderer.triggerConfetti();
         }
 
-        this.delayCall(() => {
+        setTimeout(() => {
           this.hud.showTierMenu();
         }, 2200);
 
       } else if (result.isRoundCompleted) {
         this.soundManager.playFanfare();
-        this.delayCall(() => {
+        setTimeout(() => {
           this.nextQuestion();
         }, 1200);
 
       } else {
-        this.delayCall(() => {
+        setTimeout(() => {
           this.nextQuestion();
         }, 800);
       }
@@ -105,10 +92,8 @@ class Game {
       this.soundManager.playIncorrect();
       this.hud.showFeedback(false, result.message);
 
-      // Nollställ svaret och lås upp tangentbordet automatiskt efter 3 sekunder (3000 ms)
-      this.delayCall(() => {
-        this.hud.clearInputAndUnlock();
-      }, 3000);
+      // Lås upp tangenter direkt & schemalägg automatisk rensning efter 3 sekunder
+      this.hud.scheduleAutoClear(3000);
     }
   }
 

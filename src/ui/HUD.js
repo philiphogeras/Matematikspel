@@ -281,12 +281,12 @@ export class HUD {
     }
   }
 
-  clearInputAndUnlock() {
+  scheduleAutoClear(ms = 3000) {
     if (this.keypad) {
-      this.keypad.clearInput();
-      this.keypad.unlockInput();
+      this.keypad.scheduleAutoClear(ms, () => {
+        this.clearFeedback();
+      });
     }
-    this.clearFeedback();
   }
 
   showFeedback(isCorrect, message) {

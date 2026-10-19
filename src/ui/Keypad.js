@@ -8,6 +8,7 @@ export class Keypad {
     this.onSubmit = onSubmit;
     this.currentInput = '';
     this.isLocked = false;
+    this.autoClearTimer = null;
 
     this.render();
     this.initKeyboardEvents();
@@ -47,20 +48,44 @@ export class Keypad {
   }
 
   handleKeyPress(key) {
+    // Om det finns en aktiv timer som väntar på att rensa rutan, avbryt den direkt när nyckeln trycks
+    if (this.autoClearTimer) {
+      clearTimeout(this.autoClearTimer);
+      this.autoClearTimer = null;
+    }
+
+    // "Rensa" ska alltid fungera direkt
+    if (key === 'clear') {
+      this.clearInput();
+      this.isLocked = false;
+      return;
+    }
+
     if (this.isLocked) return;
 
-    if (key === 'clear') {
-      this.currentInput = '';
-    } else if (key === 'submit') {
+    if (key === 'submit') {
       if (this.currentInput !== '' && this.onSubmit) {
         this.isLocked = true;
         this.onSubmit(this.currentInput);
       }
     } else if (this.currentInput.length < 5) {
       this.currentInput += key;
+      this.updateDisplay();
     }
+  }
 
-    this.updateDisplay();
+  scheduleAutoClear(ms = 3000, onCleared) {
+    if (this.autoClearTimer) {
+      clearTimeout(this.autoClearTimer);
+    }
+    // Lås upp omedelbart så att "Rensa" eller nya siffertryck tas emot utan fördröjning
+    this.isLocked = false;
+
+    this.autoClearTimer = setTimeout(() => {
+      this.clearInput();
+      this.autoClearTimer = null;
+      if (onCleared) onCleared();
+    }, ms);
   }
 
   updateDisplay() {
@@ -70,6 +95,10 @@ export class Keypad {
   }
 
   clearInput() {
+    if (this.autoClearTimer) {
+      clearTimeout(this.autoClearTimer);
+      this.autoClearTimer = null;
+    }
     this.currentInput = '';
     this.updateDisplay();
   }
@@ -80,8 +109,6 @@ export class Keypad {
 
   initKeyboardEvents() {
     window.addEventListener('keydown', (e) => {
-      if (this.isLocked) return;
-
       if (e.key >= '0' && e.key <= '9') {
         this.handleKeyPress(e.key);
       } else if (e.key === 'Backspace') {
