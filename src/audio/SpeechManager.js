@@ -4,8 +4,13 @@
  */
 export class SpeechManager {
   constructor() {
-    this.synth = window.speechSynthesis;
-    const savedSetting = localStorage.getItem('tts_enabled');
+    this.synth = window.speechSynthesis || null;
+    let savedSetting = 'true';
+    try {
+      savedSetting = localStorage.getItem('tts_enabled');
+    } catch (e) {
+      console.warn('LocalStorage ej tillgängligt:', e);
+    }
     this.isEnabled = savedSetting === null ? true : savedSetting === 'true';
     this.voice = null;
 
@@ -18,7 +23,9 @@ export class SpeechManager {
     const loadVoices = () => {
       try {
         const voices = this.synth.getVoices();
-        this.voice = voices.find(v => v.lang && v.lang.startsWith('sv')) || null;
+        if (voices && voices.length > 0) {
+          this.voice = voices.find(v => v.lang && v.lang.startsWith('sv')) || null;
+        }
       } catch (e) {
         console.warn('Röster kunde inte laddas:', e);
       }
@@ -48,7 +55,7 @@ export class SpeechManager {
       if (this.voice) {
         utterance.voice = this.voice;
       }
-      utterance.rate = 0.9; // Lugnt och tydligt tempo
+      utterance.rate = 0.9;
 
       this.synth.speak(utterance);
     } catch (e) {
@@ -66,7 +73,9 @@ export class SpeechManager {
 
   toggleEnabled() {
     this.isEnabled = !this.isEnabled;
-    localStorage.setItem('tts_enabled', this.isEnabled ? 'true' : 'false');
+    try {
+      localStorage.setItem('tts_enabled', this.isEnabled ? 'true' : 'false');
+    } catch (e) {}
     if (!this.isEnabled) {
       this.cancel();
     }

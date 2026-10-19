@@ -24,113 +24,137 @@ export class MenuManager {
     this.initEventListeners();
   }
 
+  getItemSafe(key) {
+    try {
+      return localStorage.getItem(key);
+    } catch (e) {
+      return null;
+    }
+  }
+
   initEventListeners() {
     // Domänval: Räknekunskap (Aritmetik)
     const btnDomainArith = document.getElementById('btn-domain-arithmetic');
     if (btnDomainArith) {
-      btnDomainArith.onclick = (e) => {
-        e.stopPropagation();
-        if (this.menuMain) this.menuMain.classList.add('hidden');
-        if (this.menuOperations) this.menuOperations.classList.remove('hidden');
-      };
+      btnDomainArith.addEventListener('click', (e) => {
+        if (e) e.preventDefault();
+        this.showOperationsMenu();
+      });
     }
 
     // Tillbaka från räknesätt till områden
     const btnBackToDomains = document.getElementById('btn-back-to-domains');
     if (btnBackToDomains) {
-      btnBackToDomains.onclick = (e) => {
-        e.stopPropagation();
-        if (this.menuOperations) this.menuOperations.classList.add('hidden');
-        if (this.menuMain) this.menuMain.classList.remove('hidden');
-      };
+      btnBackToDomains.addEventListener('click', (e) => {
+        if (e) e.preventDefault();
+        this.showStartScreen();
+      });
     }
 
     // Räknesätt
     const btnAdd = document.getElementById('btn-category-addition');
     if (btnAdd) {
-      btnAdd.onclick = (e) => {
-        e.stopPropagation();
+      btnAdd.addEventListener('click', (e) => {
+        if (e) e.preventDefault();
         this.setupSubcategoryMenu('addition', 'Addition (+)', [
           { label: 'Ental', key: 'ental' },
           { label: 'Tiotal', key: 'tiotal' },
           { label: 'Hundratal', key: 'hundratal' },
           { label: 'Problemlösning', key: 'problemlosning' }
         ]);
-      };
+      });
     }
 
     const btnSub = document.getElementById('btn-category-subtraction');
     if (btnSub) {
-      btnSub.onclick = (e) => {
-        e.stopPropagation();
+      btnSub.addEventListener('click', (e) => {
+        if (e) e.preventDefault();
         this.setupSubcategoryMenu('subtraction', 'Subtraktion (–)', [
           { label: 'Ental', key: 'ental' },
           { label: 'Tiotal', key: 'tiotal' },
           { label: 'Hundratal', key: 'hundratal' },
           { label: 'Problemlösning', key: 'problemlosning' }
         ]);
-      };
+      });
     }
 
     const btnMult = document.getElementById('btn-category-multiplication');
     if (btnMult) {
-      btnMult.onclick = (e) => {
-        e.stopPropagation();
+      btnMult.addEventListener('click', (e) => {
+        if (e) e.preventDefault();
         this.setupSubcategoryMenu('multiplication', 'Multiplikation (×)', [
           { label: '2, 5 & 10:an', key: 'tabell_2_5_10' },
           { label: '3, 4 & 6:an', key: 'tabell_3_4_6' },
           { label: '7, 8 & 9:an', key: 'tabell_7_8_9' },
           { label: 'Problemlösning', key: 'problemlosning' }
         ]);
-      };
+      });
     }
 
     const btnDiv = document.getElementById('btn-category-division');
     if (btnDiv) {
-      btnDiv.onclick = (e) => {
-        e.stopPropagation();
+      btnDiv.addEventListener('click', (e) => {
+        if (e) e.preventDefault();
         this.setupSubcategoryMenu('division', 'Division (÷)', [
           { label: '2, 5 & 10:an', key: 'tabell_2_5_10' },
           { label: '3, 4 & 6:an', key: 'tabell_3_4_6' },
           { label: '7, 8 & 9:an', key: 'tabell_7_8_9' },
           { label: 'Problemlösning', key: 'problemlosning' }
         ]);
-      };
+      });
     }
 
     // Tillbaka från nivåmeny till delmoment
     const btnBackSubcats = document.getElementById('btn-back-to-subcats');
     if (btnBackSubcats) {
-      btnBackSubcats.onclick = (e) => {
-        e.stopPropagation();
+      btnBackSubcats.addEventListener('click', (e) => {
+        if (e) e.preventDefault();
         if (this.menuTiers) this.menuTiers.classList.add('hidden');
         if (this.menuSubcats) this.menuSubcats.classList.remove('hidden');
-      };
+      });
     }
 
     const tierBtns = document.querySelectorAll('.btn-tier');
     tierBtns.forEach((btn) => {
-      btn.onclick = (e) => {
-        e.stopPropagation();
+      btn.addEventListener('click', (e) => {
+        if (e) e.preventDefault();
         if (btn.disabled) return;
         const tier = btn.getAttribute('data-tier');
         this.showGameScreen();
         if (this.onStartGame) {
           this.onStartGame(this.selectedOperation, this.selectedCategory, tier);
         }
-      };
+      });
     });
 
     const btnMenu = document.getElementById('btn-menu');
     if (btnMenu) {
-      btnMenu.onclick = (e) => {
-        e.stopPropagation();
+      btnMenu.addEventListener('click', (e) => {
+        if (e) e.preventDefault();
         this.showTierMenu();
         if (this.onReturnToMenu) {
           this.onReturnToMenu();
         }
-      };
+      });
     }
+  }
+
+  showStartScreen() {
+    if (this.startScreen) this.startScreen.classList.remove('hidden');
+    if (this.gameScreen) this.gameScreen.classList.add('hidden');
+    if (this.menuMain) this.menuMain.classList.remove('hidden');
+    if (this.menuOperations) this.menuOperations.classList.add('hidden');
+    if (this.menuSubcats) this.menuSubcats.classList.add('hidden');
+    if (this.menuTiers) this.menuTiers.classList.add('hidden');
+  }
+
+  showOperationsMenu() {
+    if (this.startScreen) this.startScreen.classList.remove('hidden');
+    if (this.gameScreen) this.gameScreen.classList.add('hidden');
+    if (this.menuMain) this.menuMain.classList.add('hidden');
+    if (this.menuOperations) this.menuOperations.classList.remove('hidden');
+    if (this.menuSubcats) this.menuSubcats.classList.add('hidden');
+    if (this.menuTiers) this.menuTiers.classList.add('hidden');
   }
 
   setupSubcategoryMenu(operationKey, titleText, subcatList) {
@@ -152,8 +176,8 @@ export class MenuManager {
         btn.classList.add('btn-problem');
       }
       btn.innerText = item.label;
-      btn.onclick = (e) => {
-        e.stopPropagation();
+      btn.addEventListener('click', (e) => {
+        if (e) e.preventDefault();
         this.selectedCategory = item.key;
         const catLabels = {
           ental: 'Ental', tiotal: 'Tiotal', hundratal: 'Hundratal',
@@ -174,7 +198,7 @@ export class MenuManager {
         if (this.menuSubcats) this.menuSubcats.classList.add('hidden');
         if (this.menuTiers) this.menuTiers.classList.remove('hidden');
         this.updateTierButtons();
-      };
+      });
       container.appendChild(btn);
     });
 
@@ -182,11 +206,11 @@ export class MenuManager {
     backBtn.id = 'btn-back-to-ops';
     backBtn.className = 'btn-secondary';
     backBtn.innerText = 'Tillbaka';
-    backBtn.onclick = (e) => {
-      e.stopPropagation();
+    backBtn.addEventListener('click', (e) => {
+      if (e) e.preventDefault();
       if (this.menuSubcats) this.menuSubcats.classList.add('hidden');
       if (this.menuOperations) this.menuOperations.classList.remove('hidden');
-    };
+    });
     container.appendChild(backBtn);
 
     if (this.menuOperations) this.menuOperations.classList.add('hidden');
@@ -197,9 +221,9 @@ export class MenuManager {
     const op = this.selectedOperation;
     const cat = this.selectedCategory;
 
-    const isBronsDone = localStorage.getItem(`completed_${op}_${cat}_brons`) === 'true';
-    const isSilverDone = localStorage.getItem(`completed_${op}_${cat}_silver`) === 'true';
-    const isGuldDone = localStorage.getItem(`completed_${op}_${cat}_guld`) === 'true';
+    const isBronsDone = this.getItemSafe(`completed_${op}_${cat}_brons`) === 'true';
+    const isSilverDone = this.getItemSafe(`completed_${op}_${cat}_silver`) === 'true';
+    const isGuldDone = this.getItemSafe(`completed_${op}_${cat}_guld`) === 'true';
 
     this.setBtnState('btn-tier-brons', 'badge-brons', true, isBronsDone);
     this.setBtnState('btn-tier-silver', 'badge-silver', isBronsDone, isSilverDone);
@@ -228,15 +252,6 @@ export class MenuManager {
       badge.innerText = 'Låst';
       badge.className = 'tier-status';
     }
-  }
-
-  showStartScreen() {
-    if (this.startScreen) this.startScreen.classList.remove('hidden');
-    if (this.gameScreen) this.gameScreen.classList.add('hidden');
-    if (this.menuMain) this.menuMain.classList.remove('hidden');
-    if (this.menuOperations) this.menuOperations.classList.add('hidden');
-    if (this.menuSubcats) this.menuSubcats.classList.add('hidden');
-    if (this.menuTiers) this.menuTiers.classList.add('hidden');
   }
 
   showTierMenu() {

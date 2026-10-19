@@ -44,13 +44,15 @@ body {
   pointer-events: none;
 }
 
-/* Gör alla knappar och allt innehåll inuti knappar helt klickbart */
-#ui-overlay button, 
-#ui-overlay button *,
-#ui-overlay input,
-#ui-overlay canvas,
-#ui-overlay .menu-buttons,
-#ui-overlay .menu-buttons * {
+/* Alla interaktiva element och deras barn i UI-overlay får pointer-events: auto */
+.screen-panel,
+.screen-panel *,
+.modal-content,
+.modal-content *,
+.top-controls,
+.top-controls *,
+button,
+button * {
   pointer-events: auto;
 }
 
