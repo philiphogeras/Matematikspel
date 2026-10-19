@@ -8,6 +8,7 @@ export class Keypad {
     this.onSubmit = onSubmit;
     this.currentInput = '';
     this.isLocked = false;
+    this.clearOnNextInput = false;
     this.autoClearTimer = null;
 
     this.render();
@@ -48,21 +49,28 @@ export class Keypad {
   }
 
   handleKeyPress(key) {
-    // Om det finns en väntande automatisk rensning, avbryt den direkt när användaren trycker
+    // Avbryt väntande automatisk rensning om användaren trycker på någon knapp
     if (this.autoClearTimer) {
       clearTimeout(this.autoClearTimer);
       this.autoClearTimer = null;
     }
 
-    // Lås upp omedelbart vid knapptryck
-    this.isLocked = false;
-
+    // Knapp: "Rensa"
     if (key === 'clear') {
       this.clearInput();
       return;
     }
 
+    // Knapp: "OK" (submit)
     if (key === 'submit') {
+      if (this.isLocked) return;
+
+      // Om vi väntar på ett nytt svar efter felaktigt svar utan att en ny siffra slagits in, rensa rutan
+      if (this.clearOnNextInput) {
+        this.clearInput();
+        return;
+      }
+
       if (this.currentInput !== '' && this.onSubmit) {
         const inputToSend = this.currentInput;
         this.isLocked = true;
@@ -71,10 +79,20 @@ export class Keypad {
       return;
     }
 
-    // Siffertryck (0-9)
-    if (this.currentInput.length < 5) {
-      this.currentInput += key;
-      this.updateDisplay();
+    // Sifferknappar (0-9)
+    if (key >= '0' && key <= '9') {
+      // Om användaren nyss svarade fel, ersätt det gamla felet direkt med den nya siffran
+      if (this.clearOnNextInput) {
+        this.currentInput = '';
+        this.clearOnNextInput = false;
+      }
+
+      this.isLocked = false;
+
+      if (this.currentInput.length < 5) {
+        this.currentInput += key;
+        this.updateDisplay();
+      }
     }
   }
 
@@ -82,11 +100,11 @@ export class Keypad {
     if (this.autoClearTimer) {
       clearTimeout(this.autoClearTimer);
     }
-    this.isLocked = false; // Tillåt direkt inmatning eller klick på Rensa
+    this.isLocked = false;
+    this.clearOnNextInput = true;
 
     this.autoClearTimer = setTimeout(() => {
       this.clearInput();
-      this.autoClearTimer = null;
       if (onReset) onReset();
     }, ms);
   }
@@ -103,11 +121,14 @@ export class Keypad {
       this.autoClearTimer = null;
     }
     this.currentInput = '';
+    this.clearOnNextInput = false;
+    this.isLocked = false;
     this.updateDisplay();
   }
 
   unlockInput() {
     this.isLocked = false;
+    this.clearOnNextInput = false;
   }
 
   initKeyboardEvents() {
