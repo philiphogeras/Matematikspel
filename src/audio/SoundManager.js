@@ -1,36 +1,19 @@
 /**
  * SoundManager.js
- * Genererar ljudeffekter via Web Audio API med volymreglage och ljudlöst-läge.
+ * Syntetiserar ljudeffekter via Web Audio API helt utan externa filer eller setTimeout-strängar.
  */
 export class SoundManager {
   constructor() {
     this.ctx = null;
-    this.masterGain = null;
-    this.volume = 0.7; // Standardvolym 70%
+    this.volume = 0.7;
     this.isMuted = false;
-
-    const unlock = () => {
-      this.init();
-      if (this.ctx && this.ctx.state === 'running') {
-        window.removeEventListener('click', unlock);
-        window.removeEventListener('touchstart', unlock);
-        window.removeEventListener('keydown', unlock);
-      }
-    };
-
-    window.addEventListener('click', unlock);
-    window.addEventListener('touchstart', unlock);
-    window.addEventListener('keydown', unlock);
   }
 
-  init() {
+  initContext() {
     if (!this.ctx) {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       if (AudioContextClass) {
         this.ctx = new AudioContextClass();
-        this.masterGain = this.ctx.createGain();
-        this.updateMasterGain();
-        this.masterGain.connect(this.ctx.destination);
       }
     }
     if (this.ctx && this.ctx.state === 'suspended') {
@@ -38,98 +21,61 @@ export class SoundManager {
     }
   }
 
-  setVolume(normalizedValue) {
-    this.volume = Math.max(0, Math.min(1, normalizedValue));
-    this.updateMasterGain();
+  setVolume(vol) {
+    this.volume = Math.max(0, Math.min(1, vol));
   }
 
   setMuted(muted) {
-    this.isMuted = muted;
-    this.updateMasterGain();
+    this.isMuted = !!muted;
   }
 
-  updateMasterGain() {
-    if (!this.masterGain || !this.ctx) return;
-    const activeVolume = this.isMuted ? 0 : this.volume;
-    this.masterGain.gain.setValueAtTime(activeVolume, this.ctx.currentTime);
+  playTone(freq, type, duration, delay = 0) {
+    if (this.isMuted || this.volume <= 0) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    try {
+      const startTime = this.ctx.currentTime + delay;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, startTime);
+
+      gain.gain.setValueAtTime(this.volume * 0.3, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(startTime);
+      osc.stop(startTime + duration);
+    } catch (e) {
+      console.warn('Ljudspelningsfel:', e);
+    }
   }
 
   playCorrect() {
-    this.init();
-    if (!this.ctx || this.isMuted) return;
-
-    const now = this.ctx.currentTime;
-    const notes = [523.25, 659.25, 783.99];
-
-    notes.forEach((freq, index) => {
-      const startTime = now + index * 0.08;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, startTime);
-
-      gain.gain.setValueAtTime(0.2, startTime);
-      gain.gain.linearRampToValueAtTime(0.001, startTime + 0.25);
-
-      osc.connect(gain);
-      gain.connect(this.masterGain);
-
-      osc.start(startTime);
-      osc.stop(startTime + 0.25);
-    });
+    this.playTone(523.25, 'sine', 0.15, 0);     // C5
+    this.playTone(659.25, 'sine', 0.25, 0.12);  // E5
   }
 
   playIncorrect() {
-    this.init();
-    if (!this.ctx || this.isMuted) return;
+    this.playTone(220, 'sawtooth', 0.2, 0);     // A3
+    this.playTone(196, 'sawtooth', 0.3, 0.15);  // G3
+  }
 
-    const now = this.ctx.currentTime;
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(220, now);
-    osc.frequency.linearRampToValueAtTime(160, now + 0.25);
-
-    gain.gain.setValueAtTime(0.15, now);
-    gain.gain.linearRampToValueAtTime(0.001, now + 0.25);
-
-    osc.connect(gain);
-    gain.connect(this.masterGain);
-
-    osc.start(now);
-    osc.stop(now + 0.25);
+  playFanfare() {
+    this.playTone(523.25, 'triangle', 0.12, 0);     // C5
+    this.playTone(659.25, 'triangle', 0.12, 0.12);  // E5
+    this.playTone(783.99, 'triangle', 0.12, 0.24);  // G5
+    this.playTone(1046.50, 'triangle', 0.35, 0.36); // C6
   }
 
   playVictory() {
-    this.init();
-    if (!this.ctx || this.isMuted) return;
-
-    const now = this.ctx.currentTime;
-    const notes = [
-      { freq: 523.25, time: 0, duration: 0.15 },
-      { freq: 659.25, time: 0.15, duration: 0.15 },
-      { freq: 783.99, time: 0.30, duration: 0.15 },
-      { freq: 1046.50, time: 0.45, duration: 0.6 }
-    ];
-
-    notes.forEach((note) => {
-      const startTime = now + note.time;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(note.freq, startTime);
-
-      gain.gain.setValueAtTime(0.25, startTime);
-      gain.gain.linearRampToValueAtTime(0.001, startTime + note.duration);
-
-      osc.connect(gain);
-      gain.connect(this.masterGain);
-
-      osc.start(startTime);
-      osc.stop(startTime + note.duration);
+    const notes = [523.25, 659.25, 783.99, 880.00, 1046.50];
+    notes.forEach((freq, i) => {
+      this.playTone(freq, 'sine', 0.25, i * 0.12);
     });
   }
 }

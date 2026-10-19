@@ -1,144 +1,94 @@
 /**
  * Keypad.js
- * Hanterar skärmtangentbord samt tangentbordsinmatning (fysiskt tangentbord/Numpad).
+ * Hanterar det virtuella tangentbordet och fysisk tangentbordsinmatning.
  */
 export class Keypad {
-  constructor(inputAreaId, onSubmitAnswer) {
-    this.inputArea = document.getElementById(inputAreaId);
-    this.onSubmitAnswer = onSubmitAnswer;
-
+  constructor(containerId, onSubmit) {
+    this.container = document.getElementById(containerId);
+    this.onSubmit = onSubmit;
     this.currentInput = '';
-    this.isWaiting = false;
+    this.isLocked = false;
 
-    this.initKeypadUI();
-    this.initKeyboardListeners();
+    this.render();
+    this.initKeyboardEvents();
   }
 
-  initKeypadUI() {
-    if (!this.inputArea) return;
-    this.inputArea.innerHTML = '';
+  render() {
+    if (!this.container) return;
 
-    const display = document.createElement('div');
-    display.id = 'answer-display';
-    display.className = 'answer-display';
-    display.innerText = '_';
-    this.inputArea.appendChild(display);
+    this.container.innerHTML = `
+      <div class="answer-display" id="answer-display">?</div>
+      <div class="keypad-grid">
+        <button class="keypad-btn" data-key="1">1</button>
+        <button class="keypad-btn" data-key="2">2</button>
+        <button class="keypad-btn" data-key="3">3</button>
+        <button class="keypad-btn" data-key="4">4</button>
+        <button class="keypad-btn" data-key="5">5</button>
+        <button class="keypad-btn" data-key="6">6</button>
+        <button class="keypad-btn" data-key="7">7</button>
+        <button class="keypad-btn" data-key="8">8</button>
+        <button class="keypad-btn" data-key="9">9</button>
+        <button class="keypad-btn btn-clear" data-key="clear">Rensa</button>
+        <button class="keypad-btn" data-key="0">0</button>
+        <button class="keypad-btn btn-submit" data-key="submit">OK</button>
+      </div>
+    `;
 
-    const keypadGrid = document.createElement('div');
-    keypadGrid.className = 'keypad-grid';
+    this.displayElement = document.getElementById('answer-display');
 
-    const buttons = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', '0', 'OK'];
-
-    buttons.forEach((symbol) => {
-      const btn = document.createElement('button');
-      btn.className = 'keypad-btn';
-      btn.innerText = symbol;
-
-      if (symbol === 'C') {
-        btn.classList.add('btn-clear');
-        btn.onclick = () => this.clearInput();
-      } else if (symbol === 'OK') {
-        btn.classList.add('btn-submit');
-        btn.onclick = () => this.submitAnswer();
-      } else {
-        btn.onclick = () => this.appendDigit(symbol);
-      }
-
-      keypadGrid.appendChild(btn);
-    });
-
-    this.inputArea.appendChild(keypadGrid);
-  }
-
-  initKeyboardListeners() {
-    window.addEventListener('keydown', (e) => {
-      const gameScreen = document.getElementById('game-screen');
-      const isGameVisible = gameScreen && !gameScreen.classList.contains('hidden');
-
-      const settingsModal = document.getElementById('settings-modal');
-      const helpModal = document.getElementById('help-modal');
-      const isModalOpen = (settingsModal && !settingsModal.classList.contains('hidden')) ||
-                          (helpModal && !helpModal.classList.contains('hidden'));
-
-      if (isModalOpen || !isGameVisible) return;
-
-      let digit = null;
-      if (e.key >= '0' && e.key <= '9') {
-        digit = e.key;
-      } else if (e.code && e.code.startsWith('Numpad') && e.code.length === 7) {
-        const num = e.code.replace('Numpad', '');
-        if (num >= '0' && num <= '9') {
-          digit = num;
-        }
-      }
-
-      if (digit !== null) {
-        e.preventDefault();
-        this.appendDigit(digit);
-        return;
-      }
-
-      if (e.key === 'Enter' || e.code === 'NumpadEnter') {
-        e.preventDefault();
-        if (document.activeElement && typeof document.activeElement.blur === 'function') {
-          document.activeElement.blur();
-        }
-        this.submitAnswer();
-        return;
-      }
-
-      if (e.key === 'Backspace') {
-        e.preventDefault();
-        this.backspace();
-        return;
-      }
-
-      if (e.key === 'c' || e.key === 'C' || e.key === 'Delete') {
-        e.preventDefault();
-        this.clearInput();
-        return;
-      }
+    const buttons = this.container.querySelectorAll('.keypad-btn');
+    buttons.forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        if (e) e.preventDefault();
+        const key = btn.getAttribute('data-key');
+        this.handleKeyPress(key);
+      });
     });
   }
 
-  appendDigit(digit) {
-    if (this.isWaiting) return;
-    if (this.currentInput.length < 4) {
-      this.currentInput += digit;
-      this.updateDisplay();
-    }
-  }
+  handleKeyPress(key) {
+    if (this.isLocked) return;
 
-  backspace() {
-    if (this.isWaiting) return;
-    if (this.currentInput.length > 0) {
-      this.currentInput = this.currentInput.slice(0, -1);
-      this.updateDisplay();
+    if (key === 'clear') {
+      this.currentInput = '';
+    } else if (key === 'submit') {
+      if (this.currentInput !== '' && this.onSubmit) {
+        this.isLocked = true;
+        this.onSubmit(this.currentInput);
+      }
+    } else if (this.currentInput.length < 5) {
+      this.currentInput += key;
     }
-  }
 
-  clearInput() {
-    if (this.isWaiting) return;
-    this.currentInput = '';
     this.updateDisplay();
   }
 
   updateDisplay() {
-    const display = document.getElementById('answer-display');
-    if (display) {
-      display.innerText = this.currentInput !== '' ? this.currentInput : '_';
+    if (this.displayElement) {
+      this.displayElement.innerText = this.currentInput === '' ? '?' : this.currentInput;
     }
   }
 
-  submitAnswer() {
-    if (this.currentInput === '' || this.isWaiting) return;
-    this.isWaiting = true;
-    if (this.onSubmitAnswer) {
-      this.onSubmitAnswer(this.currentInput);
-    }
+  clearInput() {
+    this.currentInput = '';
+    this.updateDisplay();
   }
 
   unlockInput() {
-    this.isWaiting = false;
+    this.isLocked = false;
+  }
+
+  initKeyboardEvents() {
+    window.addEventListener('keydown', (e) => {
+      if (this.isLocked) return;
+
+      if (e.key >= '0' && e.key <= '9') {
+        this.handleKeyPress(e.key);
+      } else if (e.key === 'Backspace') {
+        this.handleKeyPress('clear');
+      } else if (e.key === 'Enter') {
+        this.handleKeyPress('submit');
+      }
+    });
   }
 }
