@@ -18,19 +18,36 @@
       <!-- STARTMENY -->
       <div id="start-screen" class="screen-panel">
         
-        <!-- HUVUDMENY -->
+        <!-- STEP 1: OMRÅDESMENY (DOMÄNER) -->
         <div id="menu-main" class="menu-step">
           <h1 class="game-title">Matematikspelet</h1>
-          <p class="game-subtitle">Välj vad du vill öva på:</p>
+          <p class="game-subtitle">Välj område:</p>
+          <div class="menu-buttons">
+            <button id="btn-domain-arithmetic" class="btn-primary btn-domain">
+              <span>Räknekunskap</span>
+            </button>
+
+            <button id="btn-domain-geometry" class="btn-primary btn-domain btn-locked" disabled>
+              <span>Vinklar och former</span>
+              <span class="badge-soon">Kommer snart</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 2: RÄKNESÄTTSMENY (UNDER RÄKNEKUNSKAP) -->
+        <div id="menu-operations" class="menu-step hidden">
+          <h2 class="game-title">Räknekunskap</h2>
+          <p class="game-subtitle">Välj räknesätt:</p>
           <div class="menu-buttons">
             <button id="btn-category-addition" class="btn-primary btn-add">Addition (+)</button>
             <button id="btn-category-subtraction" class="btn-primary btn-sub">Subtraktion (–)</button>
             <button id="btn-category-multiplication" class="btn-primary btn-mult">Multiplikation (×)</button>
             <button id="btn-category-division" class="btn-primary btn-div">Division (÷)</button>
+            <button id="btn-back-to-domains" class="btn-secondary">Tillbaka</button>
           </div>
         </div>
 
-        <!-- DELMOMENTSMENY -->
+        <!-- STEP 3: DELMOMENTSMENY -->
         <div id="menu-subcategories" class="menu-step hidden">
           <h2 id="subcat-menu-title" class="game-title">Addition</h2>
           <p class="game-subtitle">Välj delmoment:</p>
@@ -39,7 +56,7 @@
           </div>
         </div>
 
-        <!-- NIVÅMENY -->
+        <!-- STEP 4: NIVÅMENY -->
         <div id="menu-tiers" class="menu-step hidden">
           <h2 id="tier-menu-title" class="game-title">Ental</h2>
           <p class="game-subtitle">Klara varje nivå för att låsa upp nästa:</p>

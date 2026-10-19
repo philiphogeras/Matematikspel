@@ -1,6 +1,6 @@
 /**
  * MenuManager.js
- * Hanterar meny-navigering och upplåsning/status för nivåknappar.
+ * Hanterar domäner, räknesätt, delmoment och nivåer.
  */
 export class MenuManager {
   constructor(onStartGame, onReturnToMenu) {
@@ -12,9 +12,11 @@ export class MenuManager {
 
     this.startScreen = document.getElementById('start-screen');
     this.gameScreen = document.getElementById('game-screen');
-    this.menuMain = document.getElementById('menu-main');
-    this.menuSubcats = document.getElementById('menu-subcategories');
-    this.menuTiers = document.getElementById('menu-tiers');
+    
+    this.menuMain = document.getElementById('menu-main');             // Step 1: Områden
+    this.menuOperations = document.getElementById('menu-operations'); // Step 2: Räknesätt
+    this.menuSubcats = document.getElementById('menu-subcategories'); // Step 3: Delmoment
+    this.menuTiers = document.getElementById('menu-tiers');           // Step 4: Nivåer
 
     this.subcatMenuTitle = document.getElementById('subcat-menu-title');
     this.tierMenuTitle = document.getElementById('tier-menu-title');
@@ -23,6 +25,25 @@ export class MenuManager {
   }
 
   initEventListeners() {
+    // Domänval: Räknekunskap (Aritmetik)
+    const btnDomainArith = document.getElementById('btn-domain-arithmetic');
+    if (btnDomainArith) {
+      btnDomainArith.onclick = () => {
+        if (this.menuMain) this.menuMain.classList.add('hidden');
+        if (this.menuOperations) this.menuOperations.classList.remove('hidden');
+      };
+    }
+
+    // Tillbaka från räknesätt till områden
+    const btnBackToDomains = document.getElementById('btn-back-to-domains');
+    if (btnBackToDomains) {
+      btnBackToDomains.onclick = () => {
+        if (this.menuOperations) this.menuOperations.classList.add('hidden');
+        if (this.menuMain) this.menuMain.classList.remove('hidden');
+      };
+    }
+
+    // Räknesätt
     const btnAdd = document.getElementById('btn-category-addition');
     if (btnAdd) {
       btnAdd.onclick = () => {
@@ -71,6 +92,7 @@ export class MenuManager {
       };
     }
 
+    // Tillbaka från nivåmeny till delmoment
     const btnBackSubcats = document.getElementById('btn-back-to-subcats');
     if (btnBackSubcats) {
       btnBackSubcats.onclick = () => {
@@ -147,16 +169,16 @@ export class MenuManager {
     });
 
     const backBtn = document.createElement('button');
-    backBtn.id = 'btn-back-to-main';
+    backBtn.id = 'btn-back-to-ops';
     backBtn.className = 'btn-secondary';
     backBtn.innerText = 'Tillbaka';
     backBtn.onclick = () => {
       if (this.menuSubcats) this.menuSubcats.classList.add('hidden');
-      if (this.menuMain) this.menuMain.classList.remove('hidden');
+      if (this.menuOperations) this.menuOperations.classList.remove('hidden');
     };
     container.appendChild(backBtn);
 
-    if (this.menuMain) this.menuMain.classList.add('hidden');
+    if (this.menuOperations) this.menuOperations.classList.add('hidden');
     if (this.menuSubcats) this.menuSubcats.classList.remove('hidden');
   }
 
@@ -201,6 +223,7 @@ export class MenuManager {
     if (this.startScreen) this.startScreen.classList.remove('hidden');
     if (this.gameScreen) this.gameScreen.classList.add('hidden');
     if (this.menuMain) this.menuMain.classList.remove('hidden');
+    if (this.menuOperations) this.menuOperations.classList.add('hidden');
     if (this.menuSubcats) this.menuSubcats.classList.add('hidden');
     if (this.menuTiers) this.menuTiers.classList.add('hidden');
   }
