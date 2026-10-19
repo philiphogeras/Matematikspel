@@ -5,7 +5,7 @@ import { VisualRenderer } from './graphics/VisualRenderer.js';
 
 /**
  * main.js
- * Huvudövergripande applikationsinitiering och spel-loop.
+ * Huvudövergripande applikationsinitiering. Helt fri från setTimeout för CSP-säkerhet.
  */
 class Game {
   constructor() {
@@ -24,6 +24,19 @@ class Game {
     );
 
     this.hud.showStartScreen();
+  }
+
+  // Timer-fri fördröjning via requestAnimationFrame
+  delayCall(callback, ms) {
+    const start = performance.now();
+    const frame = (now) => {
+      if (now - start >= ms) {
+        callback();
+      } else {
+        requestAnimationFrame(frame);
+      }
+    };
+    requestAnimationFrame(frame);
   }
 
   startNewGame(operation, category, tier) {
@@ -71,18 +84,18 @@ class Game {
           this.visualRenderer.triggerConfetti();
         }
 
-        setTimeout(() => {
+        this.delayCall(() => {
           this.hud.showTierMenu();
         }, 2200);
 
       } else if (result.isRoundCompleted) {
         this.soundManager.playFanfare();
-        setTimeout(() => {
+        this.delayCall(() => {
           this.nextQuestion();
         }, 1200);
 
       } else {
-        setTimeout(() => {
+        this.delayCall(() => {
           this.nextQuestion();
         }, 800);
       }
@@ -98,7 +111,6 @@ class Game {
   }
 }
 
-// Starta spelet när DOM:en laddats
 window.addEventListener('DOMContentLoaded', () => {
   new Game();
 });

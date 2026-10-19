@@ -6,28 +6,25 @@ import { SpeechManager } from '../audio/SpeechManager.js';
 
 /**
  * HUD.js
- * Huvudkoordinator för gränssnittet. Delegerar till undermoduler samt hanterar talsyntes.
+ * Huvudkoordinator för gränssnittet.
  */
 export class HUD {
   constructor(onAnswerSubmit, onStartGame, onReturnToMenu, soundCallbacks) {
     this.soundCallbacks = soundCallbacks || {};
     this.isMuted = false;
 
-    // Skapa undermoduler
     this.menuManager = new MenuManager(onStartGame, onReturnToMenu);
     this.keypad = new Keypad('input-area', onAnswerSubmit);
     this.helpModal = new HelpModal();
     this.sketchpad = new Sketchpad('sketchCanvas', 'btn-clear-sketch');
     this.speechManager = new SpeechManager();
 
-    // UI-element för spelskärmen
     this.levelIndicator = document.getElementById('level-indicator');
     this.roundIndicator = document.getElementById('round-indicator');
     this.questionElement = document.getElementById('question-box');
     this.feedbackElement = document.getElementById('feedback-message');
     this.progressBar = document.getElementById('progress-bar');
 
-    // Inställningar & Skissknapp & Högtalare
     this.settingsModal = document.getElementById('settings-modal');
     this.sketchpadPanel = document.getElementById('sketchpad-panel');
     this.btnSketch = document.getElementById('btn-sketch');
@@ -61,17 +58,17 @@ export class HUD {
     const btnCloseSettings = document.getElementById('btn-close-settings');
 
     if (btnSettings) {
-      btnSettings.onclick = () => {
+      btnSettings.addEventListener('click', () => {
         const msg = document.getElementById('reset-confirm-msg');
         if (msg) msg.classList.add('hidden');
         if (this.settingsModal) this.settingsModal.classList.remove('hidden');
-      };
+      });
     }
 
     if (btnCloseSettings) {
-      btnCloseSettings.onclick = () => {
+      btnCloseSettings.addEventListener('click', () => {
         if (this.settingsModal) this.settingsModal.classList.add('hidden');
-      };
+      });
     }
 
     window.addEventListener('keydown', (e) => {
@@ -82,48 +79,50 @@ export class HUD {
 
     const volumeSlider = document.getElementById('volume-slider');
     if (volumeSlider) {
-      volumeSlider.oninput = (e) => {
+      volumeSlider.addEventListener('input', (e) => {
         const vol = parseFloat(e.target.value) / 100;
         if (this.soundCallbacks.onVolumeChange) {
           this.soundCallbacks.onVolumeChange(vol);
         }
-      };
+      });
     }
 
     const muteBtn = document.getElementById('btn-toggle-mute');
     if (muteBtn) {
-      muteBtn.onclick = () => {
+      muteBtn.addEventListener('click', () => {
         this.isMuted = !this.isMuted;
         muteBtn.innerText = this.isMuted ? 'Ljudeffekter: Av' : 'Ljudeffekter: På';
         if (this.soundCallbacks.onMuteToggle) {
           this.soundCallbacks.onMuteToggle(this.isMuted);
         }
-      };
+      });
     }
 
     const ttsBtn = document.getElementById('btn-toggle-tts');
     if (ttsBtn) {
       this.updateTTSButtonText(ttsBtn);
 
-      ttsBtn.onclick = () => {
+      ttsBtn.addEventListener('click', () => {
         this.speechManager.toggleEnabled();
         this.updateTTSButtonText(ttsBtn);
         this.updateSpeakerButtonVisibility();
-      };
+      });
     }
 
     const btnReset = document.getElementById('btn-reset-progress');
     if (btnReset) {
-      btnReset.onclick = () => {
-        Object.keys(localStorage).forEach((key) => {
-          if (key.startsWith('completed_')) {
-            localStorage.removeItem(key);
-          }
-        });
+      btnReset.addEventListener('click', () => {
+        try {
+          Object.keys(localStorage).forEach((key) => {
+            if (key.startsWith('completed_')) {
+              localStorage.removeItem(key);
+            }
+          });
+        } catch (e) {}
         this.updateTierButtons();
         const msg = document.getElementById('reset-confirm-msg');
         if (msg) msg.classList.remove('hidden');
-      };
+      });
     }
   }
 
@@ -146,28 +145,28 @@ export class HUD {
 
   initSketchpadEvents() {
     if (this.btnSketch && this.sketchpadPanel) {
-      this.btnSketch.onclick = () => {
+      this.btnSketch.addEventListener('click', () => {
         const isHidden = this.sketchpadPanel.classList.contains('hidden');
         if (isHidden) {
           this.sketchpadPanel.classList.remove('hidden');
           this.btnSketch.classList.add('btn-top-active');
-          setTimeout(() => this.sketchpad.resize(), 50);
+          requestAnimationFrame(() => this.sketchpad.resize());
         } else {
           this.sketchpadPanel.classList.add('hidden');
           this.btnSketch.classList.remove('btn-top-active');
         }
-      };
+      });
     }
   }
 
   initSpeechEvents() {
     if (this.btnReadAloud) {
-      this.btnReadAloud.onclick = () => {
+      this.btnReadAloud.addEventListener('click', () => {
         if (this.currentQuestion && this.speechManager.isEnabled) {
           const textToRead = this.speechManager.formatQuestionForSpeech(this.currentQuestion);
           this.speechManager.speak(textToRead);
         }
-      };
+      });
     }
   }
 
