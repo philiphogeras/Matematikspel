@@ -28,7 +28,8 @@ export class MenuManager {
     // Domänval: Räknekunskap (Aritmetik)
     const btnDomainArith = document.getElementById('btn-domain-arithmetic');
     if (btnDomainArith) {
-      btnDomainArith.onclick = () => {
+      btnDomainArith.onclick = (e) => {
+        e.stopPropagation();
         if (this.menuMain) this.menuMain.classList.add('hidden');
         if (this.menuOperations) this.menuOperations.classList.remove('hidden');
       };
@@ -37,7 +38,8 @@ export class MenuManager {
     // Tillbaka från räknesätt till områden
     const btnBackToDomains = document.getElementById('btn-back-to-domains');
     if (btnBackToDomains) {
-      btnBackToDomains.onclick = () => {
+      btnBackToDomains.onclick = (e) => {
+        e.stopPropagation();
         if (this.menuOperations) this.menuOperations.classList.add('hidden');
         if (this.menuMain) this.menuMain.classList.remove('hidden');
       };
@@ -46,7 +48,8 @@ export class MenuManager {
     // Räknesätt
     const btnAdd = document.getElementById('btn-category-addition');
     if (btnAdd) {
-      btnAdd.onclick = () => {
+      btnAdd.onclick = (e) => {
+        e.stopPropagation();
         this.setupSubcategoryMenu('addition', 'Addition (+)', [
           { label: 'Ental', key: 'ental' },
           { label: 'Tiotal', key: 'tiotal' },
@@ -58,7 +61,8 @@ export class MenuManager {
 
     const btnSub = document.getElementById('btn-category-subtraction');
     if (btnSub) {
-      btnSub.onclick = () => {
+      btnSub.onclick = (e) => {
+        e.stopPropagation();
         this.setupSubcategoryMenu('subtraction', 'Subtraktion (–)', [
           { label: 'Ental', key: 'ental' },
           { label: 'Tiotal', key: 'tiotal' },
@@ -70,7 +74,8 @@ export class MenuManager {
 
     const btnMult = document.getElementById('btn-category-multiplication');
     if (btnMult) {
-      btnMult.onclick = () => {
+      btnMult.onclick = (e) => {
+        e.stopPropagation();
         this.setupSubcategoryMenu('multiplication', 'Multiplikation (×)', [
           { label: '2, 5 & 10:an', key: 'tabell_2_5_10' },
           { label: '3, 4 & 6:an', key: 'tabell_3_4_6' },
@@ -82,7 +87,8 @@ export class MenuManager {
 
     const btnDiv = document.getElementById('btn-category-division');
     if (btnDiv) {
-      btnDiv.onclick = () => {
+      btnDiv.onclick = (e) => {
+        e.stopPropagation();
         this.setupSubcategoryMenu('division', 'Division (÷)', [
           { label: '2, 5 & 10:an', key: 'tabell_2_5_10' },
           { label: '3, 4 & 6:an', key: 'tabell_3_4_6' },
@@ -95,7 +101,8 @@ export class MenuManager {
     // Tillbaka från nivåmeny till delmoment
     const btnBackSubcats = document.getElementById('btn-back-to-subcats');
     if (btnBackSubcats) {
-      btnBackSubcats.onclick = () => {
+      btnBackSubcats.onclick = (e) => {
+        e.stopPropagation();
         if (this.menuTiers) this.menuTiers.classList.add('hidden');
         if (this.menuSubcats) this.menuSubcats.classList.remove('hidden');
       };
@@ -103,7 +110,8 @@ export class MenuManager {
 
     const tierBtns = document.querySelectorAll('.btn-tier');
     tierBtns.forEach((btn) => {
-      btn.onclick = () => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
         if (btn.disabled) return;
         const tier = btn.getAttribute('data-tier');
         this.showGameScreen();
@@ -115,7 +123,8 @@ export class MenuManager {
 
     const btnMenu = document.getElementById('btn-menu');
     if (btnMenu) {
-      btnMenu.onclick = () => {
+      btnMenu.onclick = (e) => {
+        e.stopPropagation();
         this.showTierMenu();
         if (this.onReturnToMenu) {
           this.onReturnToMenu();
@@ -143,7 +152,8 @@ export class MenuManager {
         btn.classList.add('btn-problem');
       }
       btn.innerText = item.label;
-      btn.onclick = () => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
         this.selectedCategory = item.key;
         const catLabels = {
           ental: 'Ental', tiotal: 'Tiotal', hundratal: 'Hundratal',
@@ -172,7 +182,8 @@ export class MenuManager {
     backBtn.id = 'btn-back-to-ops';
     backBtn.className = 'btn-secondary';
     backBtn.innerText = 'Tillbaka';
-    backBtn.onclick = () => {
+    backBtn.onclick = (e) => {
+      e.stopPropagation();
       if (this.menuSubcats) this.menuSubcats.classList.add('hidden');
       if (this.menuOperations) this.menuOperations.classList.remove('hidden');
     };

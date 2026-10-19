@@ -44,9 +44,13 @@ body {
   pointer-events: none;
 }
 
+/* Gör alla knappar och allt innehåll inuti knappar helt klickbart */
 #ui-overlay button, 
+#ui-overlay button *,
 #ui-overlay input,
-#ui-overlay canvas {
+#ui-overlay canvas,
+#ui-overlay .menu-buttons,
+#ui-overlay .menu-buttons * {
   pointer-events: auto;
 }
 
