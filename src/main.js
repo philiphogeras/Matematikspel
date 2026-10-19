@@ -92,8 +92,8 @@ class Game {
       this.soundManager.playIncorrect();
       this.hud.showFeedback(false, result.message);
 
-      // Lås upp tangenter direkt & schemalägg automatisk rensning efter 3 sekunder
-      this.hud.scheduleAutoClear(3000);
+      // Nollställ automatiskt efter 3 sekunder och tillåt direkt inmatning
+      this.hud.scheduleWrongAnswerReset(3000);
     }
   }
 

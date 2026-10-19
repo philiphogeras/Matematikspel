@@ -48,43 +48,46 @@ export class Keypad {
   }
 
   handleKeyPress(key) {
-    // Om det finns en aktiv timer som väntar på att rensa rutan, avbryt den direkt när nyckeln trycks
+    // Om det finns en väntande automatisk rensning, avbryt den direkt när användaren trycker
     if (this.autoClearTimer) {
       clearTimeout(this.autoClearTimer);
       this.autoClearTimer = null;
     }
 
-    // "Rensa" ska alltid fungera direkt
+    // Lås upp omedelbart vid knapptryck
+    this.isLocked = false;
+
     if (key === 'clear') {
       this.clearInput();
-      this.isLocked = false;
       return;
     }
 
-    if (this.isLocked) return;
-
     if (key === 'submit') {
       if (this.currentInput !== '' && this.onSubmit) {
+        const inputToSend = this.currentInput;
         this.isLocked = true;
-        this.onSubmit(this.currentInput);
+        this.onSubmit(inputToSend);
       }
-    } else if (this.currentInput.length < 5) {
+      return;
+    }
+
+    // Siffertryck (0-9)
+    if (this.currentInput.length < 5) {
       this.currentInput += key;
       this.updateDisplay();
     }
   }
 
-  scheduleAutoClear(ms = 3000, onCleared) {
+  scheduleWrongAnswerReset(ms = 3000, onReset) {
     if (this.autoClearTimer) {
       clearTimeout(this.autoClearTimer);
     }
-    // Lås upp omedelbart så att "Rensa" eller nya siffertryck tas emot utan fördröjning
-    this.isLocked = false;
+    this.isLocked = false; // Tillåt direkt inmatning eller klick på Rensa
 
     this.autoClearTimer = setTimeout(() => {
       this.clearInput();
       this.autoClearTimer = null;
-      if (onCleared) onCleared();
+      if (onReset) onReset();
     }, ms);
   }
 
@@ -111,7 +114,7 @@ export class Keypad {
     window.addEventListener('keydown', (e) => {
       if (e.key >= '0' && e.key <= '9') {
         this.handleKeyPress(e.key);
-      } else if (e.key === 'Backspace') {
+      } else if (e.key === 'Backspace' || e.key === 'Delete') {
         this.handleKeyPress('clear');
       } else if (e.key === 'Enter') {
         this.handleKeyPress('submit');

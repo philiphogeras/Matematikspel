@@ -281,9 +281,9 @@ export class HUD {
     }
   }
 
-  scheduleAutoClear(ms = 3000) {
+  scheduleWrongAnswerReset(ms = 3000) {
     if (this.keypad) {
-      this.keypad.scheduleAutoClear(ms, () => {
+      this.keypad.scheduleWrongAnswerReset(ms, () => {
         this.clearFeedback();
       });
     }
