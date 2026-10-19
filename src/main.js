@@ -59,12 +59,17 @@ class Game {
       );
 
       if (result.isTierCompleted) {
-        // Spara avklarad nivå i LocalStorage
-        const key = `completed_${this.mathEngine.operation}_${this.mathEngine.category}_${this.mathEngine.tier}`;
-        localStorage.setItem(key, 'true');
+        try {
+          const key = `completed_${this.mathEngine.operation}_${this.mathEngine.category}_${this.mathEngine.tier}`;
+          localStorage.setItem(key, 'true');
+        } catch (e) {
+          console.warn('LocalStorage sparning misslyckades:', e);
+        }
 
         this.soundManager.playVictory();
-        this.visualRenderer.triggerConfetti();
+        if (this.visualRenderer) {
+          this.visualRenderer.triggerConfetti();
+        }
 
         setTimeout(() => {
           this.hud.showTierMenu();

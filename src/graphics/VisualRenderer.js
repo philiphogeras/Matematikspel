@@ -1,74 +1,96 @@
 /**
  * VisualRenderer.js
- * Hanterar grafik och visuella effekter som konfettiregn vid vinst.
+ * Hanterar konfetti och visuella effekter på bakgrundscanvasen.
  */
 export class VisualRenderer {
-  constructor(canvas) {
-    this.canvas = canvas;
-    this.ctx = canvas.getContext('2d');
-    this.confettiParticles = [];
-    this.animationFrame = null;
-  }
-
-  /**
-   * Rensar canvasen och stoppar eventuell pågående animation.
-   */
-  clear() {
-    if (this.animationFrame) {
-      cancelAnimationFrame(this.animationFrame);
-      this.animationFrame = null;
+  constructor(canvasOrId) {
+    if (typeof canvasOrId === 'string') {
+      this.canvas = document.getElementById(canvasOrId);
+    } else {
+      this.canvas = canvasOrId;
     }
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    if (!this.canvas) {
+      console.warn('VisualRenderer: Canvas-element hittades inte:', canvasOrId);
+      this.ctx = null;
+      this.particles = [];
+      return;
+    }
+
+    this.ctx = this.canvas.getContext('2d');
+    this.particles = [];
+    this.animating = false;
+
+    this.resize();
+    window.addEventListener('resize', () => this.resize());
   }
 
-  /**
-   * Startar ett färgstarkt konfettiregn på canvasen.
-   */
-  startConfetti() {
-    this.clear();
+  resize() {
+    if (!this.canvas) return;
+    const parent = this.canvas.parentElement;
+    if (parent) {
+      this.canvas.width = parent.clientWidth || 1200;
+      this.canvas.height = parent.clientHeight || 800;
+    }
+  }
 
-    const colors = ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#eab308'];
-    this.confettiParticles = [];
+  triggerConfetti() {
+    if (!this.ctx || !this.canvas) return;
+    
+    const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#38bdf8'];
+    this.particles = [];
 
-    // Skapa 130 konfettibitar i olika färger, storlekar och hastigheter
-    for (let i = 0; i < 130; i++) {
-      this.confettiParticles.push({
-        x: Math.random() * this.canvas.width,
-        y: Math.random() * this.canvas.height - this.canvas.height,
-        size: Math.random() * 10 + 6,
+    for (let i = 0; i < 80; i++) {
+      this.particles.push({
+        x: this.canvas.width / 2 + (Math.random() * 200 - 100),
+        y: this.canvas.height / 2 - 100 + (Math.random() * 100 - 50),
+        vx: (Math.random() - 0.5) * 12,
+        vy: Math.random() * -12 - 4,
+        size: Math.random() * 8 + 6,
         color: colors[Math.floor(Math.random() * colors.length)],
-        vx: (Math.random() - 0.5) * 3,
-        vy: Math.random() * 4 + 3,
         rotation: Math.random() * 360,
-        rotationSpeed: (Math.random() - 0.5) * 8
+        vRot: (Math.random() - 0.5) * 10,
+        opacity: 1
       });
     }
 
-    const animate = () => {
+    if (!this.animating) {
+      this.animating = true;
+      this.animate();
+    }
+  }
+
+  animate() {
+    if (!this.ctx || !this.animating || !this.canvas) return;
+
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    let activeParticles = 0;
+
+    for (let p of this.particles) {
+      if (p.opacity <= 0) continue;
+
+      activeParticles++;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.35;
+      p.rotation += p.vRot;
+      p.opacity -= 0.008;
+
+      this.ctx.save();
+      this.ctx.translate(p.x, p.y);
+      this.ctx.rotate((p.rotation * Math.PI) / 180);
+      this.ctx.globalAlpha = Math.max(0, p.opacity);
+      this.ctx.fillStyle = p.color;
+      this.ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+      this.ctx.restore();
+    }
+
+    if (activeParticles > 0) {
+      requestAnimationFrame(() => this.animate());
+    } else {
+      this.animating = false;
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-      this.confettiParticles.forEach((p) => {
-        p.x += p.vx;
-        p.y += p.vy;
-        p.rotation += p.rotationSpeed;
-
-        // Om konfettibiten faller utanför botten, snurra om den från toppen
-        if (p.y > this.canvas.height) {
-          p.y = -10;
-          p.x = Math.random() * this.canvas.width;
-        }
-
-        this.ctx.save();
-        this.ctx.translate(p.x, p.y);
-        this.ctx.rotate((p.rotation * Math.PI) / 180);
-        this.ctx.fillStyle = p.color;
-        this.ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
-        this.ctx.restore();
-      });
-
-      this.animationFrame = requestAnimationFrame(animate);
-    };
-
-    animate();
+    }
   }
 }
