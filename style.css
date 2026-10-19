@@ -74,6 +74,22 @@ body {
   display: none !important;
 }
 
+/* FÄRGKODADE SIFFROR (POSITIONSSYSTEMET) */
+.digit-ental {
+  color: #1e40af; /* Blå */
+  font-weight: bold;
+}
+
+.digit-tiotal {
+  color: #b91c1c; /* Röd */
+  font-weight: bold;
+}
+
+.digit-hundratal {
+  color: #15803d; /* Grön */
+  font-weight: bold;
+}
+
 /* TOPP-KNAPPAR (PENNA OCH KUGGHJUL) */
 .top-controls {
   position: absolute;

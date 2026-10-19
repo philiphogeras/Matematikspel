@@ -41,6 +41,25 @@ export class HUD {
     this.updateSpeakerButtonVisibility();
   }
 
+  /**
+   * Omvandlar ett tal till HTML med färglagda siffror baserat på positionssystemet.
+   * Ental = Blå, Tiotal = Röd, Hundratal = Grön.
+   */
+  formatColoredNumber(num) {
+    const str = num.toString();
+    const len = str.length;
+    const posClasses = ['digit-ental', 'digit-tiotal', 'digit-hundratal'];
+
+    let html = '';
+    for (let i = 0; i < len; i++) {
+      const digit = str[i];
+      const posIndex = len - 1 - i; // 0 = ental, 1 = tiotal, 2 = hundratal
+      const cls = posClasses[posIndex] || 'digit-ental';
+      html += `<span class="${cls}">${digit}</span>`;
+    }
+    return html;
+  }
+
   initSettingsEvents() {
     const btnSettings = document.getElementById('btn-settings');
     const btnCloseSettings = document.getElementById('btn-close-settings');
@@ -228,7 +247,10 @@ export class HUD {
         this.questionElement.style.lineHeight = '1.5';
         this.questionElement.style.maxWidth = '700px';
       } else {
-        this.questionElement.innerText = `${question.num1} ${question.operator} ${question.num2} = ?`;
+        const coloredNum1 = this.formatColoredNumber(question.num1);
+        const coloredNum2 = this.formatColoredNumber(question.num2);
+        
+        this.questionElement.innerHTML = `${coloredNum1} ${question.operator} ${coloredNum2} = ?`;
         this.questionElement.style.fontSize = '3.2rem';
         this.questionElement.style.lineHeight = 'normal';
         this.questionElement.style.maxWidth = 'none';
