@@ -1,6 +1,6 @@
 /**
  * Keypad.js
- * Hanterar det virtuella tangentbordet och fysisk tangentbordsinmatning.
+ * Hanterar det virtuella tangentbordet, svarsknappar och fysisk tangentbordsinmatning.
  */
 export class Keypad {
   constructor(containerId, onSubmit) {
@@ -10,16 +10,53 @@ export class Keypad {
     this.isLocked = false;
     this.clearOnNextInput = false;
     this.autoClearTimer = null;
+    this.currentQuestion = null;
 
     this.render();
     this.initKeyboardEvents();
   }
 
+  setQuestion(question) {
+    this.currentQuestion = question;
+    this.currentInput = '';
+    this.clearOnNextInput = false;
+    this.isLocked = false;
+    this.render();
+  }
+
   render() {
     if (!this.container) return;
 
+    // OM FRÅGAN HAR SVARSALTERNATIV (SVAR-RUTOR)
+    if (this.currentQuestion && this.currentQuestion.options) {
+      let optionsHtml = '<div class="options-grid">';
+      this.currentQuestion.options.forEach(opt => {
+        optionsHtml += `
+          <button class="option-btn" data-value="${opt.value}">
+            ${opt.label}
+          </button>
+        `;
+      });
+      optionsHtml += '</div>';
+
+      this.container.innerHTML = optionsHtml;
+
+      const optButtons = this.container.querySelectorAll('.option-btn');
+      optButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          if (e) e.preventDefault();
+          if (this.isLocked) return;
+          const val = btn.getAttribute('data-value');
+          this.isLocked = true;
+          if (this.onSubmit) this.onSubmit(val);
+        });
+      });
+      return;
+    }
+
+    // STANDARD SIFFERKNAPPSATS
     this.container.innerHTML = `
-      <div class="answer-display" id="answer-display">?</div>
+      <div class="answer-display" id="answer-display">${this.currentInput === '' ? '?' : this.currentInput}</div>
       <div class="keypad-grid">
         <button class="keypad-btn" data-key="1">1</button>
         <button class="keypad-btn" data-key="2">2</button>
@@ -49,23 +86,19 @@ export class Keypad {
   }
 
   handleKeyPress(key) {
-    // Avbryt väntande automatisk rensning om användaren trycker på någon knapp
     if (this.autoClearTimer) {
       clearTimeout(this.autoClearTimer);
       this.autoClearTimer = null;
     }
 
-    // Knapp: "Rensa"
     if (key === 'clear') {
       this.clearInput();
       return;
     }
 
-    // Knapp: "OK" (submit)
     if (key === 'submit') {
       if (this.isLocked) return;
 
-      // Om vi väntar på ett nytt svar efter felaktigt svar utan att en ny siffra slagits in, rensa rutan
       if (this.clearOnNextInput) {
         this.clearInput();
         return;
@@ -79,9 +112,7 @@ export class Keypad {
       return;
     }
 
-    // Sifferknappar (0-9)
     if (key >= '0' && key <= '9') {
-      // Om användaren nyss svarade fel, ersätt det gamla felet direkt med den nya siffran
       if (this.clearOnNextInput) {
         this.currentInput = '';
         this.clearOnNextInput = false;
@@ -133,6 +164,8 @@ export class Keypad {
 
   initKeyboardEvents() {
     window.addEventListener('keydown', (e) => {
+      if (this.currentQuestion && this.currentQuestion.options) return;
+
       if (e.key >= '0' && e.key <= '9') {
         this.handleKeyPress(e.key);
       } else if (e.key === 'Backspace' || e.key === 'Delete') {
