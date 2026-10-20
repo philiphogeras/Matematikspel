@@ -2,6 +2,7 @@ import { SoundManager } from './audio/SoundManager.js';
 import { MathEngine } from './core/MathEngine.js';
 import { HUD } from './ui/HUD.js';
 import { VisualRenderer } from './graphics/VisualRenderer.js';
+import { GeometryRenderer } from './graphics/GeometryRenderer.js';
 
 /**
  * main.js
@@ -12,6 +13,7 @@ class Game {
     this.soundManager = new SoundManager();
     this.mathEngine = new MathEngine();
     this.visualRenderer = new VisualRenderer('gameCanvas');
+    this.geometryRenderer = new GeometryRenderer('geometryCanvas');
 
     this.hud = new HUD(
       (answer) => this.handleAnswerSubmit(answer),
@@ -34,6 +36,20 @@ class Game {
   nextQuestion() {
     const question = this.mathEngine.generateQuestion();
     this.hud.displayQuestion(question);
+
+    const geoCanvas = document.getElementById('geometryCanvas');
+
+    // Om det är en geometrifråga, rita ut figuren på duken
+    if (question && question.isGeometry && this.geometryRenderer) {
+      if (geoCanvas) geoCanvas.classList.remove('hidden');
+      this.geometryRenderer.drawShape(question.shapeType, {
+        showVertices: question.showVertices
+      });
+    } else {
+      if (geoCanvas) geoCanvas.classList.add('hidden');
+      if (this.geometryRenderer) this.geometryRenderer.clear();
+    }
+
     this.hud.updateTopBar(
       this.mathEngine.operation,
       this.mathEngine.category,
@@ -92,7 +108,7 @@ class Game {
       this.soundManager.playIncorrect();
       this.hud.showFeedback(false, result.message);
 
-      // Nollställ automatiskt efter 3 sekunder och tillåt direkt inmatning
+      // Nollställ automatiskt efter 3 sekunder
       this.hud.scheduleWrongAnswerReset(3000);
     }
   }

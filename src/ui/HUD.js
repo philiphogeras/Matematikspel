@@ -236,44 +236,47 @@ export class HUD {
   }
 
   displayQuestion(question) {
-    if (!question) return;
+  if (!question) return;
 
-    this.currentQuestion = question;
+  this.currentQuestion = question;
 
-    if (this.helpModal) {
-      this.helpModal.setCurrentQuestion(question);
-    }
-    this.unlockInput();
-
-    if (this.questionElement) {
-      if (question.isTextProblem) {
-        this.questionElement.innerText = question.text;
-        this.questionElement.style.fontSize = '1.35rem';
-        this.questionElement.style.lineHeight = '1.5';
-        this.questionElement.style.maxWidth = '700px';
-      } else {
-        const coloredNum1 = this.formatColoredNumber(question.num1);
-        const coloredNum2 = this.formatColoredNumber(question.num2);
-        
-        this.questionElement.innerHTML = `${coloredNum1} ${question.operator} ${coloredNum2} = ?`;
-        this.questionElement.style.fontSize = '3.2rem';
-        this.questionElement.style.lineHeight = 'normal';
-        this.questionElement.style.maxWidth = 'none';
-      }
-    }
-
-    if (this.speechManager && this.speechManager.isEnabled) {
-      const textToRead = this.speechManager.formatQuestionForSpeech(question);
-      this.speechManager.speak(textToRead);
-    } else if (this.speechManager) {
-      this.speechManager.cancel();
-    }
-
-    if (this.keypad) {
-      this.keypad.clearInput();
-    }
-    this.clearFeedback();
+  if (this.helpModal) {
+    this.helpModal.setCurrentQuestion(question);
   }
+  this.unlockInput();
+
+  if (this.questionElement) {
+    // Om det är en textfråga eller geometrifråga
+    if (question.isTextProblem || question.isGeometry || question.text) {
+      this.questionElement.innerText = question.text;
+      this.questionElement.style.fontSize = question.isGeometry ? '1.8rem' : '1.35rem';
+      this.questionElement.style.lineHeight = '1.4';
+      this.questionElement.style.maxWidth = '700px';
+      this.questionElement.style.whiteSpace = 'pre-line'; // Bevarar radbrytningar för alternativ 1-4
+    } else {
+      const coloredNum1 = this.formatColoredNumber(question.num1);
+      const coloredNum2 = this.formatColoredNumber(question.num2);
+      
+      this.questionElement.innerHTML = `${coloredNum1} ${question.operator} ${coloredNum2} = ?`;
+      this.questionElement.style.fontSize = '3.2rem';
+      this.questionElement.style.lineHeight = 'normal';
+      this.questionElement.style.maxWidth = 'none';
+      this.questionElement.style.whiteSpace = 'normal';
+    }
+  }
+
+  if (this.speechManager && this.speechManager.isEnabled) {
+    const textToRead = this.speechManager.formatQuestionForSpeech(question);
+    this.speechManager.speak(textToRead);
+  } else if (this.speechManager) {
+    this.speechManager.cancel();
+  }
+
+  if (this.keypad) {
+    this.keypad.clearInput();
+  }
+  this.clearFeedback();
+}
 
   unlockInput() {
     if (this.keypad) {

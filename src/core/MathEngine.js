@@ -1,179 +1,93 @@
-import { AdditionEngine } from './generators/AdditionEngine.js';
-import { SubtractionEngine } from './generators/SubtractionEngine.js';
-import { MultiplicationEngine } from './generators/MultiplicationEngine.js';
-import { DivisionEngine } from './generators/DivisionEngine.js';
-import { WORD_PROBLEMS } from '../data/wordProblems.js';
+import { AdditionEngine } from './generators/arithmetic/AdditionEngine.js';
+import { SubtractionEngine } from './generators/arithmetic/SubtractionEngine.js';
+import { MultiplicationEngine } from './generators/arithmetic/MultiplicationEngine.js';
+import { DivisionEngine } from './generators/arithmetic/DivisionEngine.js';
+import { ShapesEngine } from './generators/geometry/ShapesEngine.js';
 
 /**
  * MathEngine.js
- * Huvudmotor som styr spelsessioner, omgångar samt anropar rätt delmotor för frågor.
+ * Koordinator för fråagenerering och rättning över båda domänerna.
  */
 export class MathEngine {
   constructor() {
+    this.additionEngine = new AdditionEngine();
+    this.subtractionEngine = new SubtractionEngine();
+    this.multiplicationEngine = new MultiplicationEngine();
+    this.divisionEngine = new DivisionEngine();
+    this.shapesEngine = new ShapesEngine();
+
     this.operation = 'addition';
     this.category = 'ental';
     this.tier = 'brons';
-    
     this.currentRound = 1;
-    this.maxRounds = 3;
-    
-    this.correctInRound = 0;
-    this.questionsPerRound = 5;
-
+    this.questionsInRound = 5;
+    this.correctInCurrentRound = 0;
     this.currentQuestion = null;
-    this.usedQuestionsInRound = [];
   }
 
-  reset(operation = 'addition', category = 'ental', tier = 'brons') {
+  reset(operation, category, tier) {
     this.operation = operation;
     this.category = category;
     this.tier = tier;
     this.currentRound = 1;
-    this.correctInRound = 0;
+    this.correctInCurrentRound = 0;
     this.currentQuestion = null;
-    this.usedQuestionsInRound = [];
-    
-    if (this.category === 'problemlosning') {
-      this.questionsPerRound = 3;
-    } else {
-      this.questionsPerRound = 5;
-    }
-  }
-
-  getRoundProgressPercentage() {
-    return Math.round((this.correctInRound / this.questionsPerRound) * 100);
-  }
-
-  rand(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
   generateQuestion() {
-    // 1. PROBLEMLÖSNING (Anpassad efter nivå: brons, silver, guld)
-    if (this.category === 'problemlosning') {
-      const opProblems = WORD_PROBLEMS[this.operation] || WORD_PROBLEMS.addition;
-      const problemList = (opProblems && opProblems[this.tier]) ? opProblems[this.tier] : (opProblems.brons || []);
-
-      let selectedProblem = null;
-
-      if (problemList.length > 0) {
-        for (let attempt = 0; attempt < 30; attempt++) {
-          const randomIndex = this.rand(0, problemList.length - 1);
-          if (!this.usedQuestionsInRound.includes(randomIndex)) {
-            this.usedQuestionsInRound.push(randomIndex);
-            selectedProblem = problemList[randomIndex]();
-            break;
-          }
-        }
-
-        if (!selectedProblem) {
-          selectedProblem = problemList[0]();
-        }
-      }
-
-      if (!selectedProblem) {
-        selectedProblem = {
-          text: 'Maja har 2 äpplen och får 3 till. Hur många äpplen har Maja?',
-          num1: 2, num2: 3, operator: '+', answer: 5
-        };
-      }
-
-      this.currentQuestion = {
-        isTextProblem: true,
-        text: selectedProblem.text,
-        num1: selectedProblem.num1,
-        num2: selectedProblem.num2,
-        operator: selectedProblem.operator,
-        answer: selectedProblem.answer,
-        isMultiStep: selectedProblem.isMultiStep || false,
-        step1: selectedProblem.step1 || '',
-        step2: selectedProblem.step2 || ''
-      };
-
-      return this.currentQuestion;
+    if (this.operation === 'shapes') {
+      this.currentQuestion = this.shapesEngine.generateQuestion(this.tier);
+    } else if (this.operation === 'addition') {
+      this.currentQuestion = this.additionEngine.generateQuestion(this.category, this.tier);
+    } else if (this.operation === 'subtraction') {
+      this.currentQuestion = this.subtractionEngine.generateQuestion(this.category, this.tier);
+    } else if (this.operation === 'multiplication') {
+      this.currentQuestion = this.multiplicationEngine.generateQuestion(this.category, this.tier);
+    } else if (this.operation === 'division') {
+      this.currentQuestion = this.divisionEngine.generateQuestion(this.category, this.tier);
     }
-
-    // 2. STANDARD RÄKNEFRÅGOR (med omgångsprogression: 1, 2, 3)
-    let generatedData = null;
-    let key = '';
-
-    for (let attempt = 0; attempt < 50; attempt++) {
-      if (this.operation === 'addition') {
-        generatedData = AdditionEngine.generate(this.category, this.tier, this.currentRound);
-      } else if (this.operation === 'subtraction') {
-        generatedData = SubtractionEngine.generate(this.category, this.tier, this.currentRound);
-      } else if (this.operation === 'multiplication') {
-        generatedData = MultiplicationEngine.generate(this.category, this.tier, this.currentRound);
-      } else if (this.operation === 'division') {
-        generatedData = DivisionEngine.generate(this.category, this.tier, this.currentRound);
-      }
-
-      key = `${generatedData.num1}_${generatedData.operator}_${generatedData.num2}`;
-      if (!this.usedQuestionsInRound.includes(key)) {
-        break;
-      }
-    }
-
-    this.usedQuestionsInRound.push(key);
-
-    let answer = generatedData.num1 + generatedData.num2;
-    if (this.operation === 'subtraction') answer = generatedData.num1 - generatedData.num2;
-    if (this.operation === 'multiplication') answer = generatedData.num1 * generatedData.num2;
-    if (this.operation === 'division') answer = generatedData.num1 / generatedData.num2;
-
-    this.currentQuestion = {
-      isTextProblem: false,
-      num1: generatedData.num1,
-      num2: generatedData.num2,
-      operator: generatedData.operator,
-      answer
-    };
 
     return this.currentQuestion;
   }
 
   checkAnswer(userAnswer) {
-    const numericAnswer = parseInt(userAnswer, 10);
-    const isCorrect = numericAnswer === this.currentQuestion.answer;
+    if (!this.currentQuestion) return { isCorrect: false, message: 'Ingen fråga laddad.' };
+
+    const formattedUser = userAnswer.trim();
+    const formattedCorrect = this.currentQuestion.correctAnswer.toString().trim();
+
+    const isCorrect = formattedUser === formattedCorrect;
 
     if (isCorrect) {
-      this.correctInRound++;
+      this.correctInCurrentRound++;
+      let isRoundCompleted = false;
+      let isTierCompleted = false;
 
-      if (this.correctInRound >= this.questionsPerRound) {
-        if (this.currentRound >= this.maxRounds) {
-          return {
-            isCorrect: true,
-            isRoundCompleted: true,
-            isTierCompleted: true,
-            message: `Bra jobbat! Du har klarat alla 3 omgångar i ${this.tier.toUpperCase()}!`
-          };
+      if (this.correctInCurrentRound >= this.questionsInRound) {
+        if (this.currentRound < 3) {
+          this.currentRound++;
+          this.correctInCurrentRound = 0;
+          isRoundCompleted = true;
+        } else {
+          isTierCompleted = true;
         }
-
-        this.currentRound++;
-        this.correctInRound = 0;
-        this.usedQuestionsInRound = [];
-
-        return {
-          isCorrect: true,
-          isRoundCompleted: true,
-          isTierCompleted: false,
-          message: `Omgång ${this.currentRound - 1} klar! Nu startar Omgång ${this.currentRound}!`
-        };
       }
 
       return {
         isCorrect: true,
-        isRoundCompleted: false,
-        isTierCompleted: false,
-        message: 'Bra jobbat! Helt rätt!'
+        message: 'Rätt svar! Bra jobbat!',
+        isRoundCompleted,
+        isTierCompleted
       };
     } else {
       return {
         isCorrect: false,
-        isRoundCompleted: false,
-        isTierCompleted: false,
         message: 'Inte riktigt. Försök igen!'
       };
     }
+  }
+
+  getRoundProgressPercentage() {
+    return (this.correctInCurrentRound / this.questionsInRound) * 100;
   }
 }

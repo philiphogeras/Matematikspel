@@ -1,6 +1,6 @@
 /**
  * MenuManager.js
- * Hanterar domäner, räknesätt, delmoment och nivåer.
+ * Hanterar menyflödet mellan domäner, räknesätt, delmoment och nivåer.
  */
 export class MenuManager {
   constructor(onStartGame, onReturnToMenu) {
@@ -9,263 +9,230 @@ export class MenuManager {
 
     this.selectedOperation = 'addition';
     this.selectedCategory = 'ental';
+    this.selectedTier = 'brons';
 
-    this.startScreen = document.getElementById('start-screen');
-    this.gameScreen = document.getElementById('game-screen');
-    
-    this.menuMain = document.getElementById('menu-main');             // Step 1: Områden
-    this.menuOperations = document.getElementById('menu-operations'); // Step 2: Räknesätt
-    this.menuSubcats = document.getElementById('menu-subcategories'); // Step 3: Delmoment
-    this.menuTiers = document.getElementById('menu-tiers');           // Step 4: Nivåer
+    this.screenStart = document.getElementById('start-screen');
+    this.screenGame = document.getElementById('game-screen');
 
-    this.subcatMenuTitle = document.getElementById('subcat-menu-title');
-    this.tierMenuTitle = document.getElementById('tier-menu-title');
+    this.stepMain = document.getElementById('menu-main');
+    this.stepOperations = document.getElementById('menu-operations');
+    this.stepSubcategories = document.getElementById('menu-subcategories');
+    this.stepTiers = document.getElementById('menu-tiers');
 
-    this.initEventListeners();
+    this.initEvents();
   }
 
-  getItemSafe(key) {
-    try {
-      return localStorage.getItem(key);
-    } catch (e) {
-      return null;
-    }
-  }
+  initEvents() {
+    // Steg 1: Domänval
+    const btnDomainArithmetic = document.getElementById('btn-domain-arithmetic');
+    const btnDomainGeometry = document.getElementById('btn-domain-geometry');
 
-  initEventListeners() {
-    // Domänval: Räknekunskap (Aritmetik)
-    const btnDomainArith = document.getElementById('btn-domain-arithmetic');
-    if (btnDomainArith) {
-      btnDomainArith.addEventListener('click', (e) => {
-        if (e) e.preventDefault();
-        this.showOperationsMenu();
+    if (btnDomainArithmetic) {
+      btnDomainArithmetic.addEventListener('click', () => {
+        this.showStep(this.stepOperations);
       });
     }
 
-    // Tillbaka från räknesätt till områden
+    if (btnDomainGeometry) {
+      btnDomainGeometry.addEventListener('click', () => {
+        this.setupGeometrySubcategories();
+      });
+    }
+
+    // Tillbaka till domäner
     const btnBackToDomains = document.getElementById('btn-back-to-domains');
     if (btnBackToDomains) {
-      btnBackToDomains.addEventListener('click', (e) => {
-        if (e) e.preventDefault();
-        this.showStartScreen();
+      btnBackToDomains.addEventListener('click', () => {
+        this.showStep(this.stepMain);
       });
     }
 
-    // Räknesätt
-    const btnAdd = document.getElementById('btn-category-addition');
-    if (btnAdd) {
-      btnAdd.addEventListener('click', (e) => {
-        if (e) e.preventDefault();
-        this.setupSubcategoryMenu('addition', 'Addition (+)', [
-          { label: 'Ental', key: 'ental' },
-          { label: 'Tiotal', key: 'tiotal' },
-          { label: 'Hundratal', key: 'hundratal' },
-          { label: 'Problemlösning', key: 'problemlosning' }
-        ]);
+    // Steg 2: Räknesätt (Aritmetik)
+    const opButtons = [
+      { id: 'btn-category-addition', key: 'addition', title: 'Addition', subcats: [
+        { key: 'ental', label: 'Ental (0-9)' },
+        { key: 'tiotal', label: 'Tiotal (10-99)' },
+        { key: 'hundratal', label: 'Hundratal (100-999)' },
+        { key: 'problemlosning', label: 'Problemlösning' }
+      ]},
+      { id: 'btn-category-subtraction', key: 'subtraction', title: 'Subtraktion', subcats: [
+        { key: 'ental', label: 'Ental (0-9)' },
+        { key: 'tiotal', label: 'Tiotal (10-99)' },
+        { key: 'hundratal', label: 'Hundratal (100-999)' },
+        { key: 'problemlosning', label: 'Problemlösning' }
+      ]},
+      { id: 'btn-category-multiplication', key: 'multiplication', title: 'Multiplikation', subcats: [
+        { key: 'tabell_2_5_10', label: '2, 5 & 10:ans tabell' },
+        { key: 'tabell_3_4_6', label: '3, 4 & 6:ans tabell' },
+        { key: 'tabell_7_8_9', label: '7, 8 & 9:ans tabell' },
+        { key: 'problemlosning', label: 'Problemlösning' }
+      ]},
+      { id: 'btn-category-division', key: 'division', title: 'Division', subcats: [
+        { key: 'tabell_2_5_10', label: '2, 5 & 10:ans tabell' },
+        { key: 'tabell_3_4_6', label: '3, 4 & 6:ans tabell' },
+        { key: 'tabell_7_8_9', label: '7, 8 & 9:ans tabell' },
+        { key: 'problemlosning', label: 'Problemlösning' }
+      ]}
+    ];
+
+    opButtons.forEach(item => {
+      const btn = document.getElementById(item.id);
+      if (btn) {
+        btn.addEventListener('click', () => {
+          this.setupSubcategoryMenu(item.key, item.title, item.subcats);
+        });
+      }
+    });
+
+    // Tillbaka till delmoment
+    const btnBackToSubcats = document.getElementById('btn-back-to-subcats');
+    if (btnBackToSubcats) {
+      btnBackToSubcats.addEventListener('click', () => {
+        this.showStep(this.stepSubcategories);
       });
     }
 
-    const btnSub = document.getElementById('btn-category-subtraction');
-    if (btnSub) {
-      btnSub.addEventListener('click', (e) => {
-        if (e) e.preventDefault();
-        this.setupSubcategoryMenu('subtraction', 'Subtraktion (–)', [
-          { label: 'Ental', key: 'ental' },
-          { label: 'Tiotal', key: 'tiotal' },
-          { label: 'Hundratal', key: 'hundratal' },
-          { label: 'Problemlösning', key: 'problemlosning' }
-        ]);
-      });
-    }
-
-    const btnMult = document.getElementById('btn-category-multiplication');
-    if (btnMult) {
-      btnMult.addEventListener('click', (e) => {
-        if (e) e.preventDefault();
-        this.setupSubcategoryMenu('multiplication', 'Multiplikation (×)', [
-          { label: '2, 5 & 10:an', key: 'tabell_2_5_10' },
-          { label: '3, 4 & 6:an', key: 'tabell_3_4_6' },
-          { label: '7, 8 & 9:an', key: 'tabell_7_8_9' },
-          { label: 'Problemlösning', key: 'problemlosning' }
-        ]);
-      });
-    }
-
-    const btnDiv = document.getElementById('btn-category-division');
-    if (btnDiv) {
-      btnDiv.addEventListener('click', (e) => {
-        if (e) e.preventDefault();
-        this.setupSubcategoryMenu('division', 'Division (÷)', [
-          { label: '2, 5 & 10:an', key: 'tabell_2_5_10' },
-          { label: '3, 4 & 6:an', key: 'tabell_3_4_6' },
-          { label: '7, 8 & 9:an', key: 'tabell_7_8_9' },
-          { label: 'Problemlösning', key: 'problemlosning' }
-        ]);
-      });
-    }
-
-    // Tillbaka från nivåmeny till delmoment
-    const btnBackSubcats = document.getElementById('btn-back-to-subcats');
-    if (btnBackSubcats) {
-      btnBackSubcats.addEventListener('click', (e) => {
-        if (e) e.preventDefault();
-        if (this.menuTiers) this.menuTiers.classList.add('hidden');
-        if (this.menuSubcats) this.menuSubcats.classList.remove('hidden');
-      });
-    }
-
+    // Steg 4: Nivåknappar (Brons, Silver, Guld)
     const tierBtns = document.querySelectorAll('.btn-tier');
-    tierBtns.forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        if (e) e.preventDefault();
-        if (btn.disabled) return;
+    tierBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (btn.classList.contains('btn-locked') || btn.disabled) return;
         const tier = btn.getAttribute('data-tier');
-        this.showGameScreen();
-        if (this.onStartGame) {
-          this.onStartGame(this.selectedOperation, this.selectedCategory, tier);
-        }
+        this.selectedTier = tier;
+        this.startGame();
       });
     });
 
+    // Tillbaka till meny från spelet
     const btnMenu = document.getElementById('btn-menu');
     if (btnMenu) {
-      btnMenu.addEventListener('click', (e) => {
-        if (e) e.preventDefault();
+      btnMenu.addEventListener('click', () => {
         this.showTierMenu();
-        if (this.onReturnToMenu) {
-          this.onReturnToMenu();
-        }
+        if (this.onReturnToMenu) this.onReturnToMenu();
       });
     }
   }
 
-  showStartScreen() {
-    if (this.startScreen) this.startScreen.classList.remove('hidden');
-    if (this.gameScreen) this.gameScreen.classList.add('hidden');
-    if (this.menuMain) this.menuMain.classList.remove('hidden');
-    if (this.menuOperations) this.menuOperations.classList.add('hidden');
-    if (this.menuSubcats) this.menuSubcats.classList.add('hidden');
-    if (this.menuTiers) this.menuTiers.classList.add('hidden');
+  setupGeometrySubcategories() {
+    this.setupSubcategoryMenu('shapes', 'Vinklar och former', [
+      { key: 'former', label: 'Former' },
+      { key: 'vinklar', label: 'Vinklar (Kommer snart)', disabled: true },
+      { key: 'omkrets_area', label: 'Omkrets & Area (Kommer snart)', disabled: true }
+    ]);
   }
 
-  showOperationsMenu() {
-    if (this.startScreen) this.startScreen.classList.remove('hidden');
-    if (this.gameScreen) this.gameScreen.classList.add('hidden');
-    if (this.menuMain) this.menuMain.classList.add('hidden');
-    if (this.menuOperations) this.menuOperations.classList.remove('hidden');
-    if (this.menuSubcats) this.menuSubcats.classList.add('hidden');
-    if (this.menuTiers) this.menuTiers.classList.add('hidden');
-  }
+  setupSubcategoryMenu(opKey, titleText, subcatList) {
+    this.selectedOperation = opKey;
 
-  setupSubcategoryMenu(operationKey, titleText, subcatList) {
-    this.selectedOperation = operationKey;
-    if (this.subcatMenuTitle) {
-      this.subcatMenuTitle.innerText = titleText;
-    }
+    const titleElem = document.getElementById('subcat-menu-title');
+    if (titleElem) titleElem.innerText = titleText;
 
-    if (!this.menuSubcats) return;
-    const container = this.menuSubcats.querySelector('.menu-buttons');
+    const container = this.stepSubcategories.querySelector('.menu-buttons');
     if (!container) return;
 
     container.innerHTML = '';
 
-    subcatList.forEach((item) => {
+    subcatList.forEach(item => {
       const btn = document.createElement('button');
-      btn.className = 'btn-subcat';
-      if (item.key === 'problemlosning') {
-        btn.classList.add('btn-problem');
-      }
+      btn.className = item.disabled ? 'btn-primary btn-locked' : 'btn-primary';
       btn.innerText = item.label;
-      btn.addEventListener('click', (e) => {
-        if (e) e.preventDefault();
-        this.selectedCategory = item.key;
-        const catLabels = {
-          ental: 'Ental', tiotal: 'Tiotal', hundratal: 'Hundratal',
-          tabell_2_5_10: '2, 5 & 10:an', tabell_3_4_6: '3, 4 & 6:an', tabell_7_8_9: '7, 8 & 9:an',
-          problemlosning: 'Problemlösning'
-        };
-        const opLabels = { 
-          addition: 'Addition', 
-          subtraction: 'Subtraktion', 
-          multiplication: 'Multiplikation',
-          division: 'Division'
-        };
-        
-        if (this.tierMenuTitle) {
-          this.tierMenuTitle.innerText = `${opLabels[this.selectedOperation]} – ${catLabels[this.selectedCategory]}`;
-        }
+      btn.disabled = !!item.disabled;
 
-        if (this.menuSubcats) this.menuSubcats.classList.add('hidden');
-        if (this.menuTiers) this.menuTiers.classList.remove('hidden');
-        this.updateTierButtons();
-      });
+      if (!item.disabled) {
+        btn.addEventListener('click', () => {
+          this.selectedCategory = item.key;
+          this.showTierMenu();
+        });
+      }
+
       container.appendChild(btn);
     });
 
     const backBtn = document.createElement('button');
-    backBtn.id = 'btn-back-to-ops';
     backBtn.className = 'btn-secondary';
     backBtn.innerText = 'Tillbaka';
-    backBtn.addEventListener('click', (e) => {
-      if (e) e.preventDefault();
-      if (this.menuSubcats) this.menuSubcats.classList.add('hidden');
-      if (this.menuOperations) this.menuOperations.classList.remove('hidden');
-    });
-    container.appendChild(backBtn);
-
-    if (this.menuOperations) this.menuOperations.classList.add('hidden');
-    if (this.menuSubcats) this.menuSubcats.classList.remove('hidden');
-  }
-
-  updateTierButtons() {
-    const op = this.selectedOperation;
-    const cat = this.selectedCategory;
-
-    const isBronsDone = this.getItemSafe(`completed_${op}_${cat}_brons`) === 'true';
-    const isSilverDone = this.getItemSafe(`completed_${op}_${cat}_silver`) === 'true';
-    const isGuldDone = this.getItemSafe(`completed_${op}_${cat}_guld`) === 'true';
-
-    this.setBtnState('btn-tier-brons', 'badge-brons', true, isBronsDone);
-    this.setBtnState('btn-tier-silver', 'badge-silver', isBronsDone, isSilverDone);
-    this.setBtnState('btn-tier-guld', 'badge-guld', isSilverDone, isGuldDone);
-  }
-
-  setBtnState(btnId, badgeId, isUnlocked, isCompleted) {
-    const btn = document.getElementById(btnId);
-    const badge = document.getElementById(badgeId);
-
-    if (!btn || !badge) return;
-
-    if (isUnlocked) {
-      btn.disabled = false;
-      btn.classList.remove('btn-locked');
-      if (isCompleted) {
-        badge.innerText = 'Klarad';
-        badge.className = 'tier-status status-completed';
+    backBtn.addEventListener('click', () => {
+      if (opKey === 'shapes') {
+        this.showStep(this.stepMain);
       } else {
-        badge.innerText = 'Öppen';
-        badge.className = 'tier-status';
+        this.showStep(this.stepOperations);
       }
-    } else {
-      btn.disabled = true;
-      btn.classList.add('btn-locked');
-      badge.innerText = 'Låst';
-      badge.className = 'tier-status';
-    }
+    });
+
+    container.appendChild(backBtn);
+    this.showStep(this.stepSubcategories);
   }
 
   showTierMenu() {
-    if (this.startScreen) this.startScreen.classList.remove('hidden');
-    if (this.gameScreen) this.gameScreen.classList.add('hidden');
-    if (this.menuMain) this.menuMain.classList.add('hidden');
-    if (this.menuOperations) this.menuOperations.classList.add('hidden');
-    if (this.menuSubcats) this.menuSubcats.classList.add('hidden');
-    if (this.menuTiers) this.menuTiers.classList.remove('hidden');
     this.updateTierButtons();
+    this.showStep(this.stepTiers);
+    if (this.screenStart) this.screenStart.classList.remove('hidden');
+    if (this.screenGame) this.screenGame.classList.add('hidden');
+  }
+
+  showStartScreen() {
+    this.showStep(this.stepMain);
+    if (this.screenStart) this.screenStart.classList.remove('hidden');
+    if (this.screenGame) this.screenGame.classList.add('hidden');
   }
 
   showGameScreen() {
-    if (this.startScreen) this.startScreen.classList.add('hidden');
-    if (this.gameScreen) this.gameScreen.classList.remove('hidden');
+    if (this.screenStart) this.screenStart.classList.add('hidden');
+    if (this.screenGame) this.screenGame.classList.remove('hidden');
+  }
+
+  updateTierButtons() {
+    const silverBtn = document.getElementById('btn-tier-silver');
+    const goldBtn = document.getElementById('btn-tier-guld');
+    const badgeSilver = document.getElementById('badge-silver');
+    const badgeGold = document.getElementById('badge-guld');
+
+    let bronsDone = false;
+    let silverDone = false;
+
+    try {
+      bronsDone = localStorage.getItem(`completed_${this.selectedOperation}_${this.selectedCategory}_brons`) === 'true';
+      silverDone = localStorage.getItem(`completed_${this.selectedOperation}_${this.selectedCategory}_silver`) === 'true';
+    } catch (e) {}
+
+    // Silver låses upp om Brons är avklarad
+    if (silverBtn) {
+      if (bronsDone) {
+        silverBtn.classList.remove('btn-locked');
+        silverBtn.disabled = false;
+        if (badgeSilver) badgeSilver.innerText = 'Öppen';
+      } else {
+        silverBtn.classList.add('btn-locked');
+        silverBtn.disabled = true;
+        if (badgeSilver) badgeSilver.innerText = 'Låst';
+      }
+    }
+
+    // Guld låses upp om Silver är avklarad
+    if (goldBtn) {
+      if (silverDone) {
+        goldBtn.classList.remove('btn-locked');
+        goldBtn.disabled = false;
+        if (badgeGold) badgeGold.innerText = 'Öppen';
+      } else {
+        goldBtn.classList.add('btn-locked');
+        goldBtn.disabled = true;
+        if (badgeGold) badgeGold.innerText = 'Låst';
+      }
+    }
+  }
+
+  showStep(stepElement) {
+    [this.stepMain, this.stepOperations, this.stepSubcategories, this.stepTiers].forEach(step => {
+      if (step) step.classList.add('hidden');
+    });
+    if (stepElement) stepElement.classList.remove('hidden');
+  }
+
+  startGame() {
+    this.showGameScreen();
+    if (this.onStartGame) {
+      this.onStartGame(this.selectedOperation, this.selectedCategory, this.selectedTier);
+    }
   }
 }
