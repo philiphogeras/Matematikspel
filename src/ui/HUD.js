@@ -39,6 +39,7 @@ export class HUD {
   }
 
   formatColoredNumber(num) {
+    if (num === undefined || num === null) return '';
     const str = num.toString();
     const len = str.length;
     const posClasses = ['digit-ental', 'digit-tiotal', 'digit-hundratal'];
@@ -176,12 +177,6 @@ export class HUD {
     }
   }
 
-  setupSubcategoryMenu(operationKey, titleText, subcatList) {
-    if (this.menuManager) {
-      this.menuManager.setupSubcategoryMenu(operationKey, titleText, subcatList);
-    }
-  }
-
   showStartScreen() {
     if (this.speechManager) {
       this.speechManager.cancel();
@@ -212,7 +207,7 @@ export class HUD {
     const catLabels = {
       ental: 'Ental', tiotal: 'Tiotal', hundratal: 'Hundratal',
       tabell_2_5_10: '2, 5 & 10:an', tabell_3_4_6: '3, 4 & 6:an', tabell_7_8_9: '7, 8 & 9:an',
-      problemlosning: 'Problemlösning'
+      former: 'Former', problemlosning: 'Problemlösning'
     };
     const tierNames = { brons: 'Brons', silver: 'Silver', guld: 'Guld' };
     
@@ -220,6 +215,7 @@ export class HUD {
     if (operation === 'subtraction') symbol = '–';
     if (operation === 'multiplication') symbol = '×';
     if (operation === 'division') symbol = '÷';
+    if (operation === 'shapes') symbol = '📐';
 
     if (this.levelIndicator) {
       this.levelIndicator.innerText = `${catLabels[category] || category} (${symbol}): ${tierNames[tier] || tier}`;
@@ -235,54 +231,41 @@ export class HUD {
     }
   }
 
-displayQuestion(question) {
-  if (!question) return;
+  displayQuestion(question) {
+    if (!question) return;
 
-  this.currentQuestion = question;
+    this.currentQuestion = question;
 
-  if (this.helpModal) {
-    this.helpModal.setCurrentQuestion(question);
-  }
-  
-  if (this.keypad) {
-    this.keypad.setQuestion(question);
-  }
-
-  if (this.questionElement) {
-    if (question.isTextProblem || question.isGeometry || question.text) {
-      this.questionElement.innerText = question.text;
-      this.questionElement.className = 'question-text-mode';
-    } else {
-      const coloredNum1 = this.formatColoredNumber(question.num1);
-      const coloredNum2 = this.formatColoredNumber(question.num2);
-      
-      this.questionElement.innerHTML = `${coloredNum1} ${question.operator} ${coloredNum2} = ?`;
-      this.questionElement.className = 'question-math-mode';
+    if (this.helpModal) {
+      this.helpModal.setCurrentQuestion(question);
     }
-  }
+    
+    if (this.keypad) {
+      this.keypad.setQuestion(question);
+    }
 
-  if (this.speechManager && this.speechManager.isEnabled) {
-    const textToRead = this.speechManager.formatQuestionForSpeech(question);
-    this.speechManager.speak(textToRead);
-  } else if (this.speechManager) {
-    this.speechManager.cancel();
-  }
+    if (this.questionElement) {
+      if (question.isTextProblem || question.isGeometry || question.text) {
+        this.questionElement.innerText = question.text;
+        this.questionElement.className = 'question-text-mode';
+      } else {
+        const coloredNum1 = this.formatColoredNumber(question.num1);
+        const coloredNum2 = this.formatColoredNumber(question.num2);
+        
+        this.questionElement.innerHTML = `${coloredNum1} ${question.operator} ${coloredNum2} = ?`;
+        this.questionElement.className = 'question-math-mode';
+      }
+    }
 
-  this.clearFeedback();
-}
+    if (this.speechManager && this.speechManager.isEnabled) {
+      const textToRead = this.speechManager.formatQuestionForSpeech(question);
+      this.speechManager.speak(textToRead);
+    } else if (this.speechManager) {
+      this.speechManager.cancel();
+    }
 
-  if (this.speechManager && this.speechManager.isEnabled) {
-    const textToRead = this.speechManager.formatQuestionForSpeech(question);
-    this.speechManager.speak(textToRead);
-  } else if (this.speechManager) {
-    this.speechManager.cancel();
+    this.clearFeedback();
   }
-
-  if (this.keypad) {
-    this.keypad.clearInput();
-  }
-  this.clearFeedback();
-}
 
   unlockInput() {
     if (this.keypad) {
