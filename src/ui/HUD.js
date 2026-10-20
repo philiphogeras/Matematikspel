@@ -55,6 +55,12 @@ export class HUD {
     return html;
   }
 
+  formatColoredExpression(expr) {
+    if (!expr) return '';
+    // Formatiera alla siffersekvenser i uttrycket med positionella färger (ental/tiotal/hundratal)
+    return expr.replace(/\b\d+\b/g, (match) => this.formatColoredNumber(match));
+  }
+
   initSettingsEvents() {
     const btnSettings = document.getElementById('btn-settings');
     const btnCloseSettings = document.getElementById('btn-close-settings');
@@ -265,7 +271,6 @@ export class HUD {
       this.roundIndicator.innerText = `Omgång ${round}/3 • Fråga ${currentQuestionNum}/${totalQuestions}`;
     }
 
-    // Färger för respektive nivå
     const tierColors = {
       brons: '#e2a76f',
       silver: '#94a3b8',
@@ -278,7 +283,7 @@ export class HUD {
     }
   }
 
- displayQuestion(question) {
+  displayQuestion(question) {
     if (!question) return;
 
     this.currentQuestion = question;
@@ -296,8 +301,8 @@ export class HUD {
         this.questionElement.innerText = question.text || '';
         this.questionElement.className = 'question-text-mode';
       } else if (question.isCustomFormat) {
-        // Visar okända termer (t.ex. ? + 5 = 11) och flerstegsfrågor exakt som de är skrivna
-        this.questionElement.innerText = question.text || '';
+        // Färgkodar alla siffror i uttrycket (t.ex. ? + 5 = 11 där 5 är blå och 11 har gul tiotalssiffra)
+        this.questionElement.innerHTML = this.formatColoredExpression(question.text || '');
         this.questionElement.className = 'question-math-mode';
       } else if (question.num1 !== undefined && question.num2 !== undefined && !question.isGeometry) {
         const coloredNum1 = this.formatColoredNumber(question.num1);
@@ -306,7 +311,7 @@ export class HUD {
         this.questionElement.innerHTML = `${coloredNum1} ${question.operator} ${coloredNum2} = ?`;
         this.questionElement.className = 'question-math-mode';
       } else {
-        this.questionElement.innerText = question.text || '';
+        this.questionElement.innerHTML = this.formatColoredExpression(question.text || '');
         this.questionElement.className = 'question-math-mode';
       }
     }
@@ -319,6 +324,12 @@ export class HUD {
     }
 
     this.clearFeedback();
+  }
+
+  unlockInput() {
+    if (this.keypad) {
+      this.keypad.unlockInput();
+    }
   }
 
   scheduleWrongAnswerReset(ms = 3000) {
