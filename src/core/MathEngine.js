@@ -1,12 +1,12 @@
-import { AdditionEngine } from './generators/AdditionEngine.js';
-import { SubtractionEngine } from './generators/SubtractionEngine.js';
-import { MultiplicationEngine } from './generators/MultiplicationEngine.js';
-import { DivisionEngine } from './generators/DivisionEngine.js';
+import { AdditionEngine } from './generators/arithmetic/AdditionEngine.js';
+import { SubtractionEngine } from './generators/arithmetic/SubtractionEngine.js';
+import { MultiplicationEngine } from './generators/arithmetic/MultiplicationEngine.js';
+import { DivisionEngine } from './generators/arithmetic/DivisionEngine.js';
 import { ShapesEngine } from './generators/geometry/ShapesEngine.js';
 
 /**
  * MathEngine.js
- * Koordinator för frågegenerering och rättning över alla områden.
+ * Huvudkoordinator för frågegenerering och rättning.
  */
 export class MathEngine {
   constructor() {
@@ -38,17 +38,24 @@ export class MathEngine {
     const op = (this.operation || '').toLowerCase();
     const cat = (this.category || '').toLowerCase();
 
-    // Strikt separation mellan Geometri och Aritmetik
+    // Geometri
     if (op === 'shapes' || cat === 'former' || op === 'geometry') {
       this.currentQuestion = this.shapesEngine.generateQuestion(this.tier);
-    } else if (op === 'subtraction') {
+    } 
+    // Subtraktion
+    else if (op === 'subtraction') {
       this.currentQuestion = this.subtractionEngine.generateQuestion(this.category, this.tier);
-    } else if (op === 'multiplication') {
+    } 
+    // Multiplikation
+    else if (op === 'multiplication') {
       this.currentQuestion = this.multiplicationEngine.generateQuestion(this.category, this.tier);
-    } else if (op === 'division') {
+    } 
+    // Division
+    else if (op === 'division') {
       this.currentQuestion = this.divisionEngine.generateQuestion(this.category, this.tier);
-    } else {
-      // Standard/Fallback för Addition & Aritmetik
+    } 
+    // Addition & standard fallback för räknekunskap
+    else {
       this.currentQuestion = this.additionEngine.generateQuestion(this.category, this.tier);
     }
 
