@@ -1,10 +1,102 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(3px);
+}
+
+.modal-content {
+  position: relative;
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 20px 24px;
+  width: 90%;
+  max-width: 480px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+}
+
+.help-modal-content {
+  max-width: 500px;
+  width: 92%;
+}
+
+.help-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+#help-instructions {
+  font-size: 1rem;
+  line-height: 1.45;
+  color: #334155;
+  margin: 8px 0 12px 0;
+  min-height: 54px;
+  text-align: center;
+}
+
+#help-visual-area {
+  width: 100%;
+  min-height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 4px 0 12px 0;
+}
+
+.help-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.btn-help-nav {
+  background-color: #f1f5f9;
+  color: #1e293b;
+  font-size: 1.3rem;
+  font-weight: 700;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #cbd5e1;
+}
+
+.btn-help-nav:hover {
+  background-color: #3b82f6;
+  color: #ffffff;
+  border-color: #3b82f6;
+}
+
+.help-page-indicator {
+  font-size: 0.95rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
 /* Vertical Setup Grid för Hjälpruta */
 .vertical-setup-grid {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin: 8px auto;
+  margin: 4px auto;
   padding: 10px 16px;
   background-color: #f8fafc;
   border-radius: 14px;
@@ -27,12 +119,12 @@
 }
 
 .grid-cell {
-  width: 38px;
-  height: 42px;
+  width: 36px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.4rem;
+  font-size: 1.35rem;
   font-weight: 700;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
@@ -68,6 +160,14 @@
   font-weight: 800;
 }
 
+.op-symbol {
+  width: 24px;
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
 /* Steg-för-steg låda på sida 2 */
 .help-step-box {
   display: flex;
@@ -79,21 +179,21 @@
   border-radius: 12px;
   width: 100%;
   max-width: 420px;
-  margin: 6px auto;
+  margin: 4px auto;
   text-align: left;
 }
 
 .step-line {
-  font-size: 1.05rem;
+  font-size: 1.02rem;
   color: #334155;
   line-height: 1.4;
 }
 
 .step-summary {
-  margin-top: 6px;
+  margin-top: 4px;
   padding-top: 6px;
   border-top: 1.5px dashed #cbd5e1;
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   color: #1e3a8a;
 }
 

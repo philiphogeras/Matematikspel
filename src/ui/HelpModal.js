@@ -69,13 +69,15 @@ export class HelpModal {
 
   // --- SIDA 1: UPPTÄLLNING I FÄRGKODADE RUTOR ---
   renderPage1VerticalSetup(q) {
-    this.instructionsEl.innerHTML = `
-      <strong>Uppställning:</strong><br>
-      Sätt talen under varandra. Räkna från höger till vänster:<br>
-      <span style="color:#2563eb; font-weight:bold;">Blå = Ental</span> | 
-      <span style="color:#d97706; font-weight:bold;">Orange = Tiotal</span> | 
-      <span style="color:#16a34a; font-weight:bold;">Grön = Hundratal</span>
-    `;
+    if (this.instructionsEl) {
+      this.instructionsEl.innerHTML = `
+        <strong>Uppställning:</strong><br>
+        Sätt talen under varandra. Räkna från höger till vänster:<br>
+        <span style="color:#2563eb; font-weight:bold;">Blå = Ental</span> | 
+        <span style="color:#d97706; font-weight:bold;">Orange = Tiotal</span> | 
+        <span style="color:#16a34a; font-weight:bold;">Grön = Hundratal</span>
+      `;
+    }
 
     const parsed = this.parseQuestionNumbers(q);
     const numbers = parsed.numbers;
@@ -86,22 +88,18 @@ export class HelpModal {
     numbers.forEach((num, index) => {
       const isLast = index === numbers.length - 1;
       const numStr = num.toString();
-      const padLen = Math.max(...numbers.map(n => n.toString().length), (parsed.target || 0).toString().length, 2);
-      const padded = numStr.padStart(padLen, ' ');
+      const maxLen = Math.max(...numbers.map(n => n.toString().length), (parsed.target || 0).toString().length, 2);
+      const padded = numStr.padStart(maxLen, ' ');
 
       html += `<div class="vertical-grid-row ${isLast ? 'border-bottom' : ''}">`;
-      if (isLast) {
-        html += `<span class="op-symbol">${operator}</span>`;
-      } else {
-        html += `<span class="op-symbol"></span>`;
-      }
+      html += `<span class="op-symbol">${isLast ? operator : ''}</span>`;
 
-      for (let i = 0; i < padLen; i++) {
+      for (let i = 0; i < maxLen; i++) {
         const char = padded[i];
         if (char === ' ') {
           html += `<div class="grid-cell empty"></div>`;
         } else {
-          const posIdx = padLen - 1 - i;
+          const posIdx = maxLen - 1 - i;
           const cls = posIdx === 0 ? 'cell-ental' : posIdx === 1 ? 'cell-tiotal' : 'cell-hundratal';
           html += `<div class="grid-cell ${cls}">${char}</div>`;
         }
@@ -111,44 +109,48 @@ export class HelpModal {
 
     // Svarsrad / Frågeteckensrad
     const targetStr = parsed.target !== null ? parsed.target.toString() : '?';
-    const padLen = Math.max(...numbers.map(n => n.toString().length), targetStr.length, 2);
-    const paddedTarget = targetStr.padStart(padLen, ' ');
+    const maxLen = Math.max(...numbers.map(n => n.toString().length), targetStr.length, 2);
+    const paddedTarget = targetStr.padStart(maxLen, ' ');
 
     html += `<div class="vertical-grid-row result-row">`;
     html += `<span class="op-symbol">=</span>`;
-    for (let i = 0; i < padLen; i++) {
+    for (let i = 0; i < maxLen; i++) {
       const char = paddedTarget[i];
       if (char === ' ') {
         html += `<div class="grid-cell empty"></div>`;
       } else if (char === '?') {
         html += `<div class="grid-cell cell-unknown">?</div>`;
       } else {
-        const posIdx = padLen - 1 - i;
+        const posIdx = maxLen - 1 - i;
         const cls = posIdx === 0 ? 'cell-ental' : posIdx === 1 ? 'cell-tiotal' : 'cell-hundratal';
         html += `<div class="grid-cell ${cls}">${char}</div>`;
       }
     }
     html += `</div></div>`;
 
-    this.visualEl.innerHTML = html;
+    if (this.visualEl) {
+      this.visualEl.innerHTML = html;
+    }
   }
 
   // --- SIDA 2: DELSTEGSBERÄKNING / UPPDELNING ---
   renderPage2Steps(q) {
     const parsed = this.parseQuestionNumbers(q);
 
+    let instrHtml = '';
+    let visualHtml = '';
+
     if (q.text && q.text.includes('? +')) {
-      // Okänd första term: ? + 5 = 11
       const known = parsed.numbers[0] || 5;
       const total = parsed.target || 11;
       const ans = parseInt(q.correctAnswer, 10) || (total - known);
 
-      this.instructionsEl.innerHTML = `
+      instrHtml = `
         <strong>Okänd term (Hitta det saknade talet):</strong><br>
-        Tänk baklänges med minus, eller räkna uppåt från <span class="digit-ental">${known}</span> till <span class="digit-tiotal">1</span><span class="digit-ental">${total % 10}</span>.
+        Tänk baklänges med minus, eller räkna uppåt från <span class="digit-ental">${known}</span> till <span class="digit-tiotal">${Math.floor(total/10) || ''}</span><span class="digit-ental">${total % 10}</span>.
       `;
 
-      this.visualEl.innerHTML = `
+      visualHtml = `
         <div class="help-step-box">
           <div class="step-line"><strong>Sätt 1 (Räkna uppåt):</strong> Starta på ${known} ➔ Hoppa ${ans} steg ➔ Nå ${total}</div>
           <div class="step-line"><strong>Sätt 2 (Minus):</strong> ${total} - ${known} = <span class="highlight-ans">${ans}</span></div>
@@ -156,17 +158,16 @@ export class HelpModal {
         </div>
       `;
     } else if (q.text && q.text.includes('+ ?')) {
-      // Okänd andra term: 6 + ? = 11
       const known = parsed.numbers[0] || 6;
       const total = parsed.target || 11;
       const ans = parseInt(q.correctAnswer, 10) || (total - known);
 
-      this.instructionsEl.innerHTML = `
+      instrHtml = `
         <strong>Okänd term (Hitta det saknade talet):</strong><br>
-        Hur mycket fattas för att nå från <span class="digit-ental">${known}</span> upp till <span class="digit-tiotal">1</span><span class="digit-ental">${total % 10}</span>?
+        Hur mycket fattas för att nå från <span class="digit-ental">${known}</span> upp till <span class="digit-tiotal">${Math.floor(total/10) || ''}</span><span class="digit-ental">${total % 10}</span>?
       `;
 
-      this.visualEl.innerHTML = `
+      visualHtml = `
         <div class="help-step-box">
           <div class="step-line"><strong>Sätt 1:</strong> Starta på ${known} och räkna upp till ${total} (+${ans}).</div>
           <div class="step-line"><strong>Sätt 2:</strong> Ta hela summan ${total} och dra bort ${known} (${total} - ${known} = <span class="highlight-ans">${ans}</span>).</div>
@@ -174,7 +175,6 @@ export class HelpModal {
         </div>
       `;
     } else if (parsed.numbers.length > 2) {
-      // Flerstegsräkning (3-4 termer): e.g. 2 + 3 + 4 = ?
       const nums = parsed.numbers;
       let stepHtml = '';
       let currentSum = nums[0];
@@ -186,19 +186,18 @@ export class HelpModal {
         stepHtml += `<div class="step-line">Steg ${i}: ${prev} + ${next} = <strong>${currentSum}</strong></div>`;
       }
 
-      this.instructionsEl.innerHTML = `
+      instrHtml = `
         <strong>Räkna i delsteg:</strong><br>
         När du har flera tal lägger du ihop dem ett i taget från vänster till höger!
       `;
 
-      this.visualEl.innerHTML = `
+      visualHtml = `
         <div class="help-step-box">
           ${stepHtml}
           <div class="step-summary">Totalt: <strong>${currentSum}</strong></div>
         </div>
       `;
     } else {
-      // Vanlig tvåstegsräkning (tiotal/ental uppdelning)
       const num1 = parsed.numbers[0] || 12;
       const num2 = parsed.numbers[1] || 15;
       const t1 = Math.floor(num1 / 10) * 10;
@@ -210,12 +209,12 @@ export class HelpModal {
       const total = sumT + sumE;
 
       if (num1 >= 10 || num2 >= 10) {
-        this.instructionsEl.innerHTML = `
+        instrHtml = `
           <strong>Dela upp i tiotal och ental:</strong><br>
           Räkna tiotalen för sig och entalen för sig, sedan lägger du ihop allt.
         `;
 
-        this.visualEl.innerHTML = `
+        visualHtml = `
           <div class="help-step-box">
             <div class="step-line">1. Tiotal: ${t1} + ${t2} = <strong>${sumT}</strong></div>
             <div class="step-line">2. Ental: ${e1} + ${e2} = <strong>${sumE}</strong></div>
@@ -223,12 +222,12 @@ export class HelpModal {
           </div>
         `;
       } else {
-        this.instructionsEl.innerHTML = `
+        instrHtml = `
           <strong>Räkna vidare:</strong><br>
           Börja på det största talet och räkna uppåt med det andra talet.
         `;
 
-        this.visualEl.innerHTML = `
+        visualHtml = `
           <div class="help-step-box">
             <div class="step-line">Börja på <strong>${Math.max(num1, num2)}</strong></div>
             <div class="step-line">Lägg till <strong>${Math.min(num1, num2)}</strong> enstaka steg.</div>
@@ -237,6 +236,9 @@ export class HelpModal {
         `;
       }
     }
+
+    if (this.instructionsEl) this.instructionsEl.innerHTML = instrHtml;
+    if (this.visualEl) this.visualEl.innerHTML = visualHtml;
   }
 
   // --- SIDA 3: TALLINJE ---
@@ -258,15 +260,17 @@ export class HelpModal {
     const minVal = Math.max(0, start - 2);
     const maxVal = end + 2;
 
-    this.instructionsEl.innerHTML = `
-      <strong>Tallinje:</strong><br>
-      Starta vid <span style="color:#2563eb; font-weight:bold;">${start}</span> och hoppa framåt till <span style="color:#16a34a; font-weight:bold;">${end}</span> på tallinjen.
-    `;
+    if (this.instructionsEl) {
+      this.instructionsEl.innerHTML = `
+        <strong>Tallinje:</strong><br>
+        Starta vid <span style="color:#2563eb; font-weight:bold;">${start}</span> och hoppa framåt till <span style="color:#16a34a; font-weight:bold;">${end}</span> på tallinjen.
+      `;
+    }
 
     const svgWidth = 440;
-    const svgHeight = 110;
-    const lineY = 70;
-    const margin = 30;
+    const svgHeight = 130;
+    const lineY = 80;
+    const margin = 35;
     const usableWidth = svgWidth - margin * 2;
     const range = maxVal - minVal;
 
@@ -287,8 +291,8 @@ export class HelpModal {
     const x1 = getX(start);
     const x2 = getX(end);
     const midX = (x1 + x2) / 2;
-    const arcHeight = Math.min(45, Math.abs(x2 - x1) * 0.4);
-    const controlY = lineY - arcHeight - 15;
+    const arcHeight = Math.min(40, Math.abs(x2 - x1) * 0.35);
+    const controlY = lineY - arcHeight - 12;
 
     const arcSvg = `
       <path d="M ${x1} ${lineY - 6} Q ${midX} ${controlY} ${x2} ${lineY - 6}" fill="none" stroke="#2563eb" stroke-width="3" stroke-dasharray="4,2" />
@@ -301,14 +305,16 @@ export class HelpModal {
       <circle cx="${x2}" cy="${lineY}" r="5" fill="#16a34a" />
     `;
 
-    this.visualEl.innerHTML = `
-      <svg width="100%" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}" style="background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0;">
-        <line x1="${margin - 10}" y1="${lineY}" x2="${svgWidth - margin + 10}" y2="${lineY}" stroke="#475569" stroke-width="3" />
-        ${ticksSvg}
-        ${arcSvg}
-        ${pointsSvg}
-      </svg>
-    `;
+    if (this.visualEl) {
+      this.visualEl.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}" style="background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0; display:block; margin:auto;">
+          <line x1="${margin - 10}" y1="${lineY}" x2="${svgWidth - margin + 10}" y2="${lineY}" stroke="#475569" stroke-width="3" />
+          ${ticksSvg}
+          ${arcSvg}
+          ${pointsSvg}
+        </svg>
+      `;
+    }
   }
 
   parseQuestionNumbers(q) {
