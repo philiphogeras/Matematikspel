@@ -258,7 +258,7 @@ export class HUD {
     }
 
     if (this.speechManager && this.speechManager.isEnabled) {
-      const textToRead = this.speechManager.formatQuestionForSpeech(question);
+      const textToRead = this.speechManager.formatQuestionForSpeech(this.currentQuestion);
       this.speechManager.speak(textToRead);
     } else if (this.speechManager) {
       this.speechManager.cancel();
