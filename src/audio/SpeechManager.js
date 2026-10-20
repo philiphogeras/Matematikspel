@@ -91,22 +91,23 @@ export class SpeechManager {
     return this.isEnabled;
   }
 
-formatQuestionForSpeech(question) {
-  if (!question) return '';
-  
-  // Om det är en textfråga eller geometrifråga, läs upp texten som den är
-  if (question.isTextProblem || question.isGeometry || question.text) {
-    // Ta bort radbrytningar och menyvalssiffror vid uppläsning för renare tal
-    return question.text.replace(/\n/g, ' ');
-  }
+  formatQuestionForSpeech(question) {
+    if (!question) return '';
+    
+    // Om det är en textfråga eller geometrifråga
+    if (question.isTextProblem || question.isGeometry || question.text) {
+      const txt = question.text || '';
+      return txt.replace(/\n/g, ' ');
+    }
 
-  const ops = {
-    '+': 'plus',
-    '-': 'minus',
-    '–': 'minus',
-    '×': 'gånger',
-    '÷': 'delat med'
-  };
-  const opWord = ops[question.operator] || question.operator;
-  return `Vad blir ${question.num1} ${opWord} ${question.num2}?`;
+    const ops = {
+      '+': 'plus',
+      '-': 'minus',
+      '–': 'minus',
+      '×': 'gånger',
+      '÷': 'delat med'
+    };
+    const opWord = ops[question.operator] || question.operator;
+    return `Vad blir ${question.num1} ${opWord} ${question.num2}?`;
+  }
 }
