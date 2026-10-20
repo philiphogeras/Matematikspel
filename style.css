@@ -220,47 +220,53 @@ button:active {
 /* ==========================================================================
    4. SPELSKÄRM & TOPPBAR
    ========================================================================== */
-#game-screen {
-  justify-content: flex-start;
-}
-
+   
 #top-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 10px 16px;
+  padding: 8px 14px;
   background-color: #ffffff;
   border-radius: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   margin-bottom: 12px;
 }
 
-#level-indicator {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #1e3a8a;
+.top-bar-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-#round-indicator {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #64748b;
+.top-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-#progress-container {
-  width: 180px;
-  height: 14px;
-  background-color: #e2e8f0;
-  border-radius: 8px;
-  overflow: hidden;
+.btn-top-icon {
+  background-color: #f1f5f9;
+  border: 2px solid #cbd5e1;
+  color: #475569;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-#progress-bar {
-  height: 100%;
-  width: 0%;
+.btn-top-icon:hover, .btn-top-active {
   background-color: #3b82f6;
-  transition: width 0.3s ease;
+  color: #ffffff;
+  border-color: #3b82f6;
+}
+
+.btn-menu-top {
+  padding: 8px 16px;
+  font-size: 0.95rem;
 }
 
 /* ==========================================================================
