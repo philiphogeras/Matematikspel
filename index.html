@@ -4,21 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Matematikspelet</title>
+  <link rel="icon" href="data:,">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
   <div id="game-container">
-    <!-- Canvas för konfetti -->
     <canvas id="gameCanvas" width="1200" height="800"></canvas>
     
-    <!-- UI Overlay -->
     <div id="ui-overlay">
       
       <!-- STARTMENY -->
       <div id="start-screen" class="screen-panel">
         
-        <!-- STEP 1: OMRÅDESMENY (DOMÄNER) -->
+        <!-- STEP 1: OMRÅDESMENY -->
         <div id="menu-main" class="menu-step">
           <h1 class="game-title">Matematikspelet</h1>
           <p class="game-subtitle">Välj område:</p>
@@ -33,7 +32,7 @@
           </div>
         </div>
 
-        <!-- STEP 2: RÄKNESÄTTSMENY (UNDER RÄKNEKUNSKAP) -->
+        <!-- STEP 2: RÄKNESÄTTSMENY -->
         <div id="menu-operations" class="menu-step hidden">
           <h2 class="game-title">Räknekunskap</h2>
           <p class="game-subtitle">Välj räknesätt:</p>
@@ -50,9 +49,7 @@
         <div id="menu-subcategories" class="menu-step hidden">
           <h2 id="subcat-menu-title" class="game-title">Addition</h2>
           <p class="game-subtitle">Välj delmoment:</p>
-          <div class="menu-buttons">
-            <!-- Skapas dynamiskt i MenuManager.js -->
-          </div>
+          <div class="menu-buttons"></div>
         </div>
 
         <!-- STEP 4: NIVÅMENY -->
@@ -103,14 +100,11 @@
           <button id="btn-menu" class="btn-secondary">Meny</button>
         </div>
 
-        <!-- HUVUDINNEHÅLL (VÄNSTER = SPEL, HÖGER = SKISSRUTA) -->
         <div id="game-body">
           <div id="game-left">
             <div class="question-wrapper">
               <div class="question-card">
-                <!-- NY RITDUK FÖR GEOMETRISKA FIGURER -->
-                <canvas id="geometryCanvas" width="360" height="220" class="hidden"></canvas>
-
+                <canvas id="geometryCanvas" width="320" height="150" class="hidden"></canvas>
                 <div id="question-box">0 + 0 = ?</div>
                 <button id="btn-read-aloud" class="btn-speak-icon" aria-label="Läs upp fråga" title="Läs upp frågan">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -126,7 +120,6 @@
             <div id="feedback-message"></div>
           </div>
 
-          <!-- SKISSRUTA / KLADDBLOCK -->
           <div id="sketchpad-panel" class="sketchpad-panel hidden">
             <div class="sketchpad-header">
               <span class="sketchpad-title">Kladdblock</span>
@@ -152,7 +145,7 @@
           </div>
 
           <div class="setting-row">
-            <button id="btn-toggle-tts" class="btn-secondary btn-full">Uppläsning (Text-till-tal): På</button>
+            <button id="btn-toggle-tts" class="btn-secondary btn-full">Uppläsning (Text-till-tal): Av</button>
           </div>
 
           <hr class="modal-divider">
@@ -168,10 +161,9 @@
         </div>
       </div>
 
-      <!-- HJÄLPMODAL MED SIDBLÄDDRING -->
+      <!-- HJÄLPMODAL -->
       <div id="help-modal" class="modal-overlay hidden">
         <div class="modal-content help-modal-content">
-          
           <div class="help-modal-header">
             <button id="btn-help-prev" class="btn-help-nav" aria-label="Föregående sida">←</button>
             <h2 id="help-modal-title" class="modal-title">Hjälp med uträkning</h2>
@@ -179,18 +171,16 @@
           </div>
           
           <div id="vertical-setup" class="vertical-setup"></div>
-
           <div id="help-instructions" class="help-instructions"></div>
 
           <div class="help-modal-footer">
             <span id="help-page-indicator" class="help-page-indicator">Sida 1 av 2</span>
             <button id="btn-close-help" class="btn-primary">Jag förstår</button>
           </div>
-
         </div>
       </div>
 
-      <!-- TOPP-KNAPPAR (PENNA OCH KUGGHJUL) -->
+      <!-- TOPP-KNAPPAR -->
       <div class="top-controls">
         <button id="btn-sketch" class="btn-top-icon" aria-label="Skissruta" title="Öppna kladdblock">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

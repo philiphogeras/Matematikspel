@@ -38,24 +38,15 @@ export class MathEngine {
     const op = (this.operation || '').toLowerCase();
     const cat = (this.category || '').toLowerCase();
 
-    // Geometri
     if (op === 'shapes' || cat === 'former' || op === 'geometry') {
       this.currentQuestion = this.shapesEngine.generateQuestion(this.tier);
-    } 
-    // Subtraktion
-    else if (op === 'subtraction') {
+    } else if (op === 'subtraction') {
       this.currentQuestion = this.subtractionEngine.generateQuestion(this.category, this.tier);
-    } 
-    // Multiplikation
-    else if (op === 'multiplication') {
+    } else if (op === 'multiplication') {
       this.currentQuestion = this.multiplicationEngine.generateQuestion(this.category, this.tier);
-    } 
-    // Division
-    else if (op === 'division') {
+    } else if (op === 'division') {
       this.currentQuestion = this.divisionEngine.generateQuestion(this.category, this.tier);
-    } 
-    // Addition & standard fallback för räknekunskap
-    else {
+    } else {
       this.currentQuestion = this.additionEngine.generateQuestion(this.category, this.tier);
     }
 
