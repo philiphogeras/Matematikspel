@@ -38,14 +38,26 @@ class Game {
     this.hud.displayQuestion(question);
 
     const geoCanvas = document.getElementById('geometryCanvas');
+    const gameScreen = document.getElementById('game-screen');
 
-    // Om det är en geometrifråga, rita ut figuren på duken
-    if (question && question.isGeometry && this.geometryRenderer) {
+    // Växla domänklass på spelskärmen
+    if (question && question.isGeometry) {
+      if (gameScreen) {
+        gameScreen.classList.add('mode-geometry');
+        gameScreen.classList.remove('mode-arithmetic');
+      }
       if (geoCanvas) geoCanvas.classList.remove('hidden');
-      this.geometryRenderer.drawShape(question.shapeType, {
-        showVertices: question.showVertices
-      });
+
+      if (this.geometryRenderer) {
+        this.geometryRenderer.drawShape(question.shapeType, {
+          showVertices: question.showVertices
+        });
+      }
     } else {
+      if (gameScreen) {
+        gameScreen.classList.add('mode-arithmetic');
+        gameScreen.classList.remove('mode-geometry');
+      }
       if (geoCanvas) geoCanvas.classList.add('hidden');
       if (this.geometryRenderer) this.geometryRenderer.clear();
     }
@@ -104,11 +116,8 @@ class Game {
       }
 
     } else {
-      // FELAKTIGT SVAR:
       this.soundManager.playIncorrect();
       this.hud.showFeedback(false, result.message);
-
-      // Nollställ automatiskt efter 3 sekunder
       this.hud.scheduleWrongAnswerReset(3000);
     }
   }

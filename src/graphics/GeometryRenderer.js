@@ -1,7 +1,6 @@
 /**
  * GeometryRenderer.js
  * Ritar ut 2D-figurer, vinklar och geometriska hjälplinjer på Canvas.
- * Anpassad med hög färgkontrast och pedagogiska stöd (t.ex. hörnmarkeringar).
  */
 export class GeometryRenderer {
   constructor(canvasOrId) {
@@ -21,8 +20,8 @@ export class GeometryRenderer {
     if (!this.canvas) return;
     const parent = this.canvas.parentElement;
     if (parent && parent.clientWidth > 0) {
-      this.canvas.width = parent.clientWidth;
-      this.canvas.height = parent.clientHeight || 400;
+      this.canvas.width = Math.min(parent.clientWidth, 320);
+      this.canvas.height = 150;
     }
   }
 
@@ -31,11 +30,6 @@ export class GeometryRenderer {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
-  /**
-   * Ritar ut en geometrisk figur i mitten av canvasen.
-   * @param {string} shapeType - 'kvadrat', 'rektangel', 'triangel', 'cirkel'
-   * @param {Object} options - Valfria inställningar (t.ex. { showVertices: true })
-   */
   drawShape(shapeType, options = {}) {
     if (!this.ctx || !this.canvas) return;
 
@@ -46,12 +40,12 @@ export class GeometryRenderer {
     const height = this.canvas.height;
     const centerX = width / 2;
     const centerY = height / 2;
-    const size = Math.min(width, height) * 0.42; // Välbalanserad storlek
+    const size = Math.min(width, height) * 0.65;
 
-    const strokeColor = options.strokeColor || '#1e40af'; // Mörkblå konturlinje
-    const fillColor = options.fillColor || '#dbeafe';     // Ljusblå fyllning
-    const lineWidth = options.lineWidth || 5;
-    const showVertices = options.showVertices || false;   // Visa röda hörnmarkeringar
+    const strokeColor = options.strokeColor || '#1e40af';
+    const fillColor = options.fillColor || '#dbeafe';
+    const lineWidth = options.lineWidth || 4;
+    const showVertices = options.showVertices || false;
 
     this.ctx.save();
     this.ctx.fillStyle = fillColor;
@@ -63,7 +57,7 @@ export class GeometryRenderer {
     const type = (shapeType || '').toLowerCase();
 
     if (type === 'kvadrat' || type === 'square') {
-      const side = size;
+      const side = size * 0.85;
       const x = centerX - side / 2;
       const y = centerY - side / 2;
 
@@ -80,8 +74,8 @@ export class GeometryRenderer {
       ];
 
     } else if (type === 'rektangel' || type === 'rectangle') {
-      const w = size * 1.35;
-      const h = size * 0.7;
+      const w = size * 1.2;
+      const h = size * 0.65;
       const x = centerX - w / 2;
       const y = centerY - h / 2;
 
@@ -98,8 +92,8 @@ export class GeometryRenderer {
       ];
 
     } else if (type === 'triangel' || type === 'triangle') {
-      const h = size * 1.05;
-      const w = size * 1.15;
+      const h = size * 0.9;
+      const w = size * 1.0;
 
       const p1 = { x: centerX, y: centerY - h / 1.7 };
       const p2 = { x: centerX + w / 2, y: centerY + h / 2.2 };
@@ -116,17 +110,16 @@ export class GeometryRenderer {
       vertices = [p1, p2, p3];
 
     } else if (type === 'cirkel' || type === 'circle') {
-      const radius = size / 2;
+      const radius = (size * 0.8) / 2;
 
       this.ctx.beginPath();
       this.ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
       this.ctx.fill();
       this.ctx.stroke();
 
-      vertices = []; // Cirkel har 0 spetsiga hörn
+      vertices = [];
     }
 
-    // Ritar ut tydliga röda hörnpunkter om frågan kräver det
     if (showVertices && vertices.length > 0) {
       this.drawVertexDots(vertices);
     }
@@ -134,20 +127,17 @@ export class GeometryRenderer {
     this.ctx.restore();
   }
 
-  /**
-   * Ritar tydliga färgade punkter i hörnen för att underlätta hörnräkning.
-   */
   drawVertexDots(vertices) {
     if (!this.ctx) return;
 
     this.ctx.save();
-    this.ctx.fillStyle = '#ef4444';   // Tydlig röd färg
-    this.ctx.strokeStyle = '#ffffff'; // Vit kantlinje för kontrast
-    this.ctx.lineWidth = 3;
+    this.ctx.fillStyle = '#ef4444';
+    this.ctx.strokeStyle = '#ffffff';
+    this.ctx.lineWidth = 2.5;
 
     vertices.forEach((v) => {
       this.ctx.beginPath();
-      this.ctx.arc(v.x, v.y, 9, 0, Math.PI * 2);
+      this.ctx.arc(v.x, v.y, 8, 0, Math.PI * 2);
       this.ctx.fill();
       this.ctx.stroke();
     });
