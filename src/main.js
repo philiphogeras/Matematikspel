@@ -40,8 +40,10 @@ class Game {
     const geoCanvas = document.getElementById('geometryCanvas');
     const gameScreen = document.getElementById('game-screen');
 
-    // Växla domänklass på spelskärmen
-    if (question && question.isGeometry) {
+    // Strikt kontroll: Endast om det är en riktig geometrifråga
+    const isGeoQuestion = question && (question.isGeometry || question.shapeType);
+
+    if (isGeoQuestion) {
       if (gameScreen) {
         gameScreen.classList.add('mode-geometry');
         gameScreen.classList.remove('mode-arithmetic');

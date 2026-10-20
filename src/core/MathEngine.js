@@ -1,12 +1,12 @@
-import { AdditionEngine } from './generators/arithmetic/AdditionEngine.js';
-import { SubtractionEngine } from './generators/arithmetic/SubtractionEngine.js';
-import { MultiplicationEngine } from './generators/arithmetic/MultiplicationEngine.js';
-import { DivisionEngine } from './generators/arithmetic/DivisionEngine.js';
+import { AdditionEngine } from './generators/AdditionEngine.js';
+import { SubtractionEngine } from './generators/SubtractionEngine.js';
+import { MultiplicationEngine } from './generators/MultiplicationEngine.js';
+import { DivisionEngine } from './generators/DivisionEngine.js';
 import { ShapesEngine } from './generators/geometry/ShapesEngine.js';
 
 /**
  * MathEngine.js
- * Koordinator för fråagenerering och rättning över båda domänerna.
+ * Koordinator för frågegenerering och rättning över alla områden.
  */
 export class MathEngine {
   constructor() {
@@ -26,25 +26,30 @@ export class MathEngine {
   }
 
   reset(operation, category, tier) {
-    this.operation = operation;
-    this.category = category;
-    this.tier = tier;
+    this.operation = operation || 'addition';
+    this.category = category || 'ental';
+    this.tier = tier || 'brons';
     this.currentRound = 1;
     this.correctInCurrentRound = 0;
     this.currentQuestion = null;
   }
 
   generateQuestion() {
-    if (this.operation === 'shapes') {
+    const op = (this.operation || '').toLowerCase();
+    const cat = (this.category || '').toLowerCase();
+
+    // Strikt separation mellan Geometri och Aritmetik
+    if (op === 'shapes' || cat === 'former' || op === 'geometry') {
       this.currentQuestion = this.shapesEngine.generateQuestion(this.tier);
-    } else if (this.operation === 'addition') {
-      this.currentQuestion = this.additionEngine.generateQuestion(this.category, this.tier);
-    } else if (this.operation === 'subtraction') {
+    } else if (op === 'subtraction') {
       this.currentQuestion = this.subtractionEngine.generateQuestion(this.category, this.tier);
-    } else if (this.operation === 'multiplication') {
+    } else if (op === 'multiplication') {
       this.currentQuestion = this.multiplicationEngine.generateQuestion(this.category, this.tier);
-    } else if (this.operation === 'division') {
+    } else if (op === 'division') {
       this.currentQuestion = this.divisionEngine.generateQuestion(this.category, this.tier);
+    } else {
+      // Standard/Fallback för Addition & Aritmetik
+      this.currentQuestion = this.additionEngine.generateQuestion(this.category, this.tier);
     }
 
     return this.currentQuestion;
@@ -53,7 +58,7 @@ export class MathEngine {
   checkAnswer(userAnswer) {
     if (!this.currentQuestion) return { isCorrect: false, message: 'Ingen fråga laddad.' };
 
-    const formattedUser = userAnswer.trim();
+    const formattedUser = userAnswer.toString().trim();
     const formattedCorrect = this.currentQuestion.correctAnswer.toString().trim();
 
     const isCorrect = formattedUser === formattedCorrect;

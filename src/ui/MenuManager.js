@@ -29,6 +29,9 @@ export class MenuManager {
 
     if (btnDomainArithmetic) {
       btnDomainArithmetic.addEventListener('click', () => {
+        // Nollställ till addition när man går in i Räknekunskap
+        this.selectedOperation = 'addition';
+        this.selectedCategory = 'ental';
         this.showStep(this.stepOperations);
       });
     }
@@ -43,6 +46,8 @@ export class MenuManager {
     const btnBackToDomains = document.getElementById('btn-back-to-domains');
     if (btnBackToDomains) {
       btnBackToDomains.addEventListener('click', () => {
+        this.selectedOperation = 'addition';
+        this.selectedCategory = 'ental';
         this.showStep(this.stepMain);
       });
     }
@@ -114,6 +119,8 @@ export class MenuManager {
   }
 
   setupGeometrySubcategories() {
+    this.selectedOperation = 'shapes';
+    this.selectedCategory = 'former';
     this.setupSubcategoryMenu('shapes', 'Vinklar och former', [
       { key: 'former', label: 'Former' },
       { key: 'vinklar', label: 'Vinklar (Kommer snart)', disabled: true },
@@ -153,6 +160,8 @@ export class MenuManager {
     backBtn.innerText = 'Tillbaka';
     backBtn.addEventListener('click', () => {
       if (opKey === 'shapes') {
+        this.selectedOperation = 'addition';
+        this.selectedCategory = 'ental';
         this.showStep(this.stepMain);
       } else {
         this.showStep(this.stepOperations);
@@ -171,6 +180,8 @@ export class MenuManager {
   }
 
   showStartScreen() {
+    this.selectedOperation = 'addition';
+    this.selectedCategory = 'ental';
     this.showStep(this.stepMain);
     if (this.screenStart) this.screenStart.classList.remove('hidden');
     if (this.screenGame) this.screenGame.classList.add('hidden');
@@ -195,7 +206,6 @@ export class MenuManager {
       silverDone = localStorage.getItem(`completed_${this.selectedOperation}_${this.selectedCategory}_silver`) === 'true';
     } catch (e) {}
 
-    // Silver låses upp om Brons är avklarad
     if (silverBtn) {
       if (bronsDone) {
         silverBtn.classList.remove('btn-locked');
@@ -208,7 +218,6 @@ export class MenuManager {
       }
     }
 
-    // Guld låses upp om Silver är avklarad
     if (goldBtn) {
       if (silverDone) {
         goldBtn.classList.remove('btn-locked');
