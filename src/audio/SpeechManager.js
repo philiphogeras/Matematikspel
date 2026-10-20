@@ -1,18 +1,19 @@
 /**
  * SpeechManager.js
  * Hanterar text-till-tal (talsyntes) via Web Speech API.
- * Prioriterar naturliga mjukare röster (t.ex. Google svensk) framför robotröster.
+ * Avstängd som standard (aktiveras i inställningar eller via högtalarknapp).
  */
 export class SpeechManager {
   constructor() {
     this.synth = window.speechSynthesis || null;
-    let savedSetting = 'true';
+    let savedSetting = null;
     try {
       savedSetting = localStorage.getItem('tts_enabled');
     } catch (e) {
       console.warn('LocalStorage ej tillgängligt:', e);
     }
-    this.isEnabled = savedSetting === null ? true : savedSetting === 'true';
+    // Avstängd (false) som standard om inget val sparas tidigare
+    this.isEnabled = savedSetting === 'true';
     this.voice = null;
 
     this.initVoice();
