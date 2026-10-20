@@ -1,9 +1,10 @@
-@import url('./css/base.css');
-@import url('./css/components/buttons.css');
-@import url('./css/components/topbar.css');
-@import url('./css/components/keypad.css');
-@import url('./css/components/sketchpad.css');
-@import url('./css/components/modals.css');
-@import url('./css/screens/menu.css');
-@import url('./css/domains/arithmetic.css');
-@import url('./css/domains/geometry.css');
+/* style.css (i projektroten) */
+@import url('./src/css/base.css');
+@import url('./src/css/components/buttons.css');
+@import url('./src/css/components/topbar.css');
+@import url('./src/css/components/keypad.css');
+@import url('./src/css/components/sketchpad.css');
+@import url('./src/css/components/modals.css');
+@import url('./src/css/screens/menu.css');
+@import url('./src/css/domains/arithmetic.css');
+@import url('./src/css/domains/geometry.css');
