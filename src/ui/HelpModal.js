@@ -2,19 +2,68 @@
  * HelpModal.js
  * Pedagogisk hjälpruta i tre delsteg:
  * Sida 1: Uppställning med färgkodade sifferrutor (ental/tiotal/hundratal)
- * Sida 2: Uppdelning / Delstegsräkning
+ * Sida 2: Delstegsberäkning / Alternativt räknesätt
  * Sida 3: Visuell Tallinje
  */
 export class HelpModal {
   constructor() {
     this.modal = document.getElementById('help-modal');
     this.pageIndicator = document.getElementById('help-page-indicator');
-    this.instructionsEl = document.getElementById('help-instructions');
-    this.visualEl = document.getElementById('help-visual-area');
+    this.instructionsEl = null;
+    this.visualEl = null;
     
     this.currentPage = 1;
     this.totalPages = 3;
     this.currentQuestion = null;
+
+    this.ensureElements();
+  }
+
+  ensureElements() {
+    if (!this.modal) {
+      this.modal = document.getElementById('help-modal');
+    }
+
+    if (this.modal) {
+      const contentBox = this.modal.querySelector('.modal-content') || this.modal;
+
+      // Hitta eller skapa instruktionsrutan
+      this.instructionsEl = document.getElementById('help-instructions') || 
+                           document.getElementById('help-text') ||
+                           this.modal.querySelector('.help-instructions');
+      
+      if (!this.instructionsEl) {
+        this.instructionsEl = document.createElement('div');
+        this.instructionsEl.id = 'help-instructions';
+        const footer = contentBox.querySelector('.help-modal-footer');
+        if (footer) {
+          contentBox.insertBefore(this.instructionsEl, footer);
+        } else {
+          contentBox.appendChild(this.instructionsEl);
+        }
+      }
+
+      // Hitta eller skapa den visuella utritningsytan
+      this.visualEl = document.getElementById('help-visual-area') || 
+                      document.getElementById('help-visual') || 
+                      document.getElementById('help-body') ||
+                      this.modal.querySelector('.help-visual-area');
+
+      if (!this.visualEl) {
+        this.visualEl = document.createElement('div');
+        this.visualEl.id = 'help-visual-area';
+        const footer = contentBox.querySelector('.help-modal-footer');
+        if (footer) {
+          contentBox.insertBefore(this.visualEl, footer);
+        } else {
+          contentBox.appendChild(this.visualEl);
+        }
+      }
+
+      if (!this.pageIndicator) {
+        this.pageIndicator = document.getElementById('help-page-indicator');
+      }
+    }
   }
 
   setCurrentQuestion(question) {
@@ -24,6 +73,7 @@ export class HelpModal {
   }
 
   show() {
+    this.ensureElements();
     if (!this.modal) return;
     this.currentPage = 1;
     this.modal.classList.remove('hidden');
@@ -50,6 +100,8 @@ export class HelpModal {
   }
 
   renderPage() {
+    this.ensureElements();
+
     if (this.pageIndicator) {
       this.pageIndicator.innerText = `Sida ${this.currentPage} av ${this.totalPages}`;
     }
@@ -85,10 +137,11 @@ export class HelpModal {
 
     let html = `<div class="vertical-setup-grid">`;
 
+    const maxLen = Math.max(...numbers.map(n => n.toString().length), (parsed.target || 0).toString().length, 2);
+
     numbers.forEach((num, index) => {
       const isLast = index === numbers.length - 1;
       const numStr = num.toString();
-      const maxLen = Math.max(...numbers.map(n => n.toString().length), (parsed.target || 0).toString().length, 2);
       const padded = numStr.padStart(maxLen, ' ');
 
       html += `<div class="vertical-grid-row ${isLast ? 'border-bottom' : ''}">`;
@@ -108,8 +161,7 @@ export class HelpModal {
     });
 
     // Svarsrad / Frågeteckensrad
-    const targetStr = parsed.target !== null ? parsed.target.toString() : '?';
-    const maxLen = Math.max(...numbers.map(n => n.toString().length), targetStr.length, 2);
+    const targetStr = parsed.target !== null && !isNaN(parsed.target) ? parsed.target.toString() : '?';
     const paddedTarget = targetStr.padStart(maxLen, ' ');
 
     html += `<div class="vertical-grid-row result-row">`;
@@ -133,7 +185,7 @@ export class HelpModal {
     }
   }
 
-  // --- SIDA 2: DELSTEGSBERÄKNING / UPPDELNING ---
+  // --- SIDA 2: DELSTEGSBERÄKNING / ALTERNATIVT RÄKNESÄTT ---
   renderPage2Steps(q) {
     const parsed = this.parseQuestionNumbers(q);
 
@@ -143,7 +195,7 @@ export class HelpModal {
     if (q.text && q.text.includes('? +')) {
       const known = parsed.numbers[0] || 5;
       const total = parsed.target || 11;
-      const ans = parseInt(q.correctAnswer, 10) || (total - known);
+      const ans = this.safeInt(q.correctAnswer, total - known);
 
       instrHtml = `
         <strong>Okänd term (Hitta det saknade talet):</strong><br>
@@ -160,7 +212,7 @@ export class HelpModal {
     } else if (q.text && q.text.includes('+ ?')) {
       const known = parsed.numbers[0] || 6;
       const total = parsed.target || 11;
-      const ans = parseInt(q.correctAnswer, 10) || (total - known);
+      const ans = this.safeInt(q.correctAnswer, total - known);
 
       instrHtml = `
         <strong>Okänd term (Hitta det saknade talet):</strong><br>
@@ -272,7 +324,7 @@ export class HelpModal {
     const lineY = 80;
     const margin = 35;
     const usableWidth = svgWidth - margin * 2;
-    const range = maxVal - minVal;
+    const range = Math.max(1, maxVal - minVal);
 
     const getX = (val) => margin + ((val - minVal) / range) * usableWidth;
 
@@ -317,13 +369,19 @@ export class HelpModal {
     }
   }
 
+  safeInt(val, fallback = 0) {
+    if (val === null || val === undefined) return fallback;
+    const res = parseInt(val, 10);
+    return isNaN(res) ? fallback : res;
+  }
+
   parseQuestionNumbers(q) {
     if (!q) return { numbers: [5, 3], target: 8 };
 
     if (q.num1 !== undefined && q.num2 !== undefined && !q.isCustomFormat) {
-      const n1 = parseInt(q.num1, 10);
-      const n2 = parseInt(q.num2, 10);
-      const ans = parseInt(q.correctAnswer, 10) || (n1 + n2);
+      const n1 = this.safeInt(q.num1, 5);
+      const n2 = this.safeInt(q.num2, 3);
+      const ans = this.safeInt(q.correctAnswer, n1 + n2);
       return { numbers: [n1, n2], target: ans };
     }
 
@@ -332,21 +390,21 @@ export class HelpModal {
       let target = null;
       if (matchTarget) {
         if (matchTarget[1] !== '?') {
-          target = parseInt(matchTarget[1], 10);
+          target = this.safeInt(matchTarget[1], null);
         } else if (q.correctAnswer) {
-          target = parseInt(q.correctAnswer, 10);
+          target = this.safeInt(q.correctAnswer, null);
         }
       }
 
       const leftPart = q.text.split('=')[0] || q.text;
       const numMatches = leftPart.match(/\d+/g) || [];
-      const numbers = numMatches.map(n => parseInt(n, 10));
+      const numbers = numMatches.map(n => this.safeInt(n, 0));
 
       if (numbers.length === 0) {
         numbers.push(5);
       }
 
-      return { numbers, target: target !== null ? target : parseInt(q.correctAnswer, 10) || 10 };
+      return { numbers, target: target !== null ? target : this.safeInt(q.correctAnswer, 10) };
     }
 
     return { numbers: [5, 3], target: 8 };
