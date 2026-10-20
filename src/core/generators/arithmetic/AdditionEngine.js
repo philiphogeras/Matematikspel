@@ -1,56 +1,167 @@
 export class AdditionEngine {
   generateQuestion(category = 'ental', tier = 'brons') {
+    // 1. TEXTUPPGIFTER / PROBLEMLÖSNING
     if (category === 'problemlosning') {
-      const problems = [
-        { text: 'Emma har 5 äpplen och köper 4 till.\nHur många äpplen har hon sammanlagt?', n1: 5, n2: 4, ans: 9 },
-        { text: 'Lukas har 12 kronor och får 15 kronor till.\nHur mycket pengar har han nu?', n1: 12, n2: 15, ans: 27 },
-        { text: 'Det står 8 bilar på parkeringen. Det kommer 6 bilar till.\nHur många bilar står där nu?', n1: 8, n2: 6, ans: 14 },
-        { text: 'Klassen läser 10 sidor på morgonen och 8 sidor på eftermiddagen.\nHur många sidor har de läst totalt?', n1: 10, n2: 8, ans: 18 },
-        { text: 'Maja bakade 7 kanelbullar och 9 vaniljbullar.\nHur många bullar bakade hon sammanlagt?', n1: 7, n2: 9, ans: 16 }
-      ];
-      const p = problems[Math.floor(Math.random() * problems.length)];
+      return this.generateProblemQuestion(tier);
+    }
+
+    // Bestäm sifferintervall baserat på kategori
+    let maxNum = 9;
+    let minNum = 0;
+    if (category === 'tiotal') {
+      maxNum = 50;
+      minNum = 10;
+    } else if (category === 'hundratal') {
+      maxNum = 500;
+      minNum = 100;
+    }
+
+    // 2. BRONSNIVÅ: Standard två termer (a + b = ?)
+    if (tier === 'brons') {
+      const num1 = Math.floor(Math.random() * (maxNum - minNum + 1)) + minNum;
+      const num2 = Math.floor(Math.random() * (maxNum - minNum + 1)) + minNum;
+      
       return {
         domain: 'arithmetic',
         operation: 'addition',
         category,
         tier,
-        num1: p.n1,
-        num2: p.n2,
+        num1,
+        num2,
         operator: '+',
-        correctAnswer: p.ans.toString(),
-        isTextProblem: true,
-        text: p.text,
-        explanation: `${p.n1} + ${p.n2} = ${p.ans}`
+        correctAnswer: (num1 + num2).toString(),
+        text: `${num1} + ${num2} = ?`
       };
     }
 
-    let num1 = 0;
-    let num2 = 0;
+    // 3. SILVERNIVÅ: Okänd term (a + ? = c eller ? + b = c)
+    if (tier === 'silver') {
+      const isMissingTerm = Math.random() > 0.3; // 70% chans för okänd term
+      const num1 = Math.floor(Math.random() * (maxNum - minNum + 1)) + minNum;
+      const num2 = Math.floor(Math.random() * (maxNum - minNum + 1)) + minNum;
+      const sum = num1 + num2;
 
-    if (category === 'ental') {
-      num1 = Math.floor(Math.random() * 10);
-      num2 = Math.floor(Math.random() * 10);
-    } else if (category === 'tiotal') {
-      num1 = Math.floor(Math.random() * 90) + 10;
-      num2 = Math.floor(Math.random() * 90) + 10;
-    } else if (category === 'hundratal') {
-      num1 = Math.floor(Math.random() * 900) + 100;
-      num2 = Math.floor(Math.random() * 900) + 100;
-    } else {
-      num1 = Math.floor(Math.random() * 10);
-      num2 = Math.floor(Math.random() * 10);
+      if (isMissingTerm) {
+        const firstIsMissing = Math.random() > 0.5;
+        if (firstIsMissing) {
+          return {
+            domain: 'arithmetic',
+            operation: 'addition',
+            category,
+            tier,
+            num1,
+            num2,
+            operator: '+',
+            correctAnswer: num1.toString(),
+            text: `? + ${num2} = ${sum}`
+          };
+        } else {
+          return {
+            domain: 'arithmetic',
+            operation: 'addition',
+            category,
+            tier,
+            num1,
+            num2,
+            operator: '+',
+            correctAnswer: num2.toString(),
+            text: `${num1} + ? = ${sum}`
+          };
+        }
+      }
+
+      return {
+        domain: 'arithmetic',
+        operation: 'addition',
+        category,
+        tier,
+        num1,
+        num2,
+        operator: '+',
+        correctAnswer: sum.toString(),
+        text: `${num1} + ${num2} = ?`
+      };
     }
 
+    // 4. GULDNIVÅ: 3-4 termer, ibland med okänd term
+    if (tier === 'guld') {
+      const termCount = Math.random() > 0.5 ? 3 : 4; // Slumpa 3 eller 4 termer
+      const terms = [];
+
+      // Välj mindre tal per term för att hålla totalsumman rimlig
+      const stepMax = category === 'ental' ? 6 : category === 'tiotal' ? 25 : 150;
+      
+      for (let i = 0; i < termCount; i++) {
+        terms.push(Math.floor(Math.random() * stepMax) + 1);
+      }
+
+      const totalSum = terms.reduce((a, b) => a + b, 0);
+      const isMissing = Math.random() > 0.4; // 60% chans för okänd term
+
+      if (isMissing) {
+        const missingIndex = Math.floor(Math.random() * termCount);
+        const correctAnswer = terms[missingIndex].toString();
+        
+        const displayTerms = terms.map((t, idx) => (idx === missingIndex ? '?' : t));
+        
+        return {
+          domain: 'arithmetic',
+          operation: 'addition',
+          category,
+          tier,
+          num1: terms[0],
+          num2: terms[1],
+          operator: '+',
+          correctAnswer,
+          text: `${displayTerms.join(' + ')} = ${totalSum}`
+        };
+      } else {
+        return {
+          domain: 'arithmetic',
+          operation: 'addition',
+          category,
+          tier,
+          num1: terms[0],
+          num2: terms[1],
+          operator: '+',
+          correctAnswer: totalSum.toString(),
+          text: `${terms.join(' + ')} = ?`
+        };
+      }
+    }
+
+    // Reserv om nivå saknas
     return {
       domain: 'arithmetic',
       operation: 'addition',
       category,
       tier,
-      num1,
-      num2,
+      num1: 2,
+      num2: 3,
       operator: '+',
-      correctAnswer: (num1 + num2).toString(),
-      text: `${num1} + ${num2} = ?`
+      correctAnswer: '5',
+      text: '2 + 3 = ?'
+    };
+  }
+
+  generateProblemQuestion(tier) {
+    const problems = [
+      { text: 'Emma har 5 äpplen och köper 4 till.\nHur många äpplen har hon sammanlagt?', ans: 9 },
+      { text: 'Lukas har 12 kronor och får 15 kronor till.\nHur mycket pengar har han nu?', ans: 27 },
+      { text: 'Det står 8 bilar på parkeringen. Det kommer 6 bilar till.\nHur många bilar står där nu?', ans: 14 },
+      { text: 'Klassen läser 10 sidor på morgonen och 8 sidor på eftermiddagen.\nHur många sidor har de läst totalt?', ans: 18 },
+      { text: 'Maja bakade 7 kanelbullar och 9 vaniljbullar.\nHur många bullar bakade hon sammanlagt?', ans: 16 }
+    ];
+    const p = problems[Math.floor(Math.random() * problems.length)];
+    return {
+      domain: 'arithmetic',
+      operation: 'addition',
+      category: 'problemlosning',
+      tier,
+      operator: '+',
+      correctAnswer: p.ans.toString(),
+      isTextProblem: true,
+      text: p.text
     };
   }
 
