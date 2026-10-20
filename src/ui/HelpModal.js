@@ -1,175 +1,348 @@
 /**
  * HelpModal.js
- * Hanterar hjälpfönstret med pedagogisk, färgkodad uppställning och steg för steg-stöd.
+ * Pedagogisk hjälpruta i tre delsteg:
+ * Sida 1: Uppställning med färgkodade sifferrutor (ental/tiotal/hundratal)
+ * Sida 2: Uppdelning / Delstegsräkning
+ * Sida 3: Visuell Tallinje
  */
 export class HelpModal {
   constructor() {
     this.modal = document.getElementById('help-modal');
-    this.titleElem = document.getElementById('help-modal-title');
-    this.verticalElem = document.getElementById('vertical-setup');
-    this.instructionsElem = document.getElementById('help-instructions');
     this.pageIndicator = document.getElementById('help-page-indicator');
-    this.btnPrev = document.getElementById('btn-help-prev');
-    this.btnNext = document.getElementById('btn-help-next');
-
-    this.currentQuestion = null;
+    this.instructionsEl = document.getElementById('help-instructions');
+    this.visualEl = document.getElementById('help-visual-area');
+    
     this.currentPage = 1;
-    this.totalPages = 1;
+    this.totalPages = 3;
+    this.currentQuestion = null;
   }
 
   setCurrentQuestion(question) {
     this.currentQuestion = question;
-    this.currentPage = 1;
-    this.updateTotalPages();
-  }
-
-  updateTotalPages() {
-    if (!this.currentQuestion) {
-      this.totalPages = 1;
-      return;
-    }
-
-    if (this.currentQuestion.isGeometry || this.currentQuestion.isTextProblem) {
-      this.totalPages = 1;
-    } else if (this.currentQuestion.num1 !== undefined && this.currentQuestion.num2 !== undefined) {
-      const isTwoDigit = this.currentQuestion.num1 >= 10 || this.currentQuestion.num2 >= 10;
-      this.totalPages = isTwoDigit ? 2 : 1;
-    } else {
-      this.totalPages = 1;
-    }
+    if (!this.modal || this.modal.classList.contains('hidden')) return;
+    this.renderPage();
   }
 
   show() {
-    if (this.modal) {
-      this.modal.classList.remove('hidden');
-      this.render();
-    }
+    if (!this.modal) return;
+    this.currentPage = 1;
+    this.modal.classList.remove('hidden');
+    this.renderPage();
   }
 
   hide() {
-    if (this.modal) {
-      this.modal.classList.add('hidden');
-    }
+    if (!this.modal) return;
+    this.modal.classList.add('hidden');
   }
 
   nextPage() {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
-      this.render();
+      this.renderPage();
     }
   }
 
   prevPage() {
     if (this.currentPage > 1) {
       this.currentPage--;
-      this.render();
+      this.renderPage();
     }
   }
 
-  formatColoredNumber(num) {
-    if (num === undefined || num === null) return '';
-    const str = num.toString();
-    const len = str.length;
-    const posClasses = ['digit-ental', 'digit-tiotal', 'digit-hundratal'];
-
-    let html = '';
-    for (let i = 0; i < len; i++) {
-      const digit = str[i];
-      const posIndex = len - 1 - i;
-      const cls = posClasses[posIndex] || 'digit-ental';
-      html += `<span class="${cls}">${digit}</span>`;
-    }
-    return html;
-  }
-
-  render() {
-    if (!this.currentQuestion) return;
-
-    const q = this.currentQuestion;
-
+  renderPage() {
     if (this.pageIndicator) {
       this.pageIndicator.innerText = `Sida ${this.currentPage} av ${this.totalPages}`;
     }
 
-    if (this.btnPrev) {
-      this.btnPrev.style.visibility = this.currentPage > 1 ? 'visible' : 'hidden';
-    }
-    if (this.btnNext) {
-      this.btnNext.style.visibility = this.currentPage < this.totalPages ? 'visible' : 'hidden';
-    }
+    const q = this.currentQuestion || {
+      num1: 5, num2: 3, operator: '+', correctAnswer: '8', text: '5 + 3 = ?'
+    };
 
-    // GEOMETRIHJÄLP
-    if (q.isGeometry) {
-      if (this.titleElem) this.titleElem.innerText = 'Hjälp & Tips';
-      if (this.verticalElem) this.verticalElem.style.display = 'none';
+    if (this.currentPage === 1) {
+      this.renderPage1VerticalSetup(q);
+    } else if (this.currentPage === 2) {
+      this.renderPage2Steps(q);
+    } else if (this.currentPage === 3) {
+      this.renderPage3NumberLine(q);
+    }
+  }
 
-      if (this.instructionsElem) {
-        let hint = q.explanation || '';
-        if (q.questionType === 'vertices') {
-          hint += '\n\n💡 Tips: Räkna de röda punkterna i figurernas hörn!';
-        } else if (q.questionType === 'sides') {
-          hint += '\n\n💡 Tips: Räkna de raka strecken runt figuren!';
-        } else if (q.questionType === 'identify') {
-          hint += '\n\n💡 Tips:\n• Triangel: 3 hörn\n• Kvadrat: 4 lika långa sidor\n• Rektangel: 4 sidor (2 långa, 2 korta)\n• Cirkel: Rund utan hörn';
-        }
-        this.instructionsElem.innerText = hint;
+  // --- SIDA 1: UPPTÄLLNING I FÄRGKODADE RUTOR ---
+  renderPage1VerticalSetup(q) {
+    this.instructionsEl.innerHTML = `
+      <strong>Uppställning:</strong><br>
+      Sätt talen under varandra. Räkna från höger till vänster:<br>
+      <span style="color:#2563eb; font-weight:bold;">Blå = Ental</span> | 
+      <span style="color:#d97706; font-weight:bold;">Orange = Tiotal</span> | 
+      <span style="color:#16a34a; font-weight:bold;">Grön = Hundratal</span>
+    `;
+
+    const parsed = this.parseQuestionNumbers(q);
+    const numbers = parsed.numbers;
+    const operator = q.operator || '+';
+
+    let html = `<div class="vertical-setup-grid">`;
+
+    numbers.forEach((num, index) => {
+      const isLast = index === numbers.length - 1;
+      const numStr = num.toString();
+      const padLen = Math.max(...numbers.map(n => n.toString().length), (parsed.target || 0).toString().length, 2);
+      const padded = numStr.padStart(padLen, ' ');
+
+      html += `<div class="vertical-grid-row ${isLast ? 'border-bottom' : ''}">`;
+      if (isLast) {
+        html += `<span class="op-symbol">${operator}</span>`;
+      } else {
+        html += `<span class="op-symbol"></span>`;
       }
-      return;
-    }
 
-    // TEXTFRÅGOR / PROBLEMLÖSNING
-    if (q.isTextProblem) {
-      if (this.titleElem) this.titleElem.innerText = 'Hjälp med textuppgift';
-      if (this.verticalElem) this.verticalElem.style.display = 'none';
-      if (this.instructionsElem) {
-        this.instructionsElem.innerHTML = `
-          <div style="font-size: 1.1rem; line-height: 1.5; text-align: left;">
-            <p style="margin-bottom: 10px;"><strong>Läs uppgiften steg för steg:</strong></p>
-            <p style="background: #f1f5f9; padding: 10px; border-radius: 8px; margin-bottom: 10px;">${q.text.replace(/\n/g, '<br>')}</p>
-            <p style="color: #2563eb; font-weight: 700;">Uträkning: ${q.explanation || ''}</p>
+      for (let i = 0; i < padLen; i++) {
+        const char = padded[i];
+        if (char === ' ') {
+          html += `<div class="grid-cell empty"></div>`;
+        } else {
+          const posIdx = padLen - 1 - i;
+          const cls = posIdx === 0 ? 'cell-ental' : posIdx === 1 ? 'cell-tiotal' : 'cell-hundratal';
+          html += `<div class="grid-cell ${cls}">${char}</div>`;
+        }
+      }
+      html += `</div>`;
+    });
+
+    // Svarsrad / Frågeteckensrad
+    const targetStr = parsed.target !== null ? parsed.target.toString() : '?';
+    const padLen = Math.max(...numbers.map(n => n.toString().length), targetStr.length, 2);
+    const paddedTarget = targetStr.padStart(padLen, ' ');
+
+    html += `<div class="vertical-grid-row result-row">`;
+    html += `<span class="op-symbol">=</span>`;
+    for (let i = 0; i < padLen; i++) {
+      const char = paddedTarget[i];
+      if (char === ' ') {
+        html += `<div class="grid-cell empty"></div>`;
+      } else if (char === '?') {
+        html += `<div class="grid-cell cell-unknown">?</div>`;
+      } else {
+        const posIdx = padLen - 1 - i;
+        const cls = posIdx === 0 ? 'cell-ental' : posIdx === 1 ? 'cell-tiotal' : 'cell-hundratal';
+        html += `<div class="grid-cell ${cls}">${char}</div>`;
+      }
+    }
+    html += `</div></div>`;
+
+    this.visualEl.innerHTML = html;
+  }
+
+  // --- SIDA 2: DELSTEGSBERÄKNING / UPPDELNING ---
+  renderPage2Steps(q) {
+    const parsed = this.parseQuestionNumbers(q);
+
+    if (q.text && q.text.includes('? +')) {
+      // Okänd första term: ? + 5 = 11
+      const known = parsed.numbers[0] || 5;
+      const total = parsed.target || 11;
+      const ans = parseInt(q.correctAnswer, 10) || (total - known);
+
+      this.instructionsEl.innerHTML = `
+        <strong>Okänd term (Hitta det saknade talet):</strong><br>
+        Tänk baklänges med minus, eller räkna uppåt från <span class="digit-ental">${known}</span> till <span class="digit-tiotal">1</span><span class="digit-ental">${total % 10}</span>.
+      `;
+
+      this.visualEl.innerHTML = `
+        <div class="help-step-box">
+          <div class="step-line"><strong>Sätt 1 (Räkna uppåt):</strong> Starta på ${known} ➔ Hoppa ${ans} steg ➔ Nå ${total}</div>
+          <div class="step-line"><strong>Sätt 2 (Minus):</strong> ${total} - ${known} = <span class="highlight-ans">${ans}</span></div>
+          <div class="step-summary">Svar: Det saknade talet är <strong>${ans}</strong></div>
+        </div>
+      `;
+    } else if (q.text && q.text.includes('+ ?')) {
+      // Okänd andra term: 6 + ? = 11
+      const known = parsed.numbers[0] || 6;
+      const total = parsed.target || 11;
+      const ans = parseInt(q.correctAnswer, 10) || (total - known);
+
+      this.instructionsEl.innerHTML = `
+        <strong>Okänd term (Hitta det saknade talet):</strong><br>
+        Hur mycket fattas för att nå från <span class="digit-ental">${known}</span> upp till <span class="digit-tiotal">1</span><span class="digit-ental">${total % 10}</span>?
+      `;
+
+      this.visualEl.innerHTML = `
+        <div class="help-step-box">
+          <div class="step-line"><strong>Sätt 1:</strong> Starta på ${known} och räkna upp till ${total} (+${ans}).</div>
+          <div class="step-line"><strong>Sätt 2:</strong> Ta hela summan ${total} och dra bort ${known} (${total} - ${known} = <span class="highlight-ans">${ans}</span>).</div>
+          <div class="step-summary">Svar: ? = <strong>${ans}</strong></div>
+        </div>
+      `;
+    } else if (parsed.numbers.length > 2) {
+      // Flerstegsräkning (3-4 termer): e.g. 2 + 3 + 4 = ?
+      const nums = parsed.numbers;
+      let stepHtml = '';
+      let currentSum = nums[0];
+
+      for (let i = 1; i < nums.length; i++) {
+        const prev = currentSum;
+        const next = nums[i];
+        currentSum += next;
+        stepHtml += `<div class="step-line">Steg ${i}: ${prev} + ${next} = <strong>${currentSum}</strong></div>`;
+      }
+
+      this.instructionsEl.innerHTML = `
+        <strong>Räkna i delsteg:</strong><br>
+        När du har flera tal lägger du ihop dem ett i taget från vänster till höger!
+      `;
+
+      this.visualEl.innerHTML = `
+        <div class="help-step-box">
+          ${stepHtml}
+          <div class="step-summary">Totalt: <strong>${currentSum}</strong></div>
+        </div>
+      `;
+    } else {
+      // Vanlig tvåstegsräkning (tiotal/ental uppdelning)
+      const num1 = parsed.numbers[0] || 12;
+      const num2 = parsed.numbers[1] || 15;
+      const t1 = Math.floor(num1 / 10) * 10;
+      const e1 = num1 % 10;
+      const t2 = Math.floor(num2 / 10) * 10;
+      const e2 = num2 % 10;
+      const sumT = t1 + t2;
+      const sumE = e1 + e2;
+      const total = sumT + sumE;
+
+      if (num1 >= 10 || num2 >= 10) {
+        this.instructionsEl.innerHTML = `
+          <strong>Dela upp i tiotal och ental:</strong><br>
+          Räkna tiotalen för sig och entalen för sig, sedan lägger du ihop allt.
+        `;
+
+        this.visualEl.innerHTML = `
+          <div class="help-step-box">
+            <div class="step-line">1. Tiotal: ${t1} + ${t2} = <strong>${sumT}</strong></div>
+            <div class="step-line">2. Ental: ${e1} + ${e2} = <strong>${sumE}</strong></div>
+            <div class="step-line">3. Lägg ihop: ${sumT} + ${sumE} = <strong>${total}</strong></div>
+          </div>
+        `;
+      } else {
+        this.instructionsEl.innerHTML = `
+          <strong>Räkna vidare:</strong><br>
+          Börja på det största talet och räkna uppåt med det andra talet.
+        `;
+
+        this.visualEl.innerHTML = `
+          <div class="help-step-box">
+            <div class="step-line">Börja på <strong>${Math.max(num1, num2)}</strong></div>
+            <div class="step-line">Lägg till <strong>${Math.min(num1, num2)}</strong> enstaka steg.</div>
+            <div class="step-summary">Svar = <strong>${num1 + num2}</strong></div>
           </div>
         `;
       }
-      return;
+    }
+  }
+
+  // --- SIDA 3: TALLINJE ---
+  renderPage3NumberLine(q) {
+    const parsed = this.parseQuestionNumbers(q);
+    const numbers = parsed.numbers;
+
+    let start = numbers[0] || 0;
+    let end = parsed.target || (numbers.reduce((a, b) => a + b, 0));
+
+    if (start > end) {
+      const temp = start;
+      start = end;
+      end = temp;
     }
 
-    // ARITMETIKHJÄLP (Sifferfrågor med färgkodad uppställning)
-    if (q.num1 !== undefined && q.num2 !== undefined) {
-      if (this.titleElem) this.titleElem.innerText = 'Hjälp med uträkning';
-      if (this.verticalElem) this.verticalElem.style.display = 'flex';
+    if (end === start) end = start + 10;
 
-      const op = q.operator || '+';
-      const n1Formatted = this.formatColoredNumber(q.num1);
-      const n2Formatted = this.formatColoredNumber(q.num2);
+    const minVal = Math.max(0, start - 2);
+    const maxVal = end + 2;
 
-      if (this.verticalElem) {
-        this.verticalElem.innerHTML = `
-          <div class="vertical-row">&nbsp;${n1Formatted}</div>
-          <div class="vertical-row border-bottom"><span class="op-symbol">${op}</span>${n2Formatted}</div>
-        `;
-      }
+    this.instructionsEl.innerHTML = `
+      <strong>Tallinje:</strong><br>
+      Starta vid <span style="color:#2563eb; font-weight:bold;">${start}</span> och hoppa framåt till <span style="color:#16a34a; font-weight:bold;">${end}</span> på tallinjen.
+    `;
 
-      if (this.instructionsElem) {
-        if (this.currentPage === 1) {
-          const ental1 = q.num1 % 10;
-          const ental2 = q.num2 % 10;
-          this.instructionsElem.innerHTML = `
-            <div style="text-align: center;">
-              <p style="font-weight: 700; margin-bottom: 6px;">Steg 1: Räkna ihop entalen (<span class="digit-ental">blå siffror</span>)</p>
-              <p style="font-size: 1.4rem; font-weight: 700;"><span class="digit-ental">${ental1}</span> ${op} <span class="digit-ental">${ental2}</span></p>
-            </div>
-          `;
-        } else {
-          const tiotal1 = Math.floor(q.num1 / 10);
-          const tiotal2 = Math.floor(q.num2 / 10);
-          this.instructionsElem.innerHTML = `
-            <div style="text-align: center;">
-              <p style="font-weight: 700; margin-bottom: 6px;">Steg 2: Räkna ihop tiotalen (<span class="digit-tiotal">gula/orange siffror</span>)</p>
-              <p style="font-size: 1.4rem; font-weight: 700;"><span class="digit-tiotal">${tiotal1 * 10}</span> ${op} <span class="digit-tiotal">${tiotal2 * 10}</span></p>
-            </div>
-          `;
+    const svgWidth = 440;
+    const svgHeight = 110;
+    const lineY = 70;
+    const margin = 30;
+    const usableWidth = svgWidth - margin * 2;
+    const range = maxVal - minVal;
+
+    const getX = (val) => margin + ((val - minVal) / range) * usableWidth;
+
+    let ticksSvg = '';
+    const step = range > 30 ? 5 : 1;
+
+    for (let v = minVal; v <= maxVal; v += step) {
+      const x = getX(v);
+      const isKey = v === start || v === end;
+      ticksSvg += `
+        <line x1="${x}" y1="${lineY - 6}" x2="${x}" y2="${lineY + 6}" stroke="${isKey ? '#1e293b' : '#94a3b8'}" stroke-width="${isKey ? 2.5 : 1.5}" />
+        <text x="${x}" y="${lineY + 22}" font-size="${isKey ? '13' : '11'}" font-weight="${isKey ? 'bold' : 'normal'}" fill="${isKey ? '#1e3a8a' : '#64748b'}" text-anchor="middle">${v}</text>
+      `;
+    }
+
+    const x1 = getX(start);
+    const x2 = getX(end);
+    const midX = (x1 + x2) / 2;
+    const arcHeight = Math.min(45, Math.abs(x2 - x1) * 0.4);
+    const controlY = lineY - arcHeight - 15;
+
+    const arcSvg = `
+      <path d="M ${x1} ${lineY - 6} Q ${midX} ${controlY} ${x2} ${lineY - 6}" fill="none" stroke="#2563eb" stroke-width="3" stroke-dasharray="4,2" />
+      <polygon points="${x2},${lineY - 6} ${x2 - 6},${lineY - 14} ${x2 + 2},${lineY - 14}" fill="#2563eb" />
+      <text x="${midX}" y="${controlY - 4}" font-size="14" font-weight="bold" fill="#2563eb" text-anchor="middle">+${end - start}</text>
+    `;
+
+    const pointsSvg = `
+      <circle cx="${x1}" cy="${lineY}" r="5" fill="#2563eb" />
+      <circle cx="${x2}" cy="${lineY}" r="5" fill="#16a34a" />
+    `;
+
+    this.visualEl.innerHTML = `
+      <svg width="100%" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}" style="background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0;">
+        <line x1="${margin - 10}" y1="${lineY}" x2="${svgWidth - margin + 10}" y2="${lineY}" stroke="#475569" stroke-width="3" />
+        ${ticksSvg}
+        ${arcSvg}
+        ${pointsSvg}
+      </svg>
+    `;
+  }
+
+  parseQuestionNumbers(q) {
+    if (!q) return { numbers: [5, 3], target: 8 };
+
+    if (q.num1 !== undefined && q.num2 !== undefined && !q.isCustomFormat) {
+      const n1 = parseInt(q.num1, 10);
+      const n2 = parseInt(q.num2, 10);
+      const ans = parseInt(q.correctAnswer, 10) || (n1 + n2);
+      return { numbers: [n1, n2], target: ans };
+    }
+
+    if (q.text) {
+      const matchTarget = q.text.match(/=\s*(\d+|\?)/);
+      let target = null;
+      if (matchTarget) {
+        if (matchTarget[1] !== '?') {
+          target = parseInt(matchTarget[1], 10);
+        } else if (q.correctAnswer) {
+          target = parseInt(q.correctAnswer, 10);
         }
       }
+
+      const leftPart = q.text.split('=')[0] || q.text;
+      const numMatches = leftPart.match(/\d+/g) || [];
+      const numbers = numMatches.map(n => parseInt(n, 10));
+
+      if (numbers.length === 0) {
+        numbers.push(5);
+      }
+
+      return { numbers, target: target !== null ? target : parseInt(q.correctAnswer, 10) || 10 };
     }
+
+    return { numbers: [5, 3], target: 8 };
   }
 }
