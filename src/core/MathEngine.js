@@ -6,7 +6,7 @@ import { ShapesEngine } from './generators/geometry/ShapesEngine.js';
 
 /**
  * MathEngine.js
- * Huvudkoordinator för frågegenerering och rättning.
+ * Huvudkoordinator för frågegenerering och rättning med automatisk metodsäkring.
  */
 export class MathEngine {
   constructor() {
@@ -34,20 +34,35 @@ export class MathEngine {
     this.currentQuestion = null;
   }
 
+  callEngineMethod(engine, category, tier) {
+    if (!engine) return null;
+    if (typeof engine.generateQuestion === 'function') {
+      return engine.generateQuestion(category, tier);
+    }
+    if (typeof engine.generate === 'function') {
+      return engine.generate(category, tier);
+    }
+    if (typeof engine.createQuestion === 'function') {
+      return engine.createQuestion(category, tier);
+    }
+    console.error('Engine saknar genereringsmetod:', engine);
+    return null;
+  }
+
   generateQuestion() {
     const op = (this.operation || '').toLowerCase();
     const cat = (this.category || '').toLowerCase();
 
     if (op === 'shapes' || cat === 'former' || op === 'geometry') {
-      this.currentQuestion = this.shapesEngine.generateQuestion(this.tier);
+      this.currentQuestion = this.callEngineMethod(this.shapesEngine, this.category, this.tier);
     } else if (op === 'subtraction') {
-      this.currentQuestion = this.subtractionEngine.generateQuestion(this.category, this.tier);
+      this.currentQuestion = this.callEngineMethod(this.subtractionEngine, this.category, this.tier);
     } else if (op === 'multiplication') {
-      this.currentQuestion = this.multiplicationEngine.generateQuestion(this.category, this.tier);
+      this.currentQuestion = this.callEngineMethod(this.multiplicationEngine, this.category, this.tier);
     } else if (op === 'division') {
-      this.currentQuestion = this.divisionEngine.generateQuestion(this.category, this.tier);
+      this.currentQuestion = this.callEngineMethod(this.divisionEngine, this.category, this.tier);
     } else {
-      this.currentQuestion = this.additionEngine.generateQuestion(this.category, this.tier);
+      this.currentQuestion = this.callEngineMethod(this.additionEngine, this.category, this.tier);
     }
 
     return this.currentQuestion;

@@ -1,6 +1,7 @@
 /**
  * GeometryRenderer.js
  * Ritar ut 2D-figurer, vinklar och geometriska hjälplinjer på Canvas.
+ * Anpassad med kompakt storlek för hög synbarhet.
  */
 export class GeometryRenderer {
   constructor(canvasOrId) {
@@ -20,8 +21,8 @@ export class GeometryRenderer {
     if (!this.canvas) return;
     const parent = this.canvas.parentElement;
     if (parent && parent.clientWidth > 0) {
-      this.canvas.width = Math.min(parent.clientWidth, 320);
-      this.canvas.height = 150;
+      this.canvas.width = Math.min(parent.clientWidth, 260);
+      this.canvas.height = 110;
     }
   }
 
@@ -40,11 +41,11 @@ export class GeometryRenderer {
     const height = this.canvas.height;
     const centerX = width / 2;
     const centerY = height / 2;
-    const size = Math.min(width, height) * 0.65;
+    const size = Math.min(width, height) * 0.72;
 
     const strokeColor = options.strokeColor || '#1e40af';
     const fillColor = options.fillColor || '#dbeafe';
-    const lineWidth = options.lineWidth || 4;
+    const lineWidth = options.lineWidth || 3.5;
     const showVertices = options.showVertices || false;
 
     this.ctx.save();
@@ -57,7 +58,7 @@ export class GeometryRenderer {
     const type = (shapeType || '').toLowerCase();
 
     if (type === 'kvadrat' || type === 'square') {
-      const side = size * 0.85;
+      const side = size * 0.8;
       const x = centerX - side / 2;
       const y = centerY - side / 2;
 
@@ -74,8 +75,8 @@ export class GeometryRenderer {
       ];
 
     } else if (type === 'rektangel' || type === 'rectangle') {
-      const w = size * 1.2;
-      const h = size * 0.65;
+      const w = size * 1.1;
+      const h = size * 0.6;
       const x = centerX - w / 2;
       const y = centerY - h / 2;
 
@@ -92,8 +93,8 @@ export class GeometryRenderer {
       ];
 
     } else if (type === 'triangel' || type === 'triangle') {
-      const h = size * 0.9;
-      const w = size * 1.0;
+      const h = size * 0.85;
+      const w = size * 0.95;
 
       const p1 = { x: centerX, y: centerY - h / 1.7 };
       const p2 = { x: centerX + w / 2, y: centerY + h / 2.2 };
@@ -110,7 +111,7 @@ export class GeometryRenderer {
       vertices = [p1, p2, p3];
 
     } else if (type === 'cirkel' || type === 'circle') {
-      const radius = (size * 0.8) / 2;
+      const radius = (size * 0.75) / 2;
 
       this.ctx.beginPath();
       this.ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
@@ -137,7 +138,7 @@ export class GeometryRenderer {
 
     vertices.forEach((v) => {
       this.ctx.beginPath();
-      this.ctx.arc(v.x, v.y, 8, 0, Math.PI * 2);
+      this.ctx.arc(v.x, v.y, 7, 0, Math.PI * 2);
       this.ctx.fill();
       this.ctx.stroke();
     });

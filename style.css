@@ -18,7 +18,6 @@ body, html {
   color: #1e293b;
 }
 
-/* Huvudbehållare för spelet */
 #game-container {
   position: relative;
   width: 100vw;
@@ -29,7 +28,6 @@ body, html {
   background-color: #f8fafc;
 }
 
-/* Konfetti canvas (Ligger överst när firande sker) */
 #gameCanvas {
   position: absolute;
   top: 0;
@@ -40,7 +38,6 @@ body, html {
   z-index: 100;
 }
 
-/* UI Overlay */
 #ui-overlay {
   position: relative;
   width: 100%;
@@ -49,7 +46,7 @@ body, html {
   max-height: 720px;
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  padding: 16px;
 }
 
 .hidden {
@@ -164,7 +161,6 @@ button:active {
   width: 100%;
 }
 
-/* Domän- och Nivåknappar */
 .btn-domain {
   font-size: 1.35rem;
   padding: 20px;
@@ -233,11 +229,11 @@ button:active {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 12px 16px;
+  padding: 10px 16px;
   background-color: #ffffff;
   border-radius: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 #level-indicator {
@@ -290,7 +286,7 @@ button:active {
   flex-direction: column;
   align-items: center;
   width: 100%;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .question-card {
@@ -303,7 +299,7 @@ button:active {
   background-color: #ffffff;
   border-radius: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  padding: 15px;
+  padding: 12px;
   text-align: center;
 }
 
@@ -315,18 +311,18 @@ button:active {
   text-align: center;
 }
 
-/* Färgkodning av siffror (Aritmetik) */
+/* Färgkodning för Aritmetik */
 .digit-ental { color: #2563eb; font-weight: 700; }
 .digit-tiotal { color: #d97706; font-weight: 700; }
 .digit-hundratal { color: #16a34a; font-weight: 700; }
 
 .btn-speak-icon {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 10px;
+  right: 10px;
   background: #f1f5f9;
   border: none;
-  padding: 8px;
+  padding: 6px;
   border-radius: 50%;
   cursor: pointer;
   color: #3b82f6;
@@ -340,12 +336,12 @@ button:active {
 }
 
 .btn-help {
-  margin-top: 8px;
+  margin-top: 6px;
   background-color: #f1f5f9;
   color: #3b82f6;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 700;
-  padding: 8px 16px;
+  padding: 6px 14px;
   border-radius: 20px;
 }
 
@@ -366,17 +362,17 @@ button:active {
 
 #answer-display {
   width: 100%;
-  height: 52px;
+  height: 48px;
   background-color: #ffffff;
   border: 3px solid #cbd5e1;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.2rem;
+  font-size: 2rem;
   font-weight: 700;
   color: #1e293b;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .keypad-grid {
@@ -390,9 +386,9 @@ button:active {
   background-color: #ffffff;
   border: 2px solid #cbd5e1;
   color: #1e293b;
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  padding: 12px 0;
+  padding: 10px 0;
   border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
@@ -406,27 +402,30 @@ button:active {
   background-color: #fef2f2;
   border-color: #fca5a5;
   color: #dc2626;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
 }
 
 .btn-submit {
   background-color: #22c55e;
   border-color: #16a34a;
   color: #ffffff;
-  font-size: 1.3rem;
+  font-size: 1.25rem;
 }
 
 .btn-submit:hover {
   background-color: #16a34a;
 }
 
-/* Feedback-meddelande */
+/* Feedback-meddelande ("Bra jobbat!" / "Inte riktigt") */
 #feedback-message {
-  min-height: 28px;
+  min-height: 36px;
   margin-top: 8px;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   font-weight: 700;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .feedback-success { color: #16a34a; }
@@ -436,9 +435,9 @@ button:active {
    7. DOMÄNSPECIFIKA OVERRIDES (Aritmetik vs Geometri)
    ========================================================================== */
 
-/* --- RÄKNEKUNSKAP (Ursprungligt utseende) --- */
+/* --- RÄKNEKUNSKAP (Ursprungligt stort format) --- */
 #game-screen.mode-arithmetic .question-card {
-  min-height: 130px;
+  min-height: 120px;
   max-width: 100%;
   margin: 0 0 10px 0;
 }
@@ -446,53 +445,53 @@ button:active {
 #game-screen.mode-arithmetic #question-box {
   font-size: 3.2rem;
   font-weight: 700;
-  margin: 10px 0;
+  margin: 8px 0;
 }
 
 #game-screen.mode-arithmetic #geometryCanvas {
   display: none !important;
 }
 
-/* --- VINKLAR OCH FORMER (Kompakt anpassad layout) --- */
+/* --- VINKLAR OCH FORMER (Superkompakt för garanterad feedbackvisning) --- */
 #game-screen.mode-geometry .question-card {
   min-height: auto;
-  max-width: 480px;
-  margin: 0 auto 10px auto;
-  padding: 10px;
+  max-width: 420px;
+  margin: 0 auto 6px auto;
+  padding: 8px 12px;
 }
 
 #game-screen.mode-geometry #geometryCanvas {
   display: block;
-  width: 320px;
-  height: 150px;
+  width: 260px;
+  height: 110px;
   margin: 0 auto;
 }
 
 #game-screen.mode-geometry #question-box {
-  font-size: 1.4rem;
+  font-size: 1.25rem;
   font-weight: 600;
-  margin: 6px 0;
+  margin: 4px 0;
   min-height: auto;
 }
 
 #game-screen.mode-geometry .options-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
-  max-width: 420px;
-  margin: 8px auto 0 auto;
+  max-width: 380px;
+  margin: 6px auto 0 auto;
 }
 
 #game-screen.mode-geometry .option-btn {
   background-color: #ffffff;
   border: 2.5px solid #3b82f6;
   color: #1e3a8a;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 700;
-  padding: 14px 8px;
-  border-radius: 12px;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.06);
+  padding: 10px 8px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.06);
 }
 
 #game-screen.mode-geometry .option-btn:hover {
@@ -505,8 +504,8 @@ button:active {
    ========================================================================== */
 .top-controls {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 16px;
+  right: 16px;
   display: flex;
   gap: 10px;
   z-index: 60;
@@ -516,8 +515,8 @@ button:active {
   background-color: #ffffff;
   border: 2px solid #cbd5e1;
   color: #475569;
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -531,13 +530,12 @@ button:active {
   border-color: #3b82f6;
 }
 
-/* Skissruta sidopanel (Drawer) */
 .sketchpad-panel {
   position: absolute;
-  top: 70px;
-  right: 20px;
-  width: 340px;
-  height: calc(100% - 90px);
+  top: 65px;
+  right: 16px;
+  width: 320px;
+  height: calc(100% - 80px);
   z-index: 50;
   background-color: #ffffff;
   border: 3px solid #cbd5e1;
@@ -545,18 +543,18 @@ button:active {
   box-shadow: -8px 8px 24px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
-  padding: 12px;
+  padding: 10px;
 }
 
 .sketchpad-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .sketchpad-title {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #1e293b;
 }
@@ -571,7 +569,7 @@ button:active {
 }
 
 /* ==========================================================================
-   9. MODALER (Inställningar & Hjälp)
+   9. MODALER
    ========================================================================== */
 .modal-overlay {
   position: absolute;
@@ -639,7 +637,6 @@ button:active {
   margin-top: 16px;
 }
 
-/* Hjälpmodal navigering */
 .help-modal-content {
   max-width: 520px;
 }

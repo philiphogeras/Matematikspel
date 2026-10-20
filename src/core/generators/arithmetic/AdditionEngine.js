@@ -29,4 +29,8 @@ export class AdditionEngine {
       text: `${num1} + ${num2} = ?`
     };
   }
+
+  generate(category = 'ental', tier = 'brons') {
+    return this.generateQuestion(category, tier);
+  }
 }

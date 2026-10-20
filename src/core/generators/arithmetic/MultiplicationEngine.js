@@ -19,4 +19,8 @@ export class MultiplicationEngine {
       text: `${num1} × ${num2} = ?`
     };
   }
+
+  generate(category = 'tabell_2_5_10', tier = 'brons') {
+    return this.generateQuestion(category, tier);
+  }
 }
