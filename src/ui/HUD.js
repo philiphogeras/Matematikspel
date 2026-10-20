@@ -35,6 +35,7 @@ export class HUD {
     this.initSettingsEvents();
     this.initSketchpadEvents();
     this.initSpeechEvents();
+    this.initHelpEvents();
     this.updateSpeakerButtonVisibility();
   }
 
@@ -123,6 +124,45 @@ export class HUD {
         this.updateTierButtons();
         const msg = document.getElementById('reset-confirm-msg');
         if (msg) msg.classList.remove('hidden');
+      });
+    }
+  }
+
+  initHelpEvents() {
+    const btnHelp = document.getElementById('btn-help');
+    const btnCloseHelp = document.getElementById('btn-close-help');
+    const btnPrev = document.getElementById('btn-help-prev');
+    const btnNext = document.getElementById('btn-help-next');
+
+    if (btnHelp) {
+      btnHelp.addEventListener('click', () => {
+        if (this.helpModal) {
+          this.helpModal.show();
+        }
+      });
+    }
+
+    if (btnCloseHelp) {
+      btnCloseHelp.addEventListener('click', () => {
+        if (this.helpModal) {
+          this.helpModal.hide();
+        }
+      });
+    }
+
+    if (btnPrev) {
+      btnPrev.addEventListener('click', () => {
+        if (this.helpModal) {
+          this.helpModal.prevPage();
+        }
+      });
+    }
+
+    if (btnNext) {
+      btnNext.addEventListener('click', () => {
+        if (this.helpModal) {
+          this.helpModal.nextPage();
+        }
       });
     }
   }
@@ -245,15 +285,17 @@ export class HUD {
     }
 
     if (this.questionElement) {
-      if (question.isTextProblem || question.isGeometry || question.text) {
-        this.questionElement.innerText = question.text;
-        this.questionElement.className = 'question-text-mode';
-      } else {
+      // Om det är en vanlig talfråga (Aritmetik)
+      if (question.num1 !== undefined && question.num2 !== undefined && !question.isTextProblem && !question.isGeometry) {
         const coloredNum1 = this.formatColoredNumber(question.num1);
         const coloredNum2 = this.formatColoredNumber(question.num2);
         
         this.questionElement.innerHTML = `${coloredNum1} ${question.operator} ${coloredNum2} = ?`;
         this.questionElement.className = 'question-math-mode';
+      } else {
+        // Geometri eller text-problemlösning
+        this.questionElement.innerText = question.text || '';
+        this.questionElement.className = 'question-text-mode';
       }
     }
 
