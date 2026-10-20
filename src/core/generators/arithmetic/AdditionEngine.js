@@ -49,10 +49,8 @@ export class AdditionEngine {
             operation: 'addition',
             category,
             tier,
-            num1,
-            num2,
-            operator: '+',
             correctAnswer: num1.toString(),
+            isCustomFormat: true,
             text: `? + ${num2} = ${sum}`
           };
         } else {
@@ -61,10 +59,8 @@ export class AdditionEngine {
             operation: 'addition',
             category,
             tier,
-            num1,
-            num2,
-            operator: '+',
             correctAnswer: num2.toString(),
+            isCustomFormat: true,
             text: `${num1} + ? = ${sum}`
           };
         }
@@ -85,10 +81,9 @@ export class AdditionEngine {
 
     // 4. GULDNIVÅ: 3-4 termer, ibland med okänd term
     if (tier === 'guld') {
-      const termCount = Math.random() > 0.5 ? 3 : 4; // Slumpa 3 eller 4 termer
+      const termCount = Math.random() > 0.5 ? 3 : 4;
       const terms = [];
 
-      // Välj mindre tal per term för att hålla totalsumman rimlig
       const stepMax = category === 'ental' ? 6 : category === 'tiotal' ? 25 : 150;
       
       for (let i = 0; i < termCount; i++) {
@@ -96,12 +91,11 @@ export class AdditionEngine {
       }
 
       const totalSum = terms.reduce((a, b) => a + b, 0);
-      const isMissing = Math.random() > 0.4; // 60% chans för okänd term
+      const isMissing = Math.random() > 0.4;
 
       if (isMissing) {
         const missingIndex = Math.floor(Math.random() * termCount);
         const correctAnswer = terms[missingIndex].toString();
-        
         const displayTerms = terms.map((t, idx) => (idx === missingIndex ? '?' : t));
         
         return {
@@ -109,10 +103,8 @@ export class AdditionEngine {
           operation: 'addition',
           category,
           tier,
-          num1: terms[0],
-          num2: terms[1],
-          operator: '+',
           correctAnswer,
+          isCustomFormat: true,
           text: `${displayTerms.join(' + ')} = ${totalSum}`
         };
       } else {
@@ -121,16 +113,13 @@ export class AdditionEngine {
           operation: 'addition',
           category,
           tier,
-          num1: terms[0],
-          num2: terms[1],
-          operator: '+',
           correctAnswer: totalSum.toString(),
+          isCustomFormat: true,
           text: `${terms.join(' + ')} = ?`
         };
       }
     }
 
-    // Reserv om nivå saknas
     return {
       domain: 'arithmetic',
       operation: 'addition',

@@ -278,7 +278,7 @@ export class HUD {
     }
   }
 
-  displayQuestion(question) {
+ displayQuestion(question) {
     if (!question) return;
 
     this.currentQuestion = question;
@@ -292,7 +292,14 @@ export class HUD {
     }
 
     if (this.questionElement) {
-      if (question.num1 !== undefined && question.num2 !== undefined && !question.isTextProblem && !question.isGeometry) {
+      if (question.isTextProblem) {
+        this.questionElement.innerText = question.text || '';
+        this.questionElement.className = 'question-text-mode';
+      } else if (question.isCustomFormat) {
+        // Visar okända termer (t.ex. ? + 5 = 11) och flerstegsfrågor exakt som de är skrivna
+        this.questionElement.innerText = question.text || '';
+        this.questionElement.className = 'question-math-mode';
+      } else if (question.num1 !== undefined && question.num2 !== undefined && !question.isGeometry) {
         const coloredNum1 = this.formatColoredNumber(question.num1);
         const coloredNum2 = this.formatColoredNumber(question.num2);
         
@@ -300,7 +307,7 @@ export class HUD {
         this.questionElement.className = 'question-math-mode';
       } else {
         this.questionElement.innerText = question.text || '';
-        this.questionElement.className = 'question-text-mode';
+        this.questionElement.className = 'question-math-mode';
       }
     }
 
@@ -312,12 +319,6 @@ export class HUD {
     }
 
     this.clearFeedback();
-  }
-
-  unlockInput() {
-    if (this.keypad) {
-      this.keypad.unlockInput();
-    }
   }
 
   scheduleWrongAnswerReset(ms = 3000) {
