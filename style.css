@@ -218,9 +218,12 @@ button:active {
 }
 
 /* ==========================================================================
-   4. SPELSKÄRM & TOPPBAR
+   4. SPELSKÄRM, TOPPBAR & FRAMSTEGSMÄTARE
    ========================================================================== */
-   
+#game-screen {
+  justify-content: flex-start;
+}
+
 #top-bar {
   display: flex;
   align-items: center;
@@ -237,6 +240,33 @@ button:active {
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+
+#level-indicator {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e3a8a;
+}
+
+#round-indicator {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+#progress-container {
+  width: 200px;
+  height: 16px;
+  background-color: #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #cbd5e1;
+}
+
+#progress-bar {
+  height: 100%;
+  width: 0%;
+  transition: width 0.3s ease, background-color 0.3s ease;
 }
 
 .top-bar-actions {
@@ -317,7 +347,7 @@ button:active {
   text-align: center;
 }
 
-/* Färgkodning för Aritmetik */
+/* Färgkodning av siffror */
 .digit-ental { color: #2563eb; font-weight: 700; }
 .digit-tiotal { color: #d97706; font-weight: 700; }
 .digit-hundratal { color: #16a34a; font-weight: 700; }
@@ -353,6 +383,17 @@ button:active {
 
 .btn-help:hover {
   background-color: #e2e8f0;
+}
+
+/* Text- och problemlösningsfrågor */
+.question-text-mode {
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.45;
+  color: #1e293b;
+  max-width: 600px;
+  margin: 4px auto;
+  white-space: pre-line;
 }
 
 /* ==========================================================================
@@ -422,7 +463,6 @@ button:active {
   background-color: #16a34a;
 }
 
-/* Feedback-meddelande ("Bra jobbat!" / "Inte riktigt") */
 #feedback-message {
   min-height: 36px;
   margin-top: 8px;
@@ -458,7 +498,7 @@ button:active {
   display: none !important;
 }
 
-/* --- VINKLAR OCH FORMER (Superkompakt för garanterad feedbackvisning) --- */
+/* --- VINKLAR OCH FORMER (Kompakt anpassad layout) --- */
 #game-screen.mode-geometry .question-card {
   min-height: auto;
   max-width: 420px;
@@ -506,36 +546,8 @@ button:active {
 }
 
 /* ==========================================================================
-   8. SVÄVANDE SKISSRUTA & TOPP-IKONER
+   8. SKISSRUTA PANEL (DRAWER)
    ========================================================================== */
-.top-controls {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  display: flex;
-  gap: 10px;
-  z-index: 60;
-}
-
-.btn-top-icon {
-  background-color: #ffffff;
-  border: 2px solid #cbd5e1;
-  color: #475569;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-}
-
-.btn-top-icon:hover, .btn-top-active {
-  background-color: #3b82f6;
-  color: #ffffff;
-  border-color: #3b82f6;
-}
-
 .sketchpad-panel {
   position: absolute;
   top: 65px;
@@ -575,7 +587,7 @@ button:active {
 }
 
 /* ==========================================================================
-   9. MODALER
+   9. MODALER (INSTÄLLNINGAR & HJÄLP)
    ========================================================================== */
 .modal-overlay {
   position: absolute;
@@ -643,6 +655,7 @@ button:active {
   margin-top: 16px;
 }
 
+/* Hjälpmodal & Uppställning */
 .help-modal-content {
   max-width: 520px;
 }
@@ -670,16 +683,40 @@ button:active {
 }
 
 .vertical-setup {
-  font-family: monospace;
-  font-size: 2rem;
-  line-height: 1.2;
-  text-align: right;
-  width: 120px;
-  margin: 10px auto;
-  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin: 12px auto;
+  padding: 12px 20px;
   background-color: #f8fafc;
-  border-radius: 8px;
+  border-radius: 12px;
+  border: 2px solid #e2e8f0;
+  width: fit-content;
+  min-width: 140px;
+}
+
+.vertical-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  width: 100%;
+}
+
+.vertical-row.border-bottom {
   border-bottom: 3px solid #1e293b;
+  padding-bottom: 4px;
+  margin-bottom: 4px;
+}
+
+.op-symbol {
+  color: #64748b;
+  font-size: 1.8rem;
+  margin-right: auto;
 }
 
 .help-instructions {

@@ -243,7 +243,7 @@ export class HUD {
     }
   }
 
-  updateTopBar(operation, category, tier, round, percentage) {
+  updateTopBar(operation, category, tier, round, percentage, currentQuestionNum = 0, totalQuestions = 5) {
     const catLabels = {
       ental: 'Ental', tiotal: 'Tiotal', hundratal: 'Hundratal',
       tabell_2_5_10: '2, 5 & 10:an', tabell_3_4_6: '3, 4 & 6:an', tabell_7_8_9: '7, 8 & 9:an',
@@ -260,14 +260,21 @@ export class HUD {
     if (this.levelIndicator) {
       this.levelIndicator.innerText = `${catLabels[category] || category} (${symbol}): ${tierNames[tier] || tier}`;
     }
+    
     if (this.roundIndicator) {
-      this.roundIndicator.innerText = `Omgång ${round}/3`;
+      this.roundIndicator.innerText = `Omgång ${round}/3 • Fråga ${currentQuestionNum}/${totalQuestions}`;
     }
 
-    const colors = { brons: '#e2a76f', silver: '#94a3b8', guld: '#fcd34d' };
+    // Färger för respektive nivå
+    const tierColors = {
+      brons: '#e2a76f',
+      silver: '#94a3b8',
+      guld: '#fcd34d'
+    };
+
     if (this.progressBar) {
       this.progressBar.style.width = `${percentage}%`;
-      this.progressBar.style.backgroundColor = colors[tier] || '#3b82f6';
+      this.progressBar.style.backgroundColor = tierColors[tier] || '#3b82f6';
     }
   }
 
@@ -285,7 +292,6 @@ export class HUD {
     }
 
     if (this.questionElement) {
-      // Om det är en vanlig talfråga (Aritmetik)
       if (question.num1 !== undefined && question.num2 !== undefined && !question.isTextProblem && !question.isGeometry) {
         const coloredNum1 = this.formatColoredNumber(question.num1);
         const coloredNum2 = this.formatColoredNumber(question.num2);
@@ -293,7 +299,6 @@ export class HUD {
         this.questionElement.innerHTML = `${coloredNum1} ${question.operator} ${coloredNum2} = ?`;
         this.questionElement.className = 'question-math-mode';
       } else {
-        // Geometri eller text-problemlösning
         this.questionElement.innerText = question.text || '';
         this.questionElement.className = 'question-text-mode';
       }

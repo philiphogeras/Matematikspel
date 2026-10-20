@@ -6,7 +6,7 @@ import { GeometryRenderer } from './graphics/GeometryRenderer.js';
 
 /**
  * main.js
- * Huvudövergripande applikationsinitiering.
+ * Huvudövergripande applikationsinitiering och spel-loop.
  */
 class Game {
   constructor() {
@@ -40,7 +40,7 @@ class Game {
     const geoCanvas = document.getElementById('geometryCanvas');
     const gameScreen = document.getElementById('game-screen');
 
-    // Strikt kontroll: Endast om det är en riktig geometrifråga
+    // Kontrollera om det är en geometrifråga
     const isGeoQuestion = question && (question.isGeometry || question.shapeType);
 
     if (isGeoQuestion) {
@@ -64,12 +64,15 @@ class Game {
       if (this.geometryRenderer) this.geometryRenderer.clear();
     }
 
+    // Uppdatera topp-balken med statistik och framstegsmätare
     this.hud.updateTopBar(
       this.mathEngine.operation,
       this.mathEngine.category,
       this.mathEngine.tier,
       this.mathEngine.currentRound,
-      this.mathEngine.getRoundProgressPercentage()
+      this.mathEngine.getRoundProgressPercentage(),
+      this.mathEngine.correctInCurrentRound,
+      this.mathEngine.questionsInRound
     );
   }
 
@@ -85,7 +88,9 @@ class Game {
         this.mathEngine.category,
         this.mathEngine.tier,
         this.mathEngine.currentRound,
-        this.mathEngine.getRoundProgressPercentage()
+        this.mathEngine.getRoundProgressPercentage(),
+        this.mathEngine.correctInCurrentRound,
+        this.mathEngine.questionsInRound
       );
 
       if (result.isTierCompleted) {

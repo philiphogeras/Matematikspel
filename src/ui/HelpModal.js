@@ -1,6 +1,6 @@
 /**
  * HelpModal.js
- * Hanterar hjälpfönstret med steg-för-steg stöd för både räknekunskap och geometri.
+ * Hanterar hjälpfönstret med pedagogisk, färgkodad uppställning och steg för steg-stöd.
  */
 export class HelpModal {
   constructor() {
@@ -29,7 +29,7 @@ export class HelpModal {
       return;
     }
 
-    if (this.currentQuestion.isGeometry) {
+    if (this.currentQuestion.isGeometry || this.currentQuestion.isTextProblem) {
       this.totalPages = 1;
     } else if (this.currentQuestion.num1 !== undefined && this.currentQuestion.num2 !== undefined) {
       const isTwoDigit = this.currentQuestion.num1 >= 10 || this.currentQuestion.num2 >= 10;
@@ -64,6 +64,22 @@ export class HelpModal {
       this.currentPage--;
       this.render();
     }
+  }
+
+  formatColoredNumber(num) {
+    if (num === undefined || num === null) return '';
+    const str = num.toString();
+    const len = str.length;
+    const posClasses = ['digit-ental', 'digit-tiotal', 'digit-hundratal'];
+
+    let html = '';
+    for (let i = 0; i < len; i++) {
+      const digit = str[i];
+      const posIndex = len - 1 - i;
+      const cls = posClasses[posIndex] || 'digit-ental';
+      html += `<span class="${cls}">${digit}</span>`;
+    }
+    return html;
   }
 
   render() {
@@ -101,41 +117,59 @@ export class HelpModal {
       return;
     }
 
-    // ARITMETIKHJÄLP (Sifferfrågor)
+    // TEXTFRÅGOR / PROBLEMLÖSNING
+    if (q.isTextProblem) {
+      if (this.titleElem) this.titleElem.innerText = 'Hjälp med textuppgift';
+      if (this.verticalElem) this.verticalElem.style.display = 'none';
+      if (this.instructionsElem) {
+        this.instructionsElem.innerHTML = `
+          <div style="font-size: 1.1rem; line-height: 1.5; text-align: left;">
+            <p style="margin-bottom: 10px;"><strong>Läs uppgiften steg för steg:</strong></p>
+            <p style="background: #f1f5f9; padding: 10px; border-radius: 8px; margin-bottom: 10px;">${q.text.replace(/\n/g, '<br>')}</p>
+            <p style="color: #2563eb; font-weight: 700;">Uträkning: ${q.explanation || ''}</p>
+          </div>
+        `;
+      }
+      return;
+    }
+
+    // ARITMETIKHJÄLP (Sifferfrågor med färgkodad uppställning)
     if (q.num1 !== undefined && q.num2 !== undefined) {
       if (this.titleElem) this.titleElem.innerText = 'Hjälp med uträkning';
-      if (this.verticalElem) this.verticalElem.style.display = 'block';
+      if (this.verticalElem) this.verticalElem.style.display = 'flex';
 
       const op = q.operator || '+';
-      const n1 = q.num1;
-      const n2 = q.num2;
+      const n1Formatted = this.formatColoredNumber(q.num1);
+      const n2Formatted = this.formatColoredNumber(q.num2);
 
       if (this.verticalElem) {
         this.verticalElem.innerHTML = `
-          <div>&nbsp;${n1}</div>
-          <div>${op} ${n2}</div>
+          <div class="vertical-row">&nbsp;${n1Formatted}</div>
+          <div class="vertical-row border-bottom"><span class="op-symbol">${op}</span>${n2Formatted}</div>
         `;
       }
 
       if (this.instructionsElem) {
         if (this.currentPage === 1) {
-          const ental1 = n1 % 10;
-          const ental2 = n2 % 10;
-          this.instructionsElem.innerText = `Steg 1: Räkna ihop entalen (blå siffror):\n${ental1} ${op} ${ental2}`;
+          const ental1 = q.num1 % 10;
+          const ental2 = q.num2 % 10;
+          this.instructionsElem.innerHTML = `
+            <div style="text-align: center;">
+              <p style="font-weight: 700; margin-bottom: 6px;">Steg 1: Räkna ihop entalen (<span class="digit-ental">blå siffror</span>)</p>
+              <p style="font-size: 1.4rem; font-weight: 700;"><span class="digit-ental">${ental1}</span> ${op} <span class="digit-ental">${ental2}</span></p>
+            </div>
+          `;
         } else {
-          const tiotal1 = Math.floor(n1 / 10);
-          const tiotal2 = Math.floor(n2 / 10);
-          this.instructionsElem.innerText = `Steg 2: Räkna ihop tiotalen (gula siffror):\n${tiotal1 * 10} ${op} ${tiotal2 * 10}`;
+          const tiotal1 = Math.floor(q.num1 / 10);
+          const tiotal2 = Math.floor(q.num2 / 10);
+          this.instructionsElem.innerHTML = `
+            <div style="text-align: center;">
+              <p style="font-weight: 700; margin-bottom: 6px;">Steg 2: Räkna ihop tiotalen (<span class="digit-tiotal">gula/orange siffror</span>)</p>
+              <p style="font-size: 1.4rem; font-weight: 700;"><span class="digit-tiotal">${tiotal1 * 10}</span> ${op} <span class="digit-tiotal">${tiotal2 * 10}</span></p>
+            </div>
+          `;
         }
       }
-      return;
-    }
-
-    // TEXTFRÅGA / FALLBACK
-    if (this.titleElem) this.titleElem.innerText = 'Hjälp';
-    if (this.verticalElem) this.verticalElem.style.display = 'none';
-    if (this.instructionsElem) {
-      this.instructionsElem.innerText = q.explanation || q.text || 'Läs frågan noggrant och använd kladdblocket om du vill rita!';
     }
   }
 }
