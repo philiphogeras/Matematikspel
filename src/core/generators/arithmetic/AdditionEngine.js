@@ -1,4 +1,6 @@
 export class AdditionEngine {
+  constructor() {}
+
   generateQuestion(category = 'ental', tier = 'brons') {
     let num1 = 0;
     let num2 = 0;
@@ -20,10 +22,10 @@ export class AdditionEngine {
     return {
       domain: 'arithmetic',
       operation: 'addition',
-      category,
-      tier,
-      num1,
-      num2,
+      category: category,
+      tier: tier,
+      num1: num1,
+      num2: num2,
       operator: '+',
       correctAnswer: (num1 + num2).toString(),
       text: `${num1} + ${num2} = ?`
