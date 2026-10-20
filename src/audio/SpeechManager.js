@@ -1,6 +1,7 @@
 /**
  * SpeechManager.js
- * Hanterar text-till-tal (talsyntes) via webbläsarens inbyggda Web Speech API.
+ * Hanterar text-till-tal (talsyntes) via Web Speech API.
+ * Prioriterar naturliga mjukare röster (t.ex. Google svensk) framför robotröster.
  */
 export class SpeechManager {
   constructor() {
@@ -24,7 +25,14 @@ export class SpeechManager {
       try {
         const voices = this.synth.getVoices();
         if (voices && voices.length > 0) {
-          this.voice = voices.find(v => v.lang && v.lang.startsWith('sv')) || null;
+          const svVoices = voices.filter(v => v.lang && (v.lang.startsWith('sv') || v.lang.includes('SE')));
+          
+          // Prioritera naturliga röster (som Google svensk eller molnröster) framför eSpeak/robotröster
+          this.voice = svVoices.find(v => v.name.includes('Google')) ||
+                       svVoices.find(v => v.name.includes('Natural')) ||
+                       svVoices.find(v => !v.localService) ||
+                       svVoices[0] ||
+                       null;
         }
       } catch (e) {
         console.warn('Röster kunde inte laddas:', e);
@@ -97,6 +105,6 @@ export class SpeechManager {
       '÷': 'delat med'
     };
     const opWord = ops[question.operator] || question.operator;
-    return `${question.num1} ${opWord} ${question.num2}, vad blir det?`;
+    return `Vad blir ${question.num1} ${opWord} ${question.num2}?`;
   }
 }
