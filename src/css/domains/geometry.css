@@ -1,0 +1,45 @@
+#game-screen.mode-geometry .question-card {
+  min-height: auto;
+  max-width: 420px;
+  margin: 0 auto 6px auto;
+  padding: 8px 12px;
+}
+
+#game-screen.mode-geometry #geometryCanvas {
+  display: block;
+  width: 260px;
+  height: 110px;
+  margin: 0 auto;
+}
+
+#game-screen.mode-geometry #question-box {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 4px 0;
+  min-height: auto;
+}
+
+#game-screen.mode-geometry .options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+  max-width: 380px;
+  margin: 6px auto 0 auto;
+}
+
+#game-screen.mode-geometry .option-btn {
+  background-color: #ffffff;
+  border: 2.5px solid #3b82f6;
+  color: #1e3a8a;
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 10px 8px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+}
+
+#game-screen.mode-geometry .option-btn:hover {
+  background-color: #3b82f6;
+  color: #ffffff;
+}

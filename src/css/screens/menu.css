@@ -1,0 +1,93 @@
+.screen-panel {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 480px;
+}
+
+.game-title {
+  font-size: 2.5rem;
+  color: #1e3a8a;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.game-subtitle {
+  font-size: 1.25rem;
+  color: #64748b;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.btn-domain {
+  font-size: 1.35rem;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-tier {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background-color: #ffffff;
+  border: 3px solid #cbd5e1;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-tier:hover:not(.btn-locked) {
+  border-color: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+}
+
+.btn-bronze { border-color: #e2a76f; }
+.btn-silver { border-color: #94a3b8; }
+.btn-gold { border-color: #fcd34d; }
+
+.tier-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.tier-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.tier-sub {
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.tier-status {
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background-color: #f1f5f9;
+  color: #475569;
+}

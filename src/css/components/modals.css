@@ -1,0 +1,149 @@
+.modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(15, 23, 42, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  backdrop-filter: blur(2px);
+}
+
+.modal-content {
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 24px;
+  width: 90%;
+  max-width: 440px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+}
+
+.modal-title {
+  font-size: 1.6rem;
+  color: #1e293b;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.setting-row {
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.setting-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.volume-slider {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  accent-color: #3b82f6;
+}
+
+.modal-divider {
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  margin: 16px 0;
+}
+
+.setting-hint {
+  font-size: 0.85rem;
+  color: #16a34a;
+  text-align: center;
+}
+
+.modal-actions {
+  margin-top: 16px;
+}
+
+.help-modal-content {
+  max-width: 520px;
+}
+
+.help-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.btn-help-nav {
+  background-color: #f1f5f9;
+  color: #1e293b;
+  font-size: 1.4rem;
+  font-weight: 700;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.btn-help-nav:hover {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+.vertical-setup {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin: 12px auto;
+  padding: 12px 20px;
+  background-color: #f8fafc;
+  border-radius: 12px;
+  border: 2px solid #e2e8f0;
+  width: fit-content;
+  min-width: 140px;
+}
+
+.vertical-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  width: 100%;
+}
+
+.vertical-row.border-bottom {
+  border-bottom: 3px solid #1e293b;
+  padding-bottom: 4px;
+  margin-bottom: 4px;
+}
+
+.op-symbol {
+  color: #64748b;
+  font-size: 1.8rem;
+  margin-right: auto;
+}
+
+.help-instructions {
+  font-size: 1.1rem;
+  line-height: 1.5;
+  color: #334155;
+  margin: 12px 0;
+  min-height: 80px;
+}
+
+.help-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.help-page-indicator {
+  font-size: 0.95rem;
+  color: #64748b;
+  font-weight: 600;
+}

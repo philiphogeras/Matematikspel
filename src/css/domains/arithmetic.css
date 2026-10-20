@@ -1,0 +1,76 @@
+#game-body {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  display: flex;
+  gap: 20px;
+}
+
+#game-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.question-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 6px;
+}
+
+.question-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 8px 12px;
+  text-align: center;
+}
+
+#question-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  text-align: center;
+}
+
+.digit-ental { color: #2563eb; font-weight: 700; }
+.digit-tiotal { color: #d97706; font-weight: 700; }
+.digit-hundratal { color: #16a34a; font-weight: 700; }
+
+.question-text-mode {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #1e293b;
+  max-width: 520px;
+  margin: 2px auto;
+  padding: 2px 6px;
+  white-space: pre-line;
+}
+
+#game-screen.mode-arithmetic .question-card {
+  min-height: auto;
+  max-width: 100%;
+  margin: 0 0 6px 0;
+  padding: 10px 14px;
+}
+
+#game-screen.mode-arithmetic .question-math-mode {
+  font-size: 3rem;
+  font-weight: 700;
+  margin: 4px 0;
+}
+
+#game-screen.mode-arithmetic #geometryCanvas {
+  display: none !important;
+}
