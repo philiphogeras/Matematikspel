@@ -112,6 +112,7 @@ export class HelpModal {
 
     const geoData = this.detectGeometry(q);
 
+    // Om det är en form/geometri-fråga visar vi BARA form-hjälpen
     if (geoData.isGeometry) {
       this.renderGeometryPage(q, geoData);
     } else {
@@ -125,29 +126,45 @@ export class HelpModal {
     }
   }
 
-  // --- DETEKTERA OM FRÅGAN ÄR GEOMETRI / FORMER ---
+  // --- OMFATTANDE OCH FELSÄKER DETEKTOR FÖR FORMER ---
   detectGeometry(q) {
-    if (!q) return { isGeometry: false };
+    if (!q) return { isGeometry: false, shape: 'triangel' };
 
-    const isGeo = q.domain === 'geometry' || q.isGeometry || q.category === 'former' || q.category === 'vinklar';
-    const text = (q.text || '').toLowerCase();
-    const ans = (q.correctAnswer || '').toLowerCase();
-    const shapeType = (q.shapeType || q.shape || '').toLowerCase();
+    const domain = (q.domain || '').toString().toLowerCase();
+    const operation = (q.operation || '').toString().toLowerCase();
+    const category = (q.category || '').toString().toLowerCase();
+    const isGeoProp = Boolean(q.isGeometry || q.isShapes || q.isGeometryQuestion);
 
-    const shapeName = shapeType || ans || text;
+    const text = (q.text || '').toString().toLowerCase();
+    const ans = (q.correctAnswer || '').toString().toLowerCase();
+    const shapeType = (q.shapeType || q.shape || '').toString().toLowerCase();
+
+    const geoKeywords = [
+      'shapes', 'geometry', 'geometri', 'former', 'vinklar', 'figur', 'form',
+      'vinkel', 'hörn', 'sida', 'omkrets', 'area',
+      'triangel', 'cirkel', 'kvadrat', 'rektangel', 'femhörning', 'femhorning',
+      'sexhörning', 'sexhorning', 'pentagon', 'hexagon', 'romb', 'oval', 'kub'
+    ];
+
+    const isGeo = isGeoProp ||
+      ['geometry', 'shapes', 'former', 'vinklar', 'geometri'].includes(domain) ||
+      ['geometry', 'shapes', 'former', 'vinklar', 'geometri'].includes(operation) ||
+      ['former', 'vinklar', 'shapes', 'geometry', 'geometri'].includes(category) ||
+      geoKeywords.some(k => text.includes(k)) ||
+      geoKeywords.some(k => ans.includes(k)) ||
+      geoKeywords.some(k => shapeType.includes(k));
+
+    const combined = `${shapeType} ${ans} ${text}`.toLowerCase();
 
     let shape = 'triangel';
-    if (shapeName.includes('cirkel')) shape = 'cirkel';
-    else if (shapeName.includes('kvadrat')) shape = 'kvadrat';
-    else if (shapeName.includes('rektangel')) shape = 'rektangel';
-    else if (shapeName.includes('femhorning') || shapeName.includes('pentagon')) shape = 'femhorning';
-    else if (shapeName.includes('sexhorning') || shapeName.includes('hexagon')) shape = 'sexhorning';
-    else if (shapeName.includes('triangel')) shape = 'triangel';
+    if (combined.includes('cirkel')) shape = 'cirkel';
+    else if (combined.includes('kvadrat')) shape = 'kvadrat';
+    else if (combined.includes('rektangel')) shape = 'rektangel';
+    else if (combined.includes('femh') || combined.includes('pentagon')) shape = 'femhorning';
+    else if (combined.includes('sexh') || combined.includes('hexagon')) shape = 'sexhorning';
+    else if (combined.includes('triangel')) shape = 'triangel';
 
-    return {
-      isGeometry: isGeo || text.includes('form') || text.includes('vinkel') || text.includes('hörn'),
-      shape
-    };
+    return { isGeometry: isGeo, shape };
   }
 
   // --- HJÄLP FÖR FORMER & GEOMETRI ---
@@ -166,13 +183,13 @@ export class HelpModal {
   // FORMER - SIDA 1: ANATOMI & EGENSKAPER
   renderGeometryPage1Anatomy(shape) {
     const details = {
-      triangel: { name: 'Triangel', corners: 3, sides: 3, desc: 'En triangel har alltid <strong>3 hörn</strong> och <strong>3 raka sidor</strong>.' },
-      kvadrat: { name: 'Kvadrat', corners: 4, sides: 4, desc: 'En kvadrat har <strong>4 hörn</strong> och <strong>4 lika långa sidor</strong>.' },
-      rektangel: { name: 'Rektangel', corners: 4, sides: 4, desc: 'En rektangel har <strong>4 hörn</strong>, med 2 långa och 2 korta sidor.' },
-      cirkel: { name: 'Cirkel', corners: 0, sides: 1, desc: 'En cirkel är helt rund. Den har <strong>0 hörn</strong> och 1 böjd linje.' },
-      femhorning: { name: 'Femhörning', corners: 5, sides: 5, desc: 'En femhörning har <strong>5 hörn</strong> och <strong>5 raka sidor</strong>.' },
-      sexhorning: { name: 'Sexhörning', corners: 6, sides: 6, desc: 'En sexhörning har <strong>6 hörn</strong> och <strong>6 raka sidor</strong>.' }
-    }[shape] || { name: 'Form', corners: 3, sides: 3, desc: 'Formens egenskaper.' };
+      triangel: { name: 'Triangel', desc: 'En triangel har alltid <strong>3 hörn</strong> och <strong>3 raka sidor</strong>.' },
+      kvadrat: { name: 'Kvadrat', desc: 'En kvadrat har <strong>4 hörn</strong> och <strong>4 lika långa sidor</strong>.' },
+      rektangel: { name: 'Rektangel', desc: 'En rektangel har <strong>4 hörn</strong>, med 2 långa och 2 korta sidor.' },
+      cirkel: { name: 'Cirkel', desc: 'En cirkel är helt rund. Den har <strong>0 hörn</strong> och 1 böjd linje.' },
+      femhorning: { name: 'Femhörning', desc: 'En femhörning har <strong>5 hörn</strong> och <strong>5 raka sidor</strong>.' },
+      sexhorning: { name: 'Sexhörning', desc: 'En sexhörning har <strong>6 hörn</strong> och <strong>6 raka sidor</strong>.' }
+    }[shape] || { name: 'Form', desc: 'Formens egenskaper.' };
 
     if (this.instructionsEl) {
       this.instructionsEl.innerHTML = `
@@ -299,7 +316,6 @@ export class HelpModal {
       points.forEach((p, idx) => {
         dotsSvg += `<circle cx="${p.x}" cy="${p.y}" r="7" fill="#2563eb" stroke="#ffffff" stroke-width="2" />`;
         if (numberCorners) {
-          // Beräkna offset för sifferetiketter så de hamnar utanför hörnet
           const offsetX = p.x > 170 ? 16 : p.x < 170 ? -16 : 0;
           const offsetY = p.y > 68 ? 16 : -14;
           dotsSvg += `<text x="${p.x + offsetX}" y="${p.y + offsetY}" font-size="14" font-weight="bold" fill="#1e3a8a" text-anchor="middle">${idx + 1}</text>`;
