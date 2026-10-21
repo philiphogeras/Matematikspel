@@ -1,9 +1,9 @@
 /**
  * HelpModal.js
- * Pedagogisk hjälpruta i tre delsteg:
- * Sida 1: Uppställning med färgkodade sifferrutor (ental/tiotal/hundratal)
- * Sida 2: Strategi & Delstegsberäkning ("Slå ihop kända tal först")
- * Sida 3: Visuell Flera-stegs-tallinje (visar kända hopp och okänd "lucka")
+ * Pedagogisk hjälpruta för alla fyra räknesätt (+, –, ×, ÷):
+ * Sida 1: Uppställning i färgkodade rutor
+ * Sida 2: Strategi & Delsteg (anpassad efter räknesätt)
+ * Sida 3: Visuell Tallinje / Gruppering
  */
 export class HelpModal {
   constructor() {
@@ -130,14 +130,13 @@ export class HelpModal {
     }
 
     const parsed = this.parseQuestion(q);
-    const terms = parsed.terms;
-    const operator = q.operator || '+';
+    const { terms, operator, target } = parsed;
 
     let html = `<div class="vertical-setup-grid">`;
 
     const maxLen = Math.max(
       ...terms.map(t => (t === '?' ? 1 : t.toString().length)),
-      (parsed.target || 0).toString().length,
+      (target || 0).toString().length,
       2
     );
 
@@ -164,8 +163,7 @@ export class HelpModal {
       html += `</div>`;
     });
 
-    // Svarsrad / Summa
-    const targetStr = parsed.target !== null && !isNaN(parsed.target) ? parsed.target.toString() : '?';
+    const targetStr = target !== null && !isNaN(target) ? target.toString() : '?';
     const paddedTarget = targetStr.padStart(maxLen, ' ');
 
     html += `<div class="vertical-grid-row result-row">`;
@@ -189,111 +187,113 @@ export class HelpModal {
     }
   }
 
-  // --- SIDA 2: STRATEGI ("Slå ihop kända tal först") ---
+  // --- SIDA 2: STRATEGI & DELSTEGSBERÄKNING ---
   renderPage2Steps(q) {
     const parsed = this.parseQuestion(q);
-    const { terms, missingIndex, target, knownSum, correctAnswer } = parsed;
+    const { terms, operator, missingIndex, target, correctAnswer } = parsed;
 
     let instrHtml = '';
     let visualHtml = '';
 
-    if (missingIndex !== -1 && terms.length > 2) {
-      // GULD: Flerstegsräkning med okänd term (t.ex. 2 + ? + 4 = 9)
-      const knownTerms = terms.filter(t => typeof t === 'number');
-      const knownStr = knownTerms.join(' + ');
+    if (operator === '–') {
+      // SUBTRAKTION
+      if (missingIndex === 0) { // ? - b = c -> ? = c + b
+        const b = terms[1];
+        instrHtml = `<strong>Okänd start (Subtraktion):</strong><br>När det första talet saknas lägger du ihop svar och del:`;
+        visualHtml = `<div class="help-step-box">
+          <div class="step-line">Räkna baklänges med plus: ${target} + ${b} = <span class="highlight-ans">${correctAnswer}</span></div>
+          <div class="step-summary">Svar: Det saknade talet är <strong>${correctAnswer}</strong></div>
+        </div>`;
+      } else if (missingIndex === 1) { // a - ? = c -> ? = a - c
+        const a = terms[0];
+        instrHtml = `<strong>Okänd del (Subtraktion):</strong><br>Ta bort svaret från starttalet:`;
+        visualHtml = `<div class="help-step-box">
+          <div class="step-line">Dra bort svaret: ${a} – ${target} = <span class="highlight-ans">${correctAnswer}</span></div>
+          <div class="step-summary">Svar: ? = <strong>${correctAnswer}</strong></div>
+        </div>`;
+      } else {
+        instrHtml = `<strong>Minska i delsteg:</strong><br>Ta bort tiotal först, sedan ental:`;
+        visualHtml = `<div class="help-step-box">
+          <div class="step-line">Starta på <strong>${terms[0]}</strong> och ta bort <strong>${terms[1]}</strong></div>
+          <div class="step-summary">Kvar = <strong>${correctAnswer}</strong></div>
+        </div>`;
+      }
+    } else if (operator === '×') {
+      // MULTIPLIKATION
+      if (missingIndex !== -1) {
+        const known = terms.find(t => typeof t === 'number') || 2;
+        instrHtml = `<strong>Okänd faktor (Multiplikation):</strong><br>Använd division för att hitta det saknade talet:`;
+        visualHtml = `<div class="help-step-box">
+          <div class="step-line">Dela produkten med den kända faktorn: ${target} ÷ ${known} = <span class="highlight-ans">${correctAnswer}</span></div>
+          <div class="step-summary">Svar: ? = <strong>${correctAnswer}</strong></div>
+        </div>`;
+      } else {
+        instrHtml = `<strong>Upprepad addition:</strong><br>Multiplikation innebär att lägga ihop lika stora grupper:`;
+        visualHtml = `<div class="help-step-box">
+          <div class="step-line">${terms[0]} × ${terms[1]} betyder ${terms[0]} grupper med ${terms[1]} i varje.</div>
+          <div class="step-summary">Totalt = <strong>${correctAnswer}</strong></div>
+        </div>`;
+      }
+    } else if (operator === '÷') {
+      // DIVISION
+      if (missingIndex === 0) { // ? ÷ b = c -> ? = b * c
+        const b = terms[1];
+        instrHtml = `<strong>Okänd täljare (Division):</strong><br>Multiplicera nämnare och svar för att få det ursprungliga talet:`;
+        visualHtml = `<div class="help-step-box">
+          <div class="step-line">Gångra ihop: ${b} × ${target} = <span class="highlight-ans">${correctAnswer}</span></div>
+          <div class="step-summary">Svar: ? = <strong>${correctAnswer}</strong></div>
+        </div>`;
+      } else if (missingIndex === 1) { // a ÷ ? = c -> ? = a / c
+        const a = terms[0];
+        instrHtml = `<strong>Okänd nämnare (Division):</strong><br>Dela starttalet med svaret:`;
+        visualHtml = `<div class="help-step-box">
+          <div class="step-line">Dela: ${a} ÷ ${target} = <span class="highlight-ans">${correctAnswer}</span></div>
+          <div class="step-summary">Svar: ? = <strong>${correctAnswer}</strong></div>
+        </div>`;
+      } else {
+        instrHtml = `<strong>Dela lika:</strong><br>Hur många får varje grupp när du delar ${terms[0]} på ${terms[1]}?`;
+        visualHtml = `<div class="help-step-box">
+          <div class="step-line">Dela ${terms[0]} i ${terms[1]} lika stora delar.</div>
+          <div class="step-summary">Varje del blir <strong>${correctAnswer}</strong></div>
+        </div>`;
+      }
+    } else {
+      // ADDITION (Standard)
+      if (missingIndex !== -1 && terms.length > 2) {
+        const knownTerms = terms.filter(t => typeof t === 'number');
+        const knownStr = knownTerms.join(' + ');
+        const knownSum = knownTerms.reduce((a, b) => a + b, 0);
 
-      instrHtml = `
-        <strong>Okänd term i flerstegsräkning:</strong><br>
-        Slå ihop de kända talen först för att göra uppgiften enklare!
-      `;
-
-      visualHtml = `
-        <div class="help-step-box">
+        instrHtml = `<strong>Okänd term i flerstegsräkning:</strong><br>Slå ihop de kända talen först!`;
+        visualHtml = `<div class="help-step-box">
           <div class="step-line"><strong>Steg 1 (Kända tal):</strong> ${knownStr} = <strong>${knownSum}</strong></div>
           <div class="step-line"><strong>Steg 2 (Förenkla):</strong> <strong>${knownSum}</strong> + ? = ${target}</div>
           <div class="step-line"><strong>Steg 3 (Hitta ?):</strong> ${target} - ${knownSum} = <span class="highlight-ans">${correctAnswer}</span></div>
           <div class="step-summary">Svar: Det saknade talet är <strong>${correctAnswer}</strong></div>
-        </div>
-      `;
-    } else if (missingIndex !== -1) {
-      // SILVER: Okänd term med två tal (t.ex. ? + 5 = 11 eller 6 + ? = 11)
-      const known = knownSum;
-      const total = target;
-      const ans = correctAnswer;
+        </div>`;
+      } else if (missingIndex !== -1) {
+        const known = terms.find(t => typeof t === 'number') || 0;
+        instrHtml = `<strong>Okänd term (Hitta det saknade talet):</strong><br>Hur mycket fattas upp till ${target}?`;
+        visualHtml = `<div class="help-step-box">
+          <div class="step-line"><strong>Sätt 1:</strong> Starta på ${known} ➔ Hoppa till ${target} (+${correctAnswer}).</div>
+          <div class="step-line"><strong>Sätt 2:</strong> ${target} - ${known} = <span class="highlight-ans">${correctAnswer}</span></div>
+          <div class="step-summary">Svar: ? = <strong>${correctAnswer}</strong></div>
+        </div>`;
+      } else {
+        let stepHtml = '';
+        let currentSum = terms[0] || 0;
+        for (let i = 1; i < terms.length; i++) {
+          const prev = currentSum;
+          const next = terms[i];
+          currentSum += next;
+          stepHtml += `<div class="step-line">Steg ${i}: ${prev} + ${next} = <strong>${currentSum}</strong></div>`;
+        }
 
-      instrHtml = `
-        <strong>Okänd term (Hitta det saknade talet):</strong><br>
-        Hur mycket fattas för att nå från <span class="digit-ental">${known}</span> upp till <span class="digit-tiotal">${Math.floor(total/10) || ''}</span><span class="digit-ental">${total % 10}</span>?
-      `;
-
-      visualHtml = `
-        <div class="help-step-box">
-          <div class="step-line"><strong>Sätt 1 (Räkna uppåt):</strong> Starta på ${known} ➔ Hoppa ${ans} ➔ Nå ${total}</div>
-          <div class="step-line"><strong>Sätt 2 (Minus):</strong> ${total} - ${known} = <span class="highlight-ans">${ans}</span></div>
-          <div class="step-summary">Svar: ? = <strong>${ans}</strong></div>
-        </div>
-      `;
-    } else if (terms.length > 2) {
-      // GULD: Flerstegsräkning utan okänd term (t.ex. 2 + 3 + 4 = ?)
-      let stepHtml = '';
-      let currentSum = terms[0];
-
-      for (let i = 1; i < terms.length; i++) {
-        const prev = currentSum;
-        const next = terms[i];
-        currentSum += next;
-        stepHtml += `<div class="step-line">Steg ${i}: ${prev} + ${next} = <strong>${currentSum}</strong></div>`;
-      }
-
-      instrHtml = `
-        <strong>Räkna i delsteg:</strong><br>
-        Lägg ihop talen ett i taget från vänster till höger!
-      `;
-
-      visualHtml = `
-        <div class="help-step-box">
+        instrHtml = `<strong>Räkna i delsteg:</strong><br>Lägg ihop talen ett i taget från vänster till höger!`;
+        visualHtml = `<div class="help-step-box">
           ${stepHtml}
           <div class="step-summary">Totalt: <strong>${currentSum}</strong></div>
-        </div>
-      `;
-    } else {
-      // BRONS: Vanlig tvåstegsräkning (t.ex. 12 + 15 = ?)
-      const num1 = terms[0] || 5;
-      const num2 = terms[1] || 3;
-      const t1 = Math.floor(num1 / 10) * 10;
-      const e1 = num1 % 10;
-      const t2 = Math.floor(num2 / 10) * 10;
-      const e2 = num2 % 10;
-      const sumT = t1 + t2;
-      const sumE = e1 + e2;
-      const total = sumT + sumE;
-
-      if (num1 >= 10 || num2 >= 10) {
-        instrHtml = `
-          <strong>Dela upp i tiotal och ental:</strong><br>
-          Räkna tiotalen för sig och entalen för sig, sedan lägger du ihop allt.
-        `;
-
-        visualHtml = `
-          <div class="help-step-box">
-            <div class="step-line">1. Tiotal: ${t1} + ${t2} = <strong>${sumT}</strong></div>
-            <div class="step-line">2. Ental: ${e1} + ${e2} = <strong>${sumE}</strong></div>
-            <div class="step-line">3. Lägg ihop: ${sumT} + ${sumE} = <strong>${total}</strong></div>
-          </div>
-        `;
-      } else {
-        instrHtml = `
-          <strong>Räkna vidare:</strong><br>
-          Börja på det största talet och räkna uppåt med det andra talet.
-        `;
-
-        visualHtml = `
-          <div class="help-step-box">
-            <div class="step-line">Börja på <strong>${Math.max(num1, num2)}</strong></div>
-            <div class="step-line">Lägg till <strong>${Math.min(num1, num2)}</strong> enstaka steg.</div>
-            <div class="step-summary">Svar = <strong>${num1 + num2}</strong></div>
-          </div>
-        `;
+        </div>`;
       }
     }
 
@@ -301,10 +301,10 @@ export class HelpModal {
     if (this.visualEl) this.visualEl.innerHTML = visualHtml;
   }
 
-  // --- SIDA 3: TALLINJE (Visualiserar kända hopp & luckan) ---
+  // --- SIDA 3: VISUELL TALLINJE / ILLUSTRATION ---
   renderPage3NumberLine(q) {
     const parsed = this.parseQuestion(q);
-    const { terms, missingIndex, target, knownSum, correctAnswer } = parsed;
+    const { terms, operator, missingIndex, target, correctAnswer } = parsed;
 
     const svgWidth = 440;
     const svgHeight = 130;
@@ -313,31 +313,26 @@ export class HelpModal {
     const usableWidth = svgWidth - margin * 2;
 
     let startVal = 0;
-    let endVal = target;
+    let endVal = target || 10;
 
-    if (missingIndex === -1 && terms.length === 2) {
-      startVal = typeof terms[0] === 'number' ? terms[0] : 0;
-      endVal = target;
+    if (operator === '–') {
+      startVal = terms[0] && typeof terms[0] === 'number' ? terms[0] : 10;
+      endVal = target || 0;
+    } else if (typeof terms[0] === 'number') {
+      startVal = terms[0];
     }
 
-    const minVal = startVal === 0 ? 0 : Math.max(0, startVal - 2);
-    const maxVal = Math.max(endVal + 2, 10);
+    const minVal = Math.max(0, Math.min(startVal, endVal) - 2);
+    const maxVal = Math.max(startVal, endVal, 10) + 2;
     const range = Math.max(1, maxVal - minVal);
 
     const getX = (val) => margin + ((val - minVal) / range) * usableWidth;
 
     if (this.instructionsEl) {
-      if (missingIndex !== -1 && terms.length > 2) {
-        this.instructionsEl.innerHTML = `
-          <strong>Tallinje:</strong><br>
-          Kända tal ger ett hopp till <span style="color:#2563eb; font-weight:bold;">${knownSum}</span>. Hur lång är "luckan" fram till <span style="color:#16a34a; font-weight:bold;">${target}</span>?
-        `;
-      } else {
-        this.instructionsEl.innerHTML = `
-          <strong>Tallinje:</strong><br>
-          Starta vid <span style="color:#2563eb; font-weight:bold;">${startVal}</span> och hoppa framåt till <span style="color:#16a34a; font-weight:bold;">${endVal}</span>.
-        `;
-      }
+      this.instructionsEl.innerHTML = `
+        <strong>Tallinje:</strong><br>
+        Starta vid <span style="color:#2563eb; font-weight:bold;">${startVal}</span> och gå till <span style="color:#16a34a; font-weight:bold;">${endVal}</span>.
+      `;
     }
 
     let ticksSvg = '';
@@ -345,9 +340,7 @@ export class HelpModal {
 
     for (let v = minVal; v <= maxVal; v += step) {
       const x = getX(v);
-      const isKey = (missingIndex !== -1 && terms.length > 2) 
-        ? (v === 0 || v === knownSum || v === target)
-        : (v === startVal || v === endVal);
+      const isKey = (v === startVal || v === endVal);
 
       ticksSvg += `
         <line x1="${x}" y1="${lineY - 6}" x2="${x}" y2="${lineY + 6}" stroke="${isKey ? '#1e293b' : '#94a3b8'}" stroke-width="${isKey ? 2.5 : 1.5}" />
@@ -355,81 +348,29 @@ export class HelpModal {
       `;
     }
 
-    let arcsSvg = '';
+    const x1 = getX(startVal);
+    const x2 = getX(endVal);
+    const mid = (x1 + x2) / 2;
+    const arcH = Math.min(40, Math.abs(x2 - x1) * 0.35);
+    const ctrlY = lineY - arcH - 12;
 
-    if (missingIndex !== -1 && terms.length > 2) {
-      // GULD OKÄND TERM: Två bågar (Kända summan -> Luckan)
-      const x0 = getX(0);
-      const xk = getX(knownSum);
-      const xt = getX(target);
+    const isBackwards = x2 < x1;
+    const arrowX = isBackwards ? x2 + 6 : x2 - 6;
 
-      // Båge 1: Kända tal
-      const mid1 = (x0 + xk) / 2;
-      const arcH1 = Math.min(35, Math.abs(xk - x0) * 0.35);
-      const ctrlY1 = lineY - arcH1 - 10;
-      arcsSvg += `
-        <path d="M ${x0} ${lineY - 6} Q ${mid1} ${ctrlY1} ${xk} ${lineY - 6}" fill="none" stroke="#2563eb" stroke-width="3" />
-        <text x="${mid1}" y="${ctrlY1 - 3}" font-size="12" font-weight="bold" fill="#2563eb" text-anchor="middle">Kända = ${knownSum}</text>
-        <circle cx="${xk}" cy="${lineY}" r="4" fill="#2563eb" />
-      `;
-
-      // Båge 2: Saknade luckan (?)
-      const mid2 = (xk + xt) / 2;
-      const arcH2 = Math.min(35, Math.abs(xt - xk) * 0.45);
-      const ctrlY2 = lineY - arcH2 - 10;
-      arcsSvg += `
-        <path d="M ${xk} ${lineY - 6} Q ${mid2} ${ctrlY2} ${xt} ${lineY - 6}" fill="none" stroke="#9333ea" stroke-width="3" stroke-dasharray="4,2" />
-        <polygon points="${xt},${lineY - 6} ${xt - 6},${lineY - 14} ${xt + 2},${lineY - 14}" fill="#9333ea" />
-        <text x="${mid2}" y="${ctrlY2 - 3}" font-size="13" font-weight="bold" fill="#9333ea" text-anchor="middle">? = ${correctAnswer}</text>
-        <circle cx="${xt}" cy="${lineY}" r="5" fill="#16a34a" />
-      `;
-    } else if (terms.length > 2 && missingIndex === -1) {
-      // GULD VANLIG: Sekventiella bågar för varje term
-      let curr = 0;
-      const colors = ['#2563eb', '#d97706', '#16a34a', '#9333ea'];
-
-      terms.forEach((term, idx) => {
-        if (typeof term === 'number') {
-          const nxt = curr + term;
-          const x1 = getX(curr);
-          const x2 = getX(nxt);
-          const mid = (x1 + x2) / 2;
-          const arcH = Math.min(30, Math.abs(x2 - x1) * 0.4);
-          const ctrlY = lineY - arcH - 10;
-          const col = colors[idx % colors.length];
-
-          arcsSvg += `
-            <path d="M ${x1} ${lineY - 6} Q ${mid} ${ctrlY} ${x2} ${lineY - 6}" fill="none" stroke="${col}" stroke-width="2.5" />
-            <polygon points="${x2},${lineY - 6} ${x2 - 5},${lineY - 12} ${x2 + 2},${lineY - 12}" fill="${col}" />
-            <text x="${mid}" y="${ctrlY - 3}" font-size="12" font-weight="bold" fill="${col}" text-anchor="middle">+${term}</text>
-          `;
-          curr = nxt;
-        }
-      });
-    } else {
-      // STANDARD 2-TERMER (Brons / Silver)
-      const x1 = getX(startVal);
-      const x2 = getX(endVal);
-      const mid = (x1 + x2) / 2;
-      const arcH = Math.min(40, Math.abs(x2 - x1) * 0.35);
-      const ctrlY = lineY - arcH - 12;
-      const label = missingIndex !== -1 ? `? = ${correctAnswer}` : `+${endVal - startVal}`;
-
-      arcsSvg += `
-        <path d="M ${x1} ${lineY - 6} Q ${mid} ${ctrlY} ${x2} ${lineY - 6}" fill="none" stroke="#2563eb" stroke-width="3" stroke-dasharray="${missingIndex !== -1 ? '4,2' : 'none'}" />
-        <polygon points="${x2},${lineY - 6} ${x2 - 6},${lineY - 14} ${x2 + 2},${lineY - 14}" fill="#2563eb" />
-        <text x="${mid}" y="${ctrlY - 4}" font-size="13" font-weight="bold" fill="#2563eb" text-anchor="middle">${label}</text>
-        <circle cx="${x1}" cy="${lineY}" r="5" fill="#2563eb" />
-        <circle cx="${x2}" cy="${lineY}" r="5" fill="#16a34a" />
-      `;
-    }
+    const arcSvg = `
+      <path d="M ${x1} ${lineY - 6} Q ${mid} ${ctrlY} ${x2} ${lineY - 6}" fill="none" stroke="#2563eb" stroke-width="3" stroke-dasharray="${missingIndex !== -1 ? '4,2' : 'none'}" />
+      <polygon points="${x2},${lineY - 6} ${arrowX},${lineY - 14} ${x2 + (isBackwards ? 8 : -2)},${lineY - 14}" fill="#2563eb" />
+      <text x="${mid}" y="${ctrlY - 4}" font-size="13" font-weight="bold" fill="#2563eb" text-anchor="middle">${missingIndex !== -1 ? `? = ${correctAnswer}` : `${operator}${Math.abs(endVal - startVal)}`}</text>
+      <circle cx="${x1}" cy="${lineY}" r="5" fill="#2563eb" />
+      <circle cx="${x2}" cy="${lineY}" r="5" fill="#16a34a" />
+    `;
 
     if (this.visualEl) {
       this.visualEl.innerHTML = `
         <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}" style="background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0; display:block; margin:auto;">
           <line x1="${margin - 10}" y1="${lineY}" x2="${svgWidth - margin + 10}" y2="${lineY}" stroke="#475569" stroke-width="3" />
           ${ticksSvg}
-          ${arcsSvg}
+          ${arcSvg}
         </svg>
       `;
     }
@@ -443,24 +384,22 @@ export class HelpModal {
 
   parseQuestion(q) {
     if (!q) {
-      return { terms: [5, 3], missingIndex: -1, target: 8, knownSum: 8, correctAnswer: '8' };
+      return { terms: [5, 3], operator: '+', missingIndex: -1, target: 8, correctAnswer: '8' };
     }
 
-    const num1 = q.num1;
-    const num2 = q.num2;
-    const isCustomFormat = q.isCustomFormat;
-    const correctAnswer = (q.correctAnswer !== undefined && q.correctAnswer !== null) ? q.correctAnswer.toString() : '';
     const text = q.text || '';
+    const operator = q.operator || (text.includes('–') ? '–' : text.includes('×') ? '×' : text.includes('÷') ? '÷' : '+');
+    const correctAnswer = (q.correctAnswer !== undefined && q.correctAnswer !== null) ? q.correctAnswer.toString() : '';
 
-    if (num1 !== undefined && num2 !== undefined && !isCustomFormat) {
-      const n1 = this.safeInt(num1, 5);
-      const n2 = this.safeInt(num2, 3);
+    if (q.num1 !== undefined && q.num2 !== undefined && !q.isCustomFormat) {
+      const n1 = this.safeInt(q.num1, 5);
+      const n2 = this.safeInt(q.num2, 3);
       const ans = this.safeInt(correctAnswer, n1 + n2);
       return {
         terms: [n1, n2],
+        operator,
         missingIndex: -1,
         target: ans,
-        knownSum: n1 + n2,
         correctAnswer: ans.toString()
       };
     }
@@ -476,7 +415,8 @@ export class HelpModal {
     }
 
     const leftPart = text.split('=')[0] || text;
-    const rawTokens = leftPart.split('+').map(t => t.trim());
+    const splitRegex = /[\+–\-×\*÷\/]/;
+    const rawTokens = leftPart.split(splitRegex).map(t => t.trim());
 
     const terms = [];
     let missingIndex = -1;
@@ -497,31 +437,16 @@ export class HelpModal {
       terms.push(5, 3);
     }
 
-    const knownSum = terms.reduce((acc, t) => (typeof t === 'number' ? acc + t : acc), 0);
-
     if (target === null) {
-      if (missingIndex !== -1 && correctAnswer) {
-        target = knownSum + this.safeInt(correctAnswer, 0);
-      } else {
-        target = correctAnswer ? this.safeInt(correctAnswer, knownSum) : knownSum;
-      }
-    }
-
-    let ansStr = correctAnswer;
-    if (!ansStr) {
-      if (missingIndex !== -1) {
-        ansStr = (target - knownSum).toString();
-      } else {
-        ansStr = knownSum.toString();
-      }
+      target = this.safeInt(correctAnswer, 10);
     }
 
     return {
       terms,
+      operator,
       missingIndex,
       target,
-      knownSum,
-      correctAnswer: ansStr
+      correctAnswer
     };
   }
 }
