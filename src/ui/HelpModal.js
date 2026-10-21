@@ -1,9 +1,11 @@
 /**
  * HelpModal.js
- * Pedagogisk hjälpruta för alla fyra räknesätt (+, –, ×, ÷):
- * Sida 1: Uppställning i färgkodade rutor
- * Sida 2: Strategi & Delsteg (anpassad efter räknesätt)
- * Sida 3: Visuell Tallinje / Gruppering
+ * Hjälpsystem för Aritmetik och Geometri (Former/Vinklar).
+ * 
+ * För Former (Geometri):
+ * Sida 1: Formens Egenskaper & Anatomi (Hörn & Sidor)
+ * Sida 2: Vardagskoppling & Minnesknep (Pizzabit, tallrik, bok m.m.)
+ * Sida 3: Räkna & Kontrollera (Peka och räkna hörn steg-för-steg)
  */
 export class HelpModal {
   constructor() {
@@ -108,16 +110,212 @@ export class HelpModal {
       num1: 5, num2: 3, operator: '+', correctAnswer: '8', text: '5 + 3 = ?'
     };
 
-    if (this.currentPage === 1) {
-      this.renderPage1VerticalSetup(q);
-    } else if (this.currentPage === 2) {
-      this.renderPage2Steps(q);
-    } else if (this.currentPage === 3) {
-      this.renderPage3NumberLine(q);
+    const geoData = this.detectGeometry(q);
+
+    if (geoData.isGeometry) {
+      this.renderGeometryPage(q, geoData);
+    } else {
+      if (this.currentPage === 1) {
+        this.renderPage1VerticalSetup(q);
+      } else if (this.currentPage === 2) {
+        this.renderPage2Steps(q);
+      } else if (this.currentPage === 3) {
+        this.renderPage3NumberLine(q);
+      }
     }
   }
 
-  // --- SIDA 1: UPPTÄLLNING I FÄRGKODADE RUTOR ---
+  // --- DETEKTERA OM FRÅGAN ÄR GEOMETRI / FORMER ---
+  detectGeometry(q) {
+    if (!q) return { isGeometry: false };
+
+    const isGeo = q.domain === 'geometry' || q.isGeometry || q.category === 'former' || q.category === 'vinklar';
+    const text = (q.text || '').toLowerCase();
+    const ans = (q.correctAnswer || '').toLowerCase();
+    const shapeType = (q.shapeType || q.shape || '').toLowerCase();
+
+    const shapeName = shapeType || ans || text;
+
+    let shape = 'triangel';
+    if (shapeName.includes('cirkel')) shape = 'cirkel';
+    else if (shapeName.includes('kvadrat')) shape = 'kvadrat';
+    else if (shapeName.includes('rektangel')) shape = 'rektangel';
+    else if (shapeName.includes('femhorning') || shapeName.includes('pentagon')) shape = 'femhorning';
+    else if (shapeName.includes('sexhorning') || shapeName.includes('hexagon')) shape = 'sexhorning';
+    else if (shapeName.includes('triangel')) shape = 'triangel';
+
+    return {
+      isGeometry: isGeo || text.includes('form') || text.includes('vinkel') || text.includes('hörn'),
+      shape
+    };
+  }
+
+  // --- HJÄLP FÖR FORMER & GEOMETRI ---
+  renderGeometryPage(q, geoData) {
+    const shape = geoData.shape;
+
+    if (this.currentPage === 1) {
+      this.renderGeometryPage1Anatomy(shape);
+    } else if (this.currentPage === 2) {
+      this.renderGeometryPage2Connections(shape);
+    } else if (this.currentPage === 3) {
+      this.renderGeometryPage3Count(shape);
+    }
+  }
+
+  // FORMER - SIDA 1: ANATOMI & EGENSKAPER
+  renderGeometryPage1Anatomy(shape) {
+    const details = {
+      triangel: { name: 'Triangel', corners: 3, sides: 3, desc: 'En triangel har alltid <strong>3 hörn</strong> och <strong>3 raka sidor</strong>.' },
+      kvadrat: { name: 'Kvadrat', corners: 4, sides: 4, desc: 'En kvadrat har <strong>4 hörn</strong> och <strong>4 lika långa sidor</strong>.' },
+      rektangel: { name: 'Rektangel', corners: 4, sides: 4, desc: 'En rektangel har <strong>4 hörn</strong>, med 2 långa och 2 korta sidor.' },
+      cirkel: { name: 'Cirkel', corners: 0, sides: 1, desc: 'En cirkel är helt rund. Den har <strong>0 hörn</strong> och 1 böjd linje.' },
+      femhorning: { name: 'Femhörning', corners: 5, sides: 5, desc: 'En femhörning har <strong>5 hörn</strong> och <strong>5 raka sidor</strong>.' },
+      sexhorning: { name: 'Sexhörning', corners: 6, sides: 6, desc: 'En sexhörning har <strong>6 hörn</strong> och <strong>6 raka sidor</strong>.' }
+    }[shape] || { name: 'Form', corners: 3, sides: 3, desc: 'Formens egenskaper.' };
+
+    if (this.instructionsEl) {
+      this.instructionsEl.innerHTML = `
+        <strong>Formens egenskaper: ${details.name}</strong><br>
+        ${details.desc}<br>
+        <span style="color:#2563eb; font-weight:bold;">Blå prickar = Hörn</span> | 
+        <span style="color:#16a34a; font-weight:bold;">Grön linje = Sidor</span>
+      `;
+    }
+
+    if (this.visualEl) {
+      this.visualEl.innerHTML = this.generateShapeSVG(shape, { showDots: true, numberCorners: false });
+    }
+  }
+
+  // FORMER - SIDA 2: VARDAGSKOPPLING & MINNESKNEP
+  renderGeometryPage2Connections(shape) {
+    const info = {
+      triangel: {
+        title: 'Triangel i vardagen',
+        examples: 'Pizzabit, Vägskylt (Varning), Tak',
+        trick: 'Tänk på ordet "Tri" som betyder tre (tre hörn)!'
+      },
+      kvadrat: {
+        title: 'Kvadrat i vardagen',
+        examples: 'Schackbräde, Bordsyta, Tärning',
+        trick: 'Alla fyra sidor är exakt lika långa!'
+      },
+      rektangel: {
+        title: 'Rektangel i vardagen',
+        examples: 'Dörr, Bok, Mobiltelefon, Fotbollsplan',
+        trick: 'Formad som en utdragen kvadrat (2 långa + 2 korta sidor).'
+      },
+      cirkel: {
+        title: 'Cirkel i vardagen',
+        examples: 'Hjul, Klocka, Tallrik, Mynt',
+        trick: 'Rund som en boll – inga vassa hörn alls!'
+      },
+      femhorning: {
+        title: 'Femhörning i vardagen',
+        examples: 'Fågelholk, Huset i ett spel',
+        trick: 'Fem hörn – precis som fingrarna på en hand!'
+      },
+      sexhorning: {
+        title: 'Sexhörning i vardagen',
+        examples: 'Bikupa (honung), Snöflinga, Muttrar',
+        trick: 'Sex hörn – ser ut som en bikaka!'
+      }
+    }[shape] || { title: 'Exempel', examples: 'Vardagsobjekt', trick: 'Kom ihåg formen!' };
+
+    if (this.instructionsEl) {
+      this.instructionsEl.innerHTML = `
+        <strong>Minnesknep & Vardagsexempel:</strong><br>
+        ${info.trick}
+      `;
+    }
+
+    if (this.visualEl) {
+      this.visualEl.innerHTML = `
+        <div class="help-step-box">
+          <div class="step-line"><strong>Form:</strong> ${info.title}</div>
+          <div class="step-line"><strong>Ser ut som:</strong> ${info.examples}</div>
+          <div class="step-summary">Känner du igen formen från klassrummet eller hemma?</div>
+        </div>
+      `;
+    }
+  }
+
+  // FORMER - SIDA 3: RÄKNA & KONTROLLERA
+  renderGeometryPage3Count(shape) {
+    const counts = {
+      triangel: 3, kvadrat: 4, rektangel: 4, cirkel: 0, femhorning: 5, sexhorning: 6
+    }[shape] || 3;
+
+    if (this.instructionsEl) {
+      if (counts === 0) {
+        this.instructionsEl.innerHTML = `
+          <strong>Kontrollera cirkeln:</strong><br>
+          Peka runt formen. Det finns <strong>0 hörn</strong> eftersom kanten är helt rund!
+        `;
+      } else {
+        this.instructionsEl.innerHTML = `
+          <strong>Peka och räkna hörnen:</strong><br>
+          Räkna siffrorna vid varje spets på formen. Totalt hittar vi <strong style="color:#2563eb;">${counts} hörn</strong>!
+        `;
+      }
+    }
+
+    if (this.visualEl) {
+      this.visualEl.innerHTML = this.generateShapeSVG(shape, { showDots: true, numberCorners: true });
+    }
+  }
+
+  // --- DYNAMISK SVG-RITARE FÖR FORMER ---
+  generateShapeSVG(shape, options = { showDots: true, numberCorners: false }) {
+    const w = 340;
+    const h = 135;
+    const { showDots, numberCorners } = options;
+
+    let pathSvg = '';
+    let points = [];
+
+    if (shape === 'triangel') {
+      points = [{ x: 170, y: 20 }, { x: 80, y: 110 }, { x: 260, y: 110 }];
+    } else if (shape === 'kvadrat') {
+      points = [{ x: 115, y: 25 }, { x: 225, y: 25 }, { x: 225, y: 115 }, { x: 115, y: 115 }];
+    } else if (shape === 'rektangel') {
+      points = [{ x: 75, y: 35 }, { x: 265, y: 35 }, { x: 265, y: 105 }, { x: 75, y: 105 }];
+    } else if (shape === 'femhorning') {
+      points = [{ x: 170, y: 18 }, { x: 255, y: 52 }, { x: 222, y: 115 }, { x: 118, y: 115 }, { x: 85, y: 52 }];
+    } else if (shape === 'sexhorning') {
+      points = [{ x: 120, y: 20 }, { x: 220, y: 20 }, { x: 265, y: 68 }, { x: 220, y: 115 }, { x: 120, y: 115 }, { x: 75, y: 68 }];
+    }
+
+    if (shape === 'cirkel') {
+      pathSvg = `<circle cx="170" cy="68" r="46" fill="#eff6ff" stroke="#16a34a" stroke-width="4" />`;
+    } else {
+      const ptsStr = points.map(p => `${p.x},${p.y}`).join(' ');
+      pathSvg = `<polygon points="${ptsStr}" fill="#eff6ff" stroke="#16a34a" stroke-width="4" stroke-linejoin="round" />`;
+    }
+
+    let dotsSvg = '';
+    if (showDots && shape !== 'cirkel') {
+      points.forEach((p, idx) => {
+        dotsSvg += `<circle cx="${p.x}" cy="${p.y}" r="7" fill="#2563eb" stroke="#ffffff" stroke-width="2" />`;
+        if (numberCorners) {
+          // Beräkna offset för sifferetiketter så de hamnar utanför hörnet
+          const offsetX = p.x > 170 ? 16 : p.x < 170 ? -16 : 0;
+          const offsetY = p.y > 68 ? 16 : -14;
+          dotsSvg += `<text x="${p.x + offsetX}" y="${p.y + offsetY}" font-size="14" font-weight="bold" fill="#1e3a8a" text-anchor="middle">${idx + 1}</text>`;
+        }
+      });
+    }
+
+    return `
+      <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="${h}" viewBox="0 0 ${w} ${h}" style="background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0; display:block; margin:auto;">
+        ${pathSvg}
+        ${dotsSvg}
+      </svg>
+    `;
+  }
+
+  // --- SIDA 1: ARITMETIK UPPTÄLLNING ---
   renderPage1VerticalSetup(q) {
     if (this.instructionsEl) {
       this.instructionsEl.innerHTML = `
@@ -187,7 +385,7 @@ export class HelpModal {
     }
   }
 
-  // --- SIDA 2: STRATEGI & DELSTEGSBERÄKNING ---
+  // --- SIDA 2: ARITMETIK STRATEGI ---
   renderPage2Steps(q) {
     const parsed = this.parseQuestion(q);
     const { terms, operator, missingIndex, target, correctAnswer } = parsed;
@@ -196,15 +394,14 @@ export class HelpModal {
     let visualHtml = '';
 
     if (operator === '–') {
-      // SUBTRAKTION
-      if (missingIndex === 0) { // ? - b = c -> ? = c + b
+      if (missingIndex === 0) {
         const b = terms[1];
         instrHtml = `<strong>Okänd start (Subtraktion):</strong><br>När det första talet saknas lägger du ihop svar och del:`;
         visualHtml = `<div class="help-step-box">
           <div class="step-line">Räkna baklänges med plus: ${target} + ${b} = <span class="highlight-ans">${correctAnswer}</span></div>
           <div class="step-summary">Svar: Det saknade talet är <strong>${correctAnswer}</strong></div>
         </div>`;
-      } else if (missingIndex === 1) { // a - ? = c -> ? = a - c
+      } else if (missingIndex === 1) {
         const a = terms[0];
         instrHtml = `<strong>Okänd del (Subtraktion):</strong><br>Ta bort svaret från starttalet:`;
         visualHtml = `<div class="help-step-box">
@@ -219,7 +416,6 @@ export class HelpModal {
         </div>`;
       }
     } else if (operator === '×') {
-      // MULTIPLIKATION
       if (missingIndex !== -1) {
         const known = terms.find(t => typeof t === 'number') || 2;
         instrHtml = `<strong>Okänd faktor (Multiplikation):</strong><br>Använd division för att hitta det saknade talet:`;
@@ -235,15 +431,14 @@ export class HelpModal {
         </div>`;
       }
     } else if (operator === '÷') {
-      // DIVISION
-      if (missingIndex === 0) { // ? ÷ b = c -> ? = b * c
+      if (missingIndex === 0) {
         const b = terms[1];
         instrHtml = `<strong>Okänd täljare (Division):</strong><br>Multiplicera nämnare och svar för att få det ursprungliga talet:`;
         visualHtml = `<div class="help-step-box">
           <div class="step-line">Gångra ihop: ${b} × ${target} = <span class="highlight-ans">${correctAnswer}</span></div>
           <div class="step-summary">Svar: ? = <strong>${correctAnswer}</strong></div>
         </div>`;
-      } else if (missingIndex === 1) { // a ÷ ? = c -> ? = a / c
+      } else if (missingIndex === 1) {
         const a = terms[0];
         instrHtml = `<strong>Okänd nämnare (Division):</strong><br>Dela starttalet med svaret:`;
         visualHtml = `<div class="help-step-box">
@@ -258,7 +453,6 @@ export class HelpModal {
         </div>`;
       }
     } else {
-      // ADDITION (Standard)
       if (missingIndex !== -1 && terms.length > 2) {
         const knownTerms = terms.filter(t => typeof t === 'number');
         const knownStr = knownTerms.join(' + ');
@@ -301,7 +495,7 @@ export class HelpModal {
     if (this.visualEl) this.visualEl.innerHTML = visualHtml;
   }
 
-  // --- SIDA 3: VISUELL TALLINJE / ILLUSTRATION ---
+  // --- SIDA 3: ARITMETIK TALLINJE ---
   renderPage3NumberLine(q) {
     const parsed = this.parseQuestion(q);
     const { terms, operator, missingIndex, target, correctAnswer } = parsed;
