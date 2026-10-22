@@ -1,10 +1,6 @@
 /**
  * GeometryHelpRenderer.js
- * Hjälpsystem anpassat för geometri/former:
- * 
- * Brons: Anatomi (1 form) -> Vardagskoppling -> Numrerad kontrollräkning
- * Silver: Sammansatta former (2 former) -> Delstegsräkning -> Ihopräkning med numrerade hörn
- * Guld: Återinför bilden för gåtor och textproblem -> Stegvis uteslutning -> Slutsats
+ * Hjälpsystem anpassat för geometri/former med säkrad felhantering mot 'undefined'.
  */
 export class GeometryHelpRenderer {
   constructor() {
@@ -47,16 +43,21 @@ export class GeometryHelpRenderer {
   }
 
   detectShape(q) {
-    const text = (q?.text || '').toString().toLowerCase();
-    const ans = (q?.correctAnswer || '').toString().toLowerCase();
-    const shapeType = (q?.shapeType || q?.shape || '').toString().toLowerCase();
-    const combined = `${shapeType} ${ans} ${text}`.toLowerCase();
+    if (!q) return 'triangel';
+
+    const shapeType = (q.shapeType || q.shape || q.shapeName || q.num1 || '').toString().toLowerCase();
+    const ans = (q.correctAnswer || q.target || '').toString().toLowerCase();
+    const text = (q.text || '').toString().toLowerCase();
+
+    const combined = `${shapeType} ${ans} ${text}`.replace(/undefined/g, '').toLowerCase();
 
     if (combined.includes('cirkel')) return 'cirkel';
     if (combined.includes('kvadrat')) return 'kvadrat';
     if (combined.includes('rektangel')) return 'rektangel';
     if (combined.includes('femh') || combined.includes('pentagon')) return 'femhorning';
     if (combined.includes('sexh') || combined.includes('hexagon')) return 'sexhorning';
+    if (combined.includes('triangel')) return 'triangel';
+
     return 'triangel';
   }
 
@@ -75,11 +76,15 @@ export class GeometryHelpRenderer {
     const shape = this.detectShape(q);
     const data = this.shapesData[shape] || this.shapesData['triangel'];
 
+    const name = data?.name || 'Form';
+    const corners = data?.corners ?? 3;
+    const sides = data?.sides ?? 3;
+
     if (page === 1) {
       if (instructionsEl) {
         instructionsEl.innerHTML = `
-          <strong>Formens egenskaper: ${data.name}</strong><br>
-          En ${data.name.toLowerCase()} har <strong>${data.corners} hörn</strong> och <strong>${data.sides} sidor</strong>.<br>
+          <strong>Formens egenskaper: ${name}</strong><br>
+          En ${name.toLowerCase()} har <strong>${corners} hörn</strong> och <strong>${sides} sidor</strong>.<br>
           <span style="color:#2563eb; font-weight:bold;">Blå prickar = Hörn</span> | 
           <span style="color:#16a34a; font-weight:bold;">Grön linje = Sidor</span>
         `;
@@ -103,8 +108,8 @@ export class GeometryHelpRenderer {
       if (visualEl) {
         visualEl.innerHTML = `
           <div class="help-step-box">
-            <div class="step-line"><strong>Form:</strong> ${data.name}</div>
-            <div class="step-line"><strong>Antal hörn:</strong> ${data.corners}</div>
+            <div class="step-line"><strong>Form:</strong> ${name}</div>
+            <div class="step-line"><strong>Antal hörn:</strong> ${corners}</div>
             <div class="step-summary">Kom ihåg formens kännetecken!</div>
           </div>
         `;
@@ -113,7 +118,7 @@ export class GeometryHelpRenderer {
       if (instructionsEl) {
         instructionsEl.innerHTML = `
           <strong>Peka och räkna hörnen:</strong><br>
-          Peka på varje sifferprick runt formen. Totalt hittar vi <strong style="color:#2563eb;">${data.corners} hörn</strong>!
+          Peka på varje sifferprick runt formen. Totalt hittar vi <strong style="color:#2563eb;">${corners} hörn</strong>!
         `;
       }
       if (visualEl) visualEl.innerHTML = this.generateSingleShapeSVG(shape, { showDots: true, numberCorners: true });
@@ -122,8 +127,8 @@ export class GeometryHelpRenderer {
 
   // --- SILVER: SAMMANSATTA FORMER (2 FORMER IHOP) ---
   renderSilverComposite(page, q, instructionsEl, visualEl) {
-    const s1Key = q.shapeType || 'triangel';
-    const s2Key = q.secondaryShape || 'kvadrat';
+    const s1Key = q?.shapeType || q?.shape || 'triangel';
+    const s2Key = q?.secondaryShape || 'kvadrat';
 
     const s1 = this.shapesData[s1Key] || this.shapesData['triangel'];
     const s2 = this.shapesData[s2Key] || this.shapesData['kvadrat'];
@@ -170,7 +175,7 @@ export class GeometryHelpRenderer {
   renderGuldAbstract(page, q, instructionsEl, visualEl) {
     const shapeKey = this.detectShape(q);
     const data = this.shapesData[shapeKey] || this.shapesData['triangel'];
-    const ans = q.correctAnswer || data.name;
+    const ans = q?.correctAnswer || data.name;
 
     if (page === 1) {
       if (instructionsEl) {
@@ -190,7 +195,7 @@ export class GeometryHelpRenderer {
       if (visualEl) {
         visualEl.innerHTML = `
           <div class="help-step-box">
-            <div class="step-line"><strong>Fråga:</strong> "${q.text || ''}"</div>
+            <div class="step-line"><strong>Fråga:</strong> "${q?.text || ''}"</div>
             <div class="step-line"><strong>Ledtråd:</strong> Formen vi söker har <strong>${data.corners} hörn</strong>.</div>
             <div class="step-summary">Rätt svar är <strong>${ans}</strong>!</div>
           </div>
@@ -207,7 +212,7 @@ export class GeometryHelpRenderer {
     }
   }
 
-  // --- SVG RITARE FOR 1 FORM ---
+  // --- SVG RITARE FÖR 1 FORM ---
   generateSingleShapeSVG(shape, options = { showDots: true, numberCorners: false }) {
     const w = 340;
     const h = 135;
