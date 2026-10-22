@@ -18,6 +18,24 @@ export class ShapesEngine {
     };
   }
 
+  // Hjälpfunktion som gör alternativen kompatibla med ALLA UI-komponenter
+  formatOptions(arr) {
+    if (!Array.isArray(arr)) return [];
+    return arr.map(item => {
+      const strVal = (item !== null && item !== undefined) ? item.toString() : '';
+      return {
+        text: strVal,
+        label: strVal,
+        value: strVal,
+        name: strVal,
+        ans: strVal,
+        display: strVal,
+        toString() { return strVal; },
+        valueOf() { return strVal; }
+      };
+    });
+  }
+
   generateQuestion(category = 'former', tier = 'brons') {
     if (tier === 'silver') {
       return this.generateSilver();
@@ -35,9 +53,11 @@ export class ShapesEngine {
     const qtype = ['name', 'corners', 'sides', 'yesno'][Math.floor(Math.random() * 4)];
 
     if (qtype === 'name') {
-      const options = this.shuffleOptions(shape.name, [
+      const rawOptions = this.shuffleOptions(shape.name, [
         'Triangel', 'Kvadrat', 'Rektangel', 'Cirkel', 'Femhörning', 'Sexhörning'
       ]);
+      const opts = this.formatOptions(rawOptions);
+
       return {
         domain: 'geometry',
         operation: 'shapes',
@@ -46,16 +66,20 @@ export class ShapesEngine {
         shape: key,
         shapeType: key,
         shapeName: shape.name,
-        num1: key,
-        target: shape.name,
         text: 'Vad heter den här formen?',
         correctAnswer: shape.name,
-        options,
+        target: shape.name,
+        options: opts,
+        choices: opts,
+        answers: opts,
+        alternatives: opts,
         isVisual: true
       };
     } else if (qtype === 'corners') {
       const correctAnswer = shape.corners.toString();
-      const options = this.shuffleOptions(correctAnswer, ['0', '3', '4', '5', '6']);
+      const rawOptions = this.shuffleOptions(correctAnswer, ['0', '3', '4', '5', '6']);
+      const opts = this.formatOptions(rawOptions);
+
       return {
         domain: 'geometry',
         operation: 'shapes',
@@ -64,16 +88,20 @@ export class ShapesEngine {
         shape: key,
         shapeType: key,
         shapeName: shape.name,
-        num1: key,
-        target: correctAnswer,
         text: `Hur många hörn har en ${shape.name.toLowerCase()}?`,
         correctAnswer,
-        options,
+        target: correctAnswer,
+        options: opts,
+        choices: opts,
+        answers: opts,
+        alternatives: opts,
         isVisual: true
       };
     } else if (qtype === 'sides') {
       const correctAnswer = shape.sides.toString();
-      const options = this.shuffleOptions(correctAnswer, ['1', '3', '4', '5', '6']);
+      const rawOptions = this.shuffleOptions(correctAnswer, ['1', '3', '4', '5', '6']);
+      const opts = this.formatOptions(rawOptions);
+
       return {
         domain: 'geometry',
         operation: 'shapes',
@@ -82,11 +110,13 @@ export class ShapesEngine {
         shape: key,
         shapeType: key,
         shapeName: shape.name,
-        num1: key,
-        target: correctAnswer,
         text: `Hur många sidor har en ${shape.name.toLowerCase()}?`,
         correctAnswer,
-        options,
+        target: correctAnswer,
+        options: opts,
+        choices: opts,
+        answers: opts,
+        alternatives: opts,
         isVisual: true
       };
     } else {
@@ -104,6 +134,8 @@ export class ShapesEngine {
         correctAnswer = 'Nej';
       }
 
+      const opts = this.formatOptions(['Ja', 'Nej']);
+
       return {
         domain: 'geometry',
         operation: 'shapes',
@@ -112,11 +144,13 @@ export class ShapesEngine {
         shape: key,
         shapeType: key,
         shapeName: shape.name,
-        num1: key,
-        target: correctAnswer,
         text,
         correctAnswer,
-        options: ['Ja', 'Nej'],
+        target: correctAnswer,
+        options: opts,
+        choices: opts,
+        answers: opts,
+        alternatives: opts,
         isVisual: true,
         isYesNo: true
       };
@@ -138,12 +172,13 @@ export class ShapesEngine {
       const tot = s1.corners + s2.corners;
       const correctAnswer = tot.toString();
 
-      const options = this.shuffleOptions(correctAnswer, [
+      const rawOptions = this.shuffleOptions(correctAnswer, [
         correctAnswer,
         (tot - 1).toString(),
         (tot + 1).toString(),
         (tot + 2).toString()
       ]);
+      const opts = this.formatOptions(rawOptions);
 
       return {
         domain: 'geometry',
@@ -153,10 +188,13 @@ export class ShapesEngine {
         shape: k1,
         shapeType: k1,
         secondaryShape: k2,
-        target: correctAnswer,
         text: `Hur många hörn har en ${s1.name.toLowerCase()} och en ${s2.name.toLowerCase()} tillsammans?`,
         correctAnswer,
-        options,
+        target: correctAnswer,
+        options: opts,
+        choices: opts,
+        answers: opts,
+        alternatives: opts,
         isComposite: true
       };
     } else if (qtype === 'double_shape') {
@@ -166,12 +204,13 @@ export class ShapesEngine {
       const correctAnswer = tot.toString();
 
       const namePlural = k === 'triangel' ? 'trianglar' : `${s.name.toLowerCase()}er`;
-      const options = this.shuffleOptions(correctAnswer, [
+      const rawOptions = this.shuffleOptions(correctAnswer, [
         correctAnswer,
         (tot - 2).toString(),
         (tot + 1).toString(),
         (tot + 2).toString()
       ]);
+      const opts = this.formatOptions(rawOptions);
 
       return {
         domain: 'geometry',
@@ -181,10 +220,13 @@ export class ShapesEngine {
         shape: k,
         shapeType: k,
         secondaryShape: k,
-        target: correctAnswer,
         text: `Hur många hörn har två ${namePlural} tillsammans?`,
         correctAnswer,
-        options,
+        target: correctAnswer,
+        options: opts,
+        choices: opts,
+        answers: opts,
+        alternatives: opts,
         isComposite: true
       };
     } else {
@@ -196,7 +238,8 @@ export class ShapesEngine {
         { k1: 'femhorning', k2: 'triangel', sum: 8, label: 'Femhörning + Triangel' }
       ];
       const target = combos[Math.floor(Math.random() * combos.length)];
-      const options = this.shuffleOptions(target.label, combos.map(c => c.label));
+      const rawOptions = this.shuffleOptions(target.label, combos.map(c => c.label));
+      const opts = this.formatOptions(rawOptions);
 
       return {
         domain: 'geometry',
@@ -206,10 +249,13 @@ export class ShapesEngine {
         shape: target.k1,
         shapeType: target.k1,
         secondaryShape: target.k2,
-        target: target.label,
         text: `Vilka två former har tillsammans ${target.sum} hörn?`,
         correctAnswer: target.label,
-        options,
+        target: target.label,
+        options: opts,
+        choices: opts,
+        answers: opts,
+        alternatives: opts,
         isComposite: true
       };
     }
@@ -247,6 +293,8 @@ export class ShapesEngine {
         }
       ];
       const p = riddles[Math.floor(Math.random() * riddles.length)];
+      const opts = this.formatOptions(this.shuffleArray([...p.options]));
+
       return {
         domain: 'geometry',
         operation: 'shapes',
@@ -254,10 +302,13 @@ export class ShapesEngine {
         tier: 'guld',
         shape: p.shapeType,
         shapeType: p.shapeType,
-        target: p.correctAnswer,
         text: p.text,
         correctAnswer: p.correctAnswer,
-        options: this.shuffleArray([...p.options]),
+        target: p.correctAnswer,
+        options: opts,
+        choices: opts,
+        answers: opts,
+        alternatives: opts,
         isAbstractProblem: true
       };
     } else if (qtype === 'word_problem') {
@@ -282,6 +333,8 @@ export class ShapesEngine {
         }
       ];
       const p = problems[Math.floor(Math.random() * problems.length)];
+      const opts = this.formatOptions(this.shuffleArray([...p.options]));
+
       return {
         domain: 'geometry',
         operation: 'shapes',
@@ -289,10 +342,13 @@ export class ShapesEngine {
         tier: 'guld',
         shape: p.shapeType,
         shapeType: p.shapeType,
-        target: p.correctAnswer,
         text: p.text,
         correctAnswer: p.correctAnswer,
-        options: this.shuffleArray([...p.options]),
+        target: p.correctAnswer,
+        options: opts,
+        choices: opts,
+        answers: opts,
+        alternatives: opts,
         isAbstractProblem: true
       };
     } else {
@@ -317,6 +373,8 @@ export class ShapesEngine {
         }
       ];
       const p = exclusions[Math.floor(Math.random() * exclusions.length)];
+      const opts = this.formatOptions(this.shuffleArray([...p.options]));
+
       return {
         domain: 'geometry',
         operation: 'shapes',
@@ -324,10 +382,13 @@ export class ShapesEngine {
         tier: 'guld',
         shape: p.shapeType,
         shapeType: p.shapeType,
-        target: p.correctAnswer,
         text: p.text,
         correctAnswer: p.correctAnswer,
-        options: this.shuffleArray([...p.options]),
+        target: p.correctAnswer,
+        options: opts,
+        choices: opts,
+        answers: opts,
+        alternatives: opts,
         isAbstractProblem: true
       };
     }
