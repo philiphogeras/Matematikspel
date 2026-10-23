@@ -120,7 +120,7 @@ export class ShapesEngine {
         isVisual: true
       };
     } else {
-      // Ja/Nej (Sant/Falskt)
+      // Ja/Nej (Sant/Falskt) med korrekta mellanslag
       const isTrue = Math.random() > 0.5;
       let text = '';
       let correctAnswer = '';
